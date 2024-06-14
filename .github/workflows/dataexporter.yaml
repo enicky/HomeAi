@@ -2,7 +2,7 @@ name: DataExporter
 on:
   push:
     branches: ['main']
-    paths: ['csharp/Common/**', 'csharp/DataExporter/**']
+    paths: ['csharp/Common/**', 'csharp/DataExporter/**', '.github/workflows/dataexporter.yaml']
 permissions:
   contents: read
 jobs:
