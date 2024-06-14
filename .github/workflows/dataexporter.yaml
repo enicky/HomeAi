@@ -2,6 +2,7 @@ name: DataExporter
 on:
   push:
     branches: ['main']
+    paths: ['csharp/Common/**', 'csharp/DataExporter/**']
 permissions:
   contents: read
 jobs:
