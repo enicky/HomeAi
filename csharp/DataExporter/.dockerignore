@@ -1,0 +1,5 @@
+.dapr
+.bin
+.obj
+Dockerfile
+appsettings.Development.json

@@ -1,0 +1,27 @@
+version: 1
+apps:
+  - appID: dataexporter
+    appDirPath: ./csharp/DataExporter/bin/Debug/net8.0
+    appPort: 8080
+    daprHTTPPort: 3510
+    appProtocol: http
+    containerImage: neichmann/dataexporter:latest
+    command: ["dotnet","DataExporter.dll"]
+  - appID: schedulerservice
+    appDirPath: ./csharp/SchedulerService/bin/Debug/net8.0
+    appPort: 8080
+    daprHTTPPort: 3500
+    appProtocol: http
+    containerImage: neichmann/schedulerservice:latest
+    createService: true
+    env:
+      SQL_CONFIG: "Server=192.168.1.154; Database=HomeAi; User Id=sa;Password=Aveve2008;Encrypt=False"
+      SCHEDULE: "* 8 * * *"
+    command: ["dotnet","SchedulerService.dll"]
+
+  - appID: modeltrainer
+    appDirPath: ./python/
+    appPort: 5000
+    daprHTTPPort: 3520
+    appProtocol: http
+    containerImage: neichmann/modeltrainer:latest

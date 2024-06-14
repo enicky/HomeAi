@@ -1,0 +1,10 @@
+.dapr
+.bin
+.obj
+appsettings.Development.json
+bin
+obj
+.vscode
+deploy
+deploy_sql*
+.DS_Store
