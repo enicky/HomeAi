@@ -28,6 +28,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ./csharp/DataExporter/
+          context: ./csharp
+          file: ./csharp/DataExporter/Dockerfile
           push: true
           tags: neichmann/dataexporter:app-${{ github.run_number }}
