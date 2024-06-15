@@ -1,5 +1,6 @@
 name: pythontrainer
 on:
+  workflow_dispatch:
   push:
     branches: ['main']
     paths: ['python/**', '.github/workflows/pythonaitrainer.yaml']
@@ -51,8 +52,11 @@ jobs:
           pwd
           cat values.yaml
           pwd
+          echo "----- start SED -------"
           sed -i "s+app-[0-9]*\"+app-$RUN_NUMBER\"+g" values.yaml
+          echo "----- finished SED ----"
           cat values.yaml
+          echo "======================="
           git add .
           git commit -m 'Done  by Github Actions   Job changemanifest: ${{ github.run_number }}'
           git push origin main
