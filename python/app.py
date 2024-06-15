@@ -25,7 +25,7 @@ state_url = "http://localhost:{}/v1.0/state".format(dapr_port)
 def train_model():
     app.logger.info(f'Start Training model on data')
     objectToReturn = {
-        success = true
+        "success" : True
     }
     return jsonify(objectToReturn)
 
