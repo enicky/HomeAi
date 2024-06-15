@@ -10,7 +10,7 @@ namespace app.Services
 
         public InfluxDBService(IConfiguration configuration)
         {
-            _token = configuration.GetValue<string>("InfluxDB:Token")!;
+            _token = configuration.GetValue<string>("InfluxDB_TOKEN")!;
             _url = configuration.GetValue<string>("InfluxDB:Url")!;
         }
 

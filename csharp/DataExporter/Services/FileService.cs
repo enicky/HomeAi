@@ -17,11 +17,11 @@ public class FileService : IFileService
 {
     private readonly BlobServiceClient _blobServiceClient;
     public FileService(IConfiguration configuration){
-        var _accountName = configuration.GetValue<string>("FileStorage:accountName");
+        var _accountName = configuration.GetValue<string>("accountName");
         if(string.IsNullOrEmpty(_accountName)){
             throw new NullReferenceException("FileStorage:accountName cannot be NULL");
         }
-        var _accountKey = configuration.GetValue<string>("FileStorage:accountKey");
+        var _accountKey = configuration.GetValue<string>("accountKey");
         if(string.IsNullOrEmpty(_accountKey)) throw new NullReferenceException("FileStorage:accountKey cannot be NULL");
 
         _blobServiceClient = GetBlobServiceClient(_accountName, _accountKey);
