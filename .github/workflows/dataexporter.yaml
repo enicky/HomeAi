@@ -27,6 +27,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v4
+        platforms: linux/arm64
         with:
           context: ./csharp
           file: ./csharp/DataExporter/Dockerfile
