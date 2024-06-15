@@ -1,5 +1,5 @@
 .dapr
-.bin
-.obj
+bin
+obj
 Dockerfile
 appsettings.Development.json
