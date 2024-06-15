@@ -40,7 +40,7 @@ jobs:
         name: changing the values of git repo
         with:
           repository: 'enicky/LabPowerConsumptionPrediction'
-          token: ${{ secrets.GIT_PASSWORD }}
+          token: ${{ secrets.GIT_TOKEN }}
       - name: modify the image
         run: |
           git config user.email enicky80@gmail.com
