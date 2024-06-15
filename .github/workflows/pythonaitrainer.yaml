@@ -34,7 +34,9 @@ jobs:
           platforms: |
             linux/arm64
           push: true
-          tags: neichmann/pythonaitrainer:app-${{ github.run_number }}
+          tags: neichmann/pythonaitrainer:app-${{ github.run_number }},neichmann/pythonaitrainer:latest
+          cache-from: type=registry,ref=neichmann/pythonaitrainer:latest
+          cache-to: type=inline
   modifygit:
     needs: docker
     runs-on: ubuntu-latest
