@@ -27,5 +27,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: csharp/DataExporter/
+          file: csharp/DataEporter/Dockerfile
           push: true
           tags: neichmann/dataexporter:app-${{ github.run_number }}
