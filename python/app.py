@@ -24,7 +24,10 @@ state_url = "http://localhost:{}/v1.0/state".format(dapr_port)
 @app.route('/train_model', methods=['GET'])
 def train_model():
     app.logger.info(f'Start Training model on data')
-    return "OK"
+    objectToReturn = {
+        success = true
+    }
+    return jsonify(objectToReturn)
 
 # @app.route('/randomNumber', methods=['GET'])
 # def random_number():
