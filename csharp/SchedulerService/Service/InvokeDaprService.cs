@@ -31,7 +31,7 @@ public class InvokeDaprService : IInvokeDaprService{
     {
         const string logPrefix= "[InvokeDaprService:TriggerTrainingOfAiModel]";
         using var client = new DaprClientBuilder().Build();
-        var retrieveResponse = await client.InvokeMethodAsync<TrainAiModelResponse>(HttpMethod.Get, "modeltrainer", "/train_model", token);
+        var retrieveResponse = await client.InvokeMethodAsync<TrainAiModelResponse>(HttpMethod.Get, "pythonaitrainer", "/train_model", token);
         if(retrieveResponse.Success){
             _logger.LogInformation($"{logPrefix} Successfully triggered training of AI Model");
             return;
