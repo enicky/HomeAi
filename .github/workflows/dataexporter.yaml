@@ -51,7 +51,7 @@ jobs:
           pwd
           cat values.yaml
           pwd
-          sed -i "s+app-[0-9]+app-$RUN_NUMBER+g" values.yaml
+          sed -i "s+app-[0-9]*+app-$RUN_NUMBER+g" values.yaml
           cat values.yaml
           git add .
           git commit -m 'Done  by Github Actions   Job changemanifest: ${{ github.run_number }}'
