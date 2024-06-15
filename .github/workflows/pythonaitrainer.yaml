@@ -2,7 +2,7 @@ name: pythontrainer
 on:
   push:
     branches: ['main']
-    paths: ['python/**']
+    paths: ['python/**', '.github/workflows/pythonaitrainer.yaml']
 permissions:
   contents: read
 jobs:
