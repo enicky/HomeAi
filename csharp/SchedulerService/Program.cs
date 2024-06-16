@@ -18,7 +18,10 @@ public class Program
         string sql_config = builder.Configuration.GetValue<string>("SQL_CONFIG")!;
         string sql_USERNAME = builder.Configuration.GetValue<string>("SQL_USERNAME")!;
         string sql_PASSWORD = builder.Configuration.GetValue<string>("SQL_PASSWORD")!;
-        sql_config = sql_config.Replace("[SQL_USERNAME]", sql_USERNAME).Replace("[SQL_PASSWORD]", sql_PASSWORD);
+        string sql_SERVER = builder.Configuration.GetValue<string>("SQL_SERVER")!;
+        sql_config = sql_config.Replace("[SQL_USERNAME]", sql_USERNAME)
+                                .Replace("[SQL_PASSWORD]", sql_PASSWORD)
+                                .Replace("[SQL_SERVER]", sql_SERVER);
         
         string schedule = builder.Configuration.GetValue<string>("SCHEDULE")!;
         string schedule_train_model = builder.Configuration.GetValue<string>("SCHEDULE_TRAIN_MODEL")!;
