@@ -48,7 +48,7 @@ namespace InfluxController.Controllers
                         table.Records.Select( record =>
                          new InfluxRecord{
                             Time = DateTime.Parse(record!.GetTime()?.ToString()!),
-                            Watt = string.IsNullOrEmpty(record.GetValueByKey("W_value")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("W_value").ToString()!),
+                            Watt = string.IsNullOrEmpty(record.GetValueByKey("W_value")?.ToString()) ? 0 : float.Parse(record.GetValueByKey("W_value").ToString()!),
                             Pressure = string.IsNullOrEmpty(record.GetValueByKey("state_pressure")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_pressure").ToString()!),
                             Humidity = string.IsNullOrEmpty(record.GetValueByKey("state_humidity")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_humidity").ToString()!),
                             Temperature = string.IsNullOrEmpty(record.GetValueByKey("°C_value")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("°C_value").ToString()!),
