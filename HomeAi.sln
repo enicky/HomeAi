@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchedulerService", "csharp\SchedulerService\SchedulerService.csproj", "{212FA3CB-F3D7-4F77-9C4A-013B83BEA5B9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "csharp\Common\Common.csproj", "{5BE64E55-D5FD-411F-B2A1-93F907147ED2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConvertOldData", "..\..\ConvertOldDataToNewFormat\ConvertOldData\ConvertOldData.csproj", "{B32DD8A0-5F44-457A-9161-91031D328301}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +31,10 @@ Global
 		{5BE64E55-D5FD-411F-B2A1-93F907147ED2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5BE64E55-D5FD-411F-B2A1-93F907147ED2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5BE64E55-D5FD-411F-B2A1-93F907147ED2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B32DD8A0-5F44-457A-9161-91031D328301}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B32DD8A0-5F44-457A-9161-91031D328301}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B32DD8A0-5F44-457A-9161-91031D328301}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B32DD8A0-5F44-457A-9161-91031D328301}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

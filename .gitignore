@@ -8,3 +8,10 @@ obj
 deploy
 deploy_sql*
 .DS_Store
+.pvenv
+python/data
+**/*.pyc
+prob_results
+test_results
+python/results
+python/process
