@@ -29,7 +29,7 @@ def train_model():
     }
     return jsonify(objectToReturn)
 
-@app.route('/download_data', method=['GET'])
+@app.route('/download_data', methods=['GET'])
 def download_data_from_azure():
     app.logger.info(f'Downloading data from azure to process')
     b = BlobRelatedClass()
