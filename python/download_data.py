@@ -14,9 +14,30 @@ logger = logging.getLogger(__name__)
 logging.getLogger('azure.core.pipeline.policies.http_logging_policy').setLevel(logging.WARN)
 
 class BlobRelatedClass:
+    def start_downloading_data(self):
+        logger.info("Start processing files from Azure to Local")
+        self.clean_data_folder()
+        
+        account_url = "https://dapraidata.blob.core.windows.net"
+        #credential = DefaultAzureCredential()
+        credential = os.getenv('blob_credential')
+        
+
+        with BlobServiceClient(account_url, credential=credential) as blob_service_client:
+            self.list_blobs_flat(blob_service_client, "sensordata")
+            logger.debug('Start merging all csv files into 1')
+            self.merge_csv_files(target_filename='merged.csv', base_path='data/')
+            logger.debug('Finished merging and sorting csv files')
+            self.clean_data_folder(False)
+            
+            
     def clean_data_folder(self, include_merged=True):
         folder = os.path.join( 'data')
         folderExists = os.path.exists(folder)
+        if not folderExists:
+            logger.info('Folder didnt exist. So Create it')
+            os.makedirs(path)
+            
         if folderExists:
             logger.info(f'Start deleting file in folder python/data')
             for filename in os.listdir(folder):
