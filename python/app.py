@@ -13,6 +13,8 @@ import random
 import requests
 import sys
 import logging
+from utils.downloaddata import BlobRelatedClass
+
 
 
 app = flask.Flask(__name__)
