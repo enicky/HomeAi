@@ -29,6 +29,15 @@ def train_model():
     }
     return jsonify(objectToReturn)
 
+@app.route('/download_data', method=['GET'])
+def download_data_from_azure():
+    app.logger.info(f'Downloading data from azure to process')
+    b = BlobRelatedClass()
+    b.start_downloading_data()
+    return jsonify({
+        "success": True
+    })
+
 # @app.route('/randomNumber', methods=['GET'])
 # def random_number():
 #     return jsonify(random.randint(0, 101))
