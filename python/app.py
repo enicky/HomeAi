@@ -18,11 +18,15 @@ from utils.downloaddata import BlobRelatedClass
 
 
 app = flask.Flask(__name__)
+
 CORS(app)
 
-dapr_port = os.getenv("DAPR_HTTP_PORT", 3500)
-state_url = "http://localhost:{}/v1.0/state".format(dapr_port)
+#dapr_port = os.getenv("DAPR_HTTP_PORT", 3500)
+#state_url = "http://localhost:{}/v1.0/state".format(dapr_port)
 
+@app.route('/healtz', methods=['GET'])
+def health():
+    return jsonify({'success' : True})
 @app.route('/train_model', methods=['GET'])
 def train_model():
     app.logger.info(f'Start Training model on data')
@@ -71,4 +75,4 @@ def download_data_from_azure():
 #     print(f'B: {request.json}', flush=True)
 #     return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
 
-app.run(host='0.0.0.0', port=5000)
+app.run(host='0.0.0.0', port=5001)
