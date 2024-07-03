@@ -14,7 +14,7 @@
 # ENTRYPOINT ["python"]
 # CMD ["app.py"]
 
-FROM nvidia/cuda:11.6.1-base-ubuntu20.04
+FROM nvidia/cuda:11.3.1-base-ubuntu20.04
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
