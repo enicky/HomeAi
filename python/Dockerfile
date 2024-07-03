@@ -1,13 +1,46 @@
-#FROM python:3.11.9-bookworm
-FROM nvcr.io/nvidia/l4t-pytorch:r35.2.1-pth2.0-py3
-COPY requirements.txt /app/requirements.txt
-WORKDIR /app
-RUN ls -la /app
-RUN pip install -r requirements.txt 
-#RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+# #FROM python:3.11.9-bookworm
+# FROM cnstark/pytorch:1.7.1-py3.9.12-cuda11.0.3-ubuntu18.04
+# RUN cat /etc/os-release
+# RUN pip3 install --upgrade pip
+# COPY requirements.txt /app/requirements.txt
+# WORKDIR /app
+# RUN ls -la /app
+# RUN pip3 install -r requirements.txt 
+# RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
-COPY . /app
-RUN ls -la
-EXPOSE 5000
-ENTRYPOINT ["python"]
+# COPY . /app
+# RUN ls -la
+# EXPOSE 5000
+# ENTRYPOINT ["python"]
+# CMD ["app.py"]
+
+FROM nvidia/cuda:11.4.0-base-ubuntu20.04
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y \
+        git \
+        python3-pip \
+        python3-dev \
+        python3-opencv \
+        libglib2.0-0
+# Install any python packages you need
+COPY requirements.txt requirements.txt
+
+RUN python3 -m pip install -r requirements.txt
+
+# Upgrade pip
+RUN python3 -m pip install --upgrade pip
+
+# Install PyTorch and torchvision
+RUN pip3 install torch torchvision torchaudio -f https://download.pytorch.org/whl/cu111/torch_stable.html
+
+# Set the working directory
+WORKDIR /app
+
+# Set the entrypoint
+ENTRYPOINT [ "python3" ]
 CMD ["app.py"]
