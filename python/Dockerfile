@@ -40,6 +40,9 @@ RUN pip3 install torch torchvision torchaudio -f https://download.pytorch.org/wh
 
 # Set the working directory
 WORKDIR /app
+COPY . /app
+RUN ls -la
+EXPOSE 5000
 
 # Set the entrypoint
 ENTRYPOINT [ "python3" ]
