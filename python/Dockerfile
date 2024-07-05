@@ -14,8 +14,7 @@
 # ENTRYPOINT ["python"]
 # CMD ["app.py"]
 
-FROM nvidia/cuda:11.3.1-runtime-ubuntu20.04
-
+FROM dustynv/l4t-pytorch:r35.3.1
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 
