@@ -31,7 +31,9 @@ class HyperParameterOptimizer(object):
 
         # core functions
         # prepare config
+        
         self.prepare_config = basic_settings.prepare_config if prepare_config is None else prepare_config
+       
         # build setting, which is the unique identifier of the model
         self.build_setting = basic_settings.build_setting if build_setting is None else build_setting
         # build config dict - the data to be stored in files
@@ -266,10 +268,10 @@ class HyperParameterOptimizer(object):
         self._task_names = task_names
         return task_names
 
-    def start_search(self, process_index=0, force_test=False, inverse_exp=False, shutdown_after_done=False):
+    def start_search(self, process_index=0, force_test=False, inverse_exp=False, shutdown_after_done=False, prepare_config_params=None):
         # set default font to Times New Roman when plotting
         set_times_new_roman_font()
-
+        print('==========================')
         # run directly under script mode
         if self.script_mode:
             # print info
@@ -278,9 +280,11 @@ class HyperParameterOptimizer(object):
                 print(Fore.RED + 'Warning: System will shutdown after done!')
             print()
 
+            print(Fore.BLUE + f'Start preparing config to args')
             # parse launch parameters and load default config
-            args = self.prepare_config(None, True)
+            args = self.prepare_config(prepare_config_params, True)
 
+            print(f'{Fore.BLUE}Finished config. Build config dict')
             # create a dict to store the configuration values
             config = self._build_config_dict(args)
 
@@ -699,6 +703,7 @@ class HyperParameterOptimizer(object):
                 _writer.writeheader()
 
     def _check_header_correct(self, header):
+        print(f'Start checking header correctness {header} -> {self.all_fieldnames}')
         correct = True
         exist_headers = []
 
@@ -716,8 +721,10 @@ class HyperParameterOptimizer(object):
         return correct, exist_headers
 
     def _check_data_header(self):
+        
         root_path = os.path.join(self.root_path, self.data_dir)
-
+        print(f'check data header ... {root_path}')
+        
         # get all csv file under the path
         for root, dirs, files in os.walk(root_path):
             for file in files:
@@ -745,15 +752,22 @@ class HyperParameterOptimizer(object):
                                 for exist_header in exist_headers:
                                     row[exist_header] = _dict[exist_header]
                                 new_data.append(row)
-
+                            
                             # create default new data
                             non_exist_headers = list(set(self.all_fieldnames) - set(exist_headers))
+                            print(f'non exist headers : {non_exist_headers}')
                             default_args = self.prepare_config(None, False)
+                            print(f'default args : {default_args}')
                             default_data_dict = self._build_config_dict(default_args)
+                            print(f'Finished building default data dict : {default_data_dict}')
+                            print('--------------------------')
                             for row in new_data:
+                                print(f'row : {row}')
                                 for non_exist_header in non_exist_headers:
-                                    row[non_exist_header] = default_data_dict[non_exist_header]
-
+                                    if non_exist_header in default_data_dict:
+                                        print(f'non_exist_header = {non_exist_header} -> {default_data_dict[non_exist_header]}')
+                                        row[non_exist_header] = default_data_dict[non_exist_header]
+                    print(f'Finished stuff')
                     # write new data if not correct
                     if new_data is not None:
                         # create new file with header
