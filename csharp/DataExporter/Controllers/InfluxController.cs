@@ -43,7 +43,7 @@ namespace InfluxController.Controllers
     
 
         [Topic(pubsubName:NameConsts.INFLUX_PUBSUB_NAME, name:NameConsts.INFLUX_RETRIEVE_DATA)]
-        [HttpGet("retrievedata")]
+        [HttpPost("retrievedata")]
         public async Task RetrieveData(CancellationToken token)
         {
             _logger.LogInformation("Trigger received to retrieve data from influx");
