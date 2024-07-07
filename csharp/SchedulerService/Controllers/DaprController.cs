@@ -20,7 +20,7 @@ public class DaprController: ControllerBase
 
 
     [Topic(pubsubName:NameConsts.INFLUX_PUBSUB_NAME, name:NameConsts.INFLUX_FINISHED_RETRIEVE_DATA)]
-    [HttpGet]
+    [HttpGet("DownloadDataHasFinished")]
     public async Task DownloadDataHasFinished([FromBody]RetrieveDataResponse response,  CancellationToken token = default){
         logger.LogInformation($"Retrieved info that download has been completed {response.Success} in filename {response.GeneratedFileName}");
         logger.LogInformation("Start triggering of downloading data to python training container");
@@ -30,7 +30,7 @@ public class DaprController: ControllerBase
     }
 
     [Topic(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_FINISHED_DOWNLOAD_DATA)]
-    [HttpGet]
+    [HttpGet("AiDownloadFinishedStartTraining")]
     public async Task AiDownloadFinishedStartTraining(CancellationToken token = default){
         logger.LogInformation("Retrieved info that download of data has been finished");
         logger.LogInformation("Send message to start training model on AI container");
@@ -40,7 +40,7 @@ public class DaprController: ControllerBase
     }
 
     [Topic(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_FINISHED_TRAIN_MODEL)]
-    [HttpGet]
+    [HttpGet("AiFinishedTrainingModel")]
     public Task AiFinishedTrainingModel(CancellationToken token = default){
         logger.LogInformation($"Retrieved message that training of model has been finished");
         return Task.CompletedTask;
