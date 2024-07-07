@@ -41,7 +41,7 @@ public class Program
         Console.WriteLine($"Using schedule {schedule}");
 
         // Add services to the container.
-        builder.Services.AddAuthorization();
+        //builder.Services.AddAuthorization();
         builder.Services.AddHangfire(configuration => configuration
         .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
             .UseSimpleAssemblyNameTypeSerializer()
