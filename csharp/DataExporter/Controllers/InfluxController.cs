@@ -4,6 +4,8 @@ using Common.Helpers;
 using Common.Models.Influx;
 using Common.Models.Responses;
 using CsvHelper;
+using Dapr;
+using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InfluxController.Controllers
@@ -39,8 +41,10 @@ namespace InfluxController.Controllers
             
         }
     
+
+        [Topic(pubsubName:NameConsts.INFLUX_PUBSUB_NAME, name:NameConsts.INFLUX_RETRIEVE_DATA)]
         [HttpGet("retrievedata")]
-        public async Task<RetrieveDataResponse> RetrieveData(CancellationToken token)
+        public async Task RetrieveData(CancellationToken token)
         {
             var response = await influxDBService.QueryAsync(async query =>{
                 var data = await query.QueryAsync(queryString, _org);
@@ -67,13 +71,23 @@ namespace InfluxController.Controllers
             _logger.LogDebug("Result of ensureContainer : {result}. Start uploading to Azure", result);
             await _fileService.UploadFromFileAsync(result, generatedFileName);
             _logger.LogDebug($"Finished uploading to Azure");
-
-            return new RetrieveDataResponse
+            
+            var retrieveDataResponse = new RetrieveDataResponse
             {
                 Success = true,
                 Value = response,
                 GeneratedFileName = generatedFileName
             };
+
+            using var client = new DaprClientBuilder().Build();
+            await client.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME,
+                            NameConsts.INFLUX_FINISHED_RETRIEVE_DATA,
+                            retrieveDataResponse, 
+                            token);
+
+            _logger.LogDebug($"Sent that retrieve of file to azaure has been finished");
+
+            
         }
     }
 }

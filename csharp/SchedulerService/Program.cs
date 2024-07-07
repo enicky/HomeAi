@@ -15,6 +15,12 @@ public class Program
         builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
         builder.Configuration.AddEnvironmentVariables();
         builder.Configuration.AddCommandLine(args);
+        builder.Services.AddControllers().AddDapr();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
+        
+
         string sql_config = builder.Configuration.GetValue<string>("SQL_CONFIG")!;
         string sql_USERNAME = builder.Configuration.GetValue<string>("SQL_USERNAME")!;
         string sql_PASSWORD = builder.Configuration.GetValue<string>("SQL_PASSWORD")!;
@@ -45,8 +51,8 @@ public class Program
         builder.Services.AddScoped<IInvokeDaprService, InvokeDaprService>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        //builder.Services.AddEndpointsApiExplorer();
+        //builder.Services.AddSwaggerGen();
 
         var app = builder.Build();
 

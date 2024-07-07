@@ -14,12 +14,19 @@ import requests
 import sys
 import logging
 from utils.downloaddata import BlobRelatedClass
+from flask_dapr.app import DaprApp
+from dapr.clients import DaprClient
+
+
 
 
 
 app = flask.Flask(__name__)
+x = DaprApp(app)
 
 CORS(app)
+
+AI_PUBSUB='ai-pubsub'
 
 #dapr_port = os.getenv("DAPR_HTTP_PORT", 3500)
 #state_url = "http://localhost:{}/v1.0/state".format(dapr_port)
@@ -35,14 +42,35 @@ def train_model():
     }
     return jsonify(objectToReturn)
 
-@app.route('/download_data', methods=['GET'])
+
+#@app.route('/download_data', methods=['GET'])
+@x.subscribe(AI_PUBSUB, 'start-download-data', dead_letter_topic='dead_letter')
 def download_data_from_azure():
     app.logger.info(f'Downloading data from azure to process')
     b = BlobRelatedClass()
     b.start_downloading_data()
-    return jsonify({
-        "success": True
-    })
+    app.logger.info(f'Finished sending downloading. Start sending message back to orchestrator')
+    with DaprClient() as client:
+        result = client.publish_event(
+            pubsub_name='ai-pubsub',
+            topic_name="finished-download-data"
+        )
+    
+    app.logger.info(f'Finished sending message back to orchestrator')
+    return "success", 200
+
+x.subscribe(AI_PUBSUB, 'start-train-model', dead_letter_topic='dead_letter')
+def start_train_model():
+    app.logger.info(f'Start Training model')
+    app.logger.info(f'Finished training model. Send message back to orchestrator')
+    
+    with DaprClient() as client:
+        result = client.publish_event(
+            pubsub_name=AI_PUBSUB,
+            topic_name='finished-train-model'
+        )
+    app.logger.info(f'Finished sending message back to orchestrator')
+    return "success", 200
 
 # @app.route('/randomNumber', methods=['GET'])
 # def random_number():
