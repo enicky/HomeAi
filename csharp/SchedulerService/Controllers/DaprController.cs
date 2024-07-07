@@ -1,13 +1,12 @@
 using Common.Helpers;
 using Common.Models.Responses;
 using Dapr;
-using Dapr.AppCallback.Autogen.Grpc.v1;
 using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SchedulerService.Controllers;
 
-[Route("api/{controller}")]
+[Route("api/[controller]")]
 [ApiController]
 public class DaprController: ControllerBase
 {
