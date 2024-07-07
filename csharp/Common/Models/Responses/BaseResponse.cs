@@ -1,6 +1,9 @@
+using System.Runtime.Serialization;
+
 namespace Common.Models.Responses
 {
-    public abstract record BaseResponse{
+    public abstract class BaseResponse{
+        [DataMember]
         public bool Success{get;set;} = false;
     }
 }

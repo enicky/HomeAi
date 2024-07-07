@@ -41,7 +41,7 @@ namespace InfluxController.Controllers
 
         }
 
-        [HttpGet]
+        [HttpGet("ExportDataForDate")]
         public async Task ExportDataForDate(DateTime startDate, CancellationToken token){
             _logger.LogInformation($"Start export data for date {startDate}");
             var strStartDate = startDate.AddDays(-1).ToStartDayString();
@@ -130,6 +130,7 @@ namespace InfluxController.Controllers
                 Value = response,
                 GeneratedFileName = generatedFileName
             };
+            
 
             using var client = new DaprClientBuilder().Build();
             await client.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME,
