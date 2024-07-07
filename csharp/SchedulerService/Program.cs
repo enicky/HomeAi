@@ -62,6 +62,9 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         //}
+
+        app.MapSubscribeHandler();
+        app.MapControllers();
         var cts = new CancellationTokenSource();
 
         app.UseHangfireDashboard();

@@ -25,6 +25,7 @@ internal class Program
         app.UseSwagger();
         app.UseSwaggerUI();
 
+        app.MapSubscribeHandler();
         app.MapControllers();
 
         app.Run();
