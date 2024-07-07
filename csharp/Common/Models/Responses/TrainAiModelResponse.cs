@@ -1,6 +1,6 @@
 namespace Common.Models.Responses
 {
-    public record TrainAiModelResponse: BaseResponse{
+    public class TrainAiModelResponse: BaseResponse{
         
     }
 }
