@@ -44,8 +44,8 @@ namespace InfluxController.Controllers
         [HttpGet]
         public async Task ExportDataForDate(DateTime startDate, CancellationToken token){
             _logger.LogInformation($"Start export data for date {startDate}");
-            var strStartDate = startDate.ToStartDayString();
-            var strTomorrowStartDate = startDate.AddDays(1).ToStartDayString();
+            var strStartDate = startDate.AddDays(-1).ToStartDayString();
+            var strTomorrowStartDate = startDate.ToStartDayString();
 
             var q = "import \"experimental\"" +
             " from(bucket: \"home_assistant\")" +
