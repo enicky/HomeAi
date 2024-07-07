@@ -46,6 +46,7 @@ namespace InfluxController.Controllers
         [HttpGet("retrievedata")]
         public async Task RetrieveData(CancellationToken token)
         {
+            _logger.LogInformation("Trigger received to retrieve data from influx");
             var response = await influxDBService.QueryAsync(async query =>{
                 var data = await query.QueryAsync(queryString, _org);
                 return data.SelectMany(table => 
@@ -61,16 +62,17 @@ namespace InfluxController.Controllers
             });
             var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
+            _logger.LogInformation($"Start writing file to {generatedFileName}");
             using (var writer = new StreamWriter(generatedFileName))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
                 csv.WriteRecords(response);
             }
-            _logger.LogDebug("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
+            _logger.LogInformation("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
             var result = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
-            _logger.LogDebug("Result of ensureContainer : {result}. Start uploading to Azure", result);
+            _logger.LogInformation("Result of ensureContainer : {result}. Start uploading to Azure", result);
             await _fileService.UploadFromFileAsync(result, generatedFileName);
-            _logger.LogDebug($"Finished uploading to Azure");
+            _logger.LogInformation($"Finished uploading to Azure");
             
             var retrieveDataResponse = new RetrieveDataResponse
             {
@@ -85,7 +87,7 @@ namespace InfluxController.Controllers
                             retrieveDataResponse, 
                             token);
 
-            _logger.LogDebug($"Sent that retrieve of file to azaure has been finished");
+            _logger.LogInformation($"Sent that retrieve of file to azaure has been finished");
 
             
         }
