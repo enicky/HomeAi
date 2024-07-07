@@ -50,7 +50,6 @@ namespace InfluxController.Controllers
             var q = "import \"experimental\"" +
             " from(bucket: \"home_assistant\")" +
             " |> range(start: "+strStartDate+", stop: "+strTomorrowStartDate+")" +
-            " |> range(start:experimental.subDuration(d: 24h, from: today()), stop: today())" +
             " |> filter(fn: (r) => r[\"entity_id\"] == \"forecast_home_2\" or r[\"entity_id\"] == \"warmtepomp_power\" or r[\"entity_id\"] == \"smoke_detector_device_17_temperature\")" +
             " |> filter(fn: (r) =>  r[\"_field\"] == \"humidity\" or r[\"_field\"] == \"pressure\" or r[\"_field\"] == \"value\")" +
             " |> aggregateWindow(every: 1m, fn: mean, createEmpty: true)" +
