@@ -24,7 +24,7 @@ from dapr.clients import DaprClient
 app = flask.Flask(__name__)
 x = DaprApp(app)
 
-CORS(app)
+#CORS(app)
 
 AI_PUBSUB='ai-pubsub'
 
@@ -44,9 +44,9 @@ def train_model():
 
 
 #@app.route('/download_data', methods=['GET'])
-@x.subscribe(AI_PUBSUB, 'start-download-data', dead_letter_topic='dead_letter')
-def download_data_from_azure():
-    app.logger.info(f'Downloading data from azure to process')
+@x.subscribe(AI_PUBSUB, 'start-download-data')
+def download_data_from_azure(event ):
+    app.logger.info(f'Downloading data from azure to process {event}')
     b = BlobRelatedClass()
     b.start_downloading_data()
     app.logger.info(f'Finished sending downloading. Start sending message back to orchestrator')
