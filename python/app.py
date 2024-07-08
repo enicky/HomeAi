@@ -61,14 +61,19 @@ def download_data_from_azure( ):
 def start_train_model():
     app.logger.info(f'[start_train_model] Start Training model')
     app.logger.info(f'[start_train_model] Finished training model. Send message back to orchestrator')
+    result = {
+        "success" : True
+    }
+    strResult = json.dumps(result)
+    app.logger.info(f'Returning : {strResult}')
     
     with DaprClient() as client:
         result = client.publish_event(
             pubsub_name='ai-pubsub',
             topic_name='finished-train-model',
-            data=json.dumps({"success":True})
+            data=strResult
         )
-        app.logger.info(f'[start_train_model] result ; {json.dumps(result)}')
+        app.logger.info(f'[start_train_model] result ; {result}')
     app.logger.info(f'[start_train_model] Finished sending message back to orchestrator')
     return "success", 200
 
