@@ -43,10 +43,10 @@ def train_model():
 #@app.route('/download_data', methods=['GET'])
 @x.subscribe(AI_PUBSUB, 'start-download-data')
 def download_data_from_azure( ):
-    app.logger.info(f'Downloading data from azure to process ')
+    app.logger.info(f'[download_data_from_azure] Downloading data from azure to process ')
     b = BlobRelatedClass()
     b.start_downloading_data()
-    app.logger.info(f'Finished sending downloading. Start sending message back to orchestrator')
+    app.logger.info(f'[download_data_from_azure]Finished sending downloading. Start sending message back to orchestrator')
     with DaprClient() as client:
         result = client.publish_event(
             pubsub_name='ai-pubsub',
@@ -54,21 +54,22 @@ def download_data_from_azure( ):
             data=json.dumps({"success": True})
         )
     
-    app.logger.info(f'Finished sending message back to orchestrator')
+    app.logger.info(f'[download_data_from_azure]Finished sending message back to orchestrator')
     return "success", 200
 
 x.subscribe(AI_PUBSUB, 'start-train-model')
 def start_train_model():
-    app.logger.info(f'Start Training model')
-    app.logger.info(f'Finished training model. Send message back to orchestrator')
+    app.logger.info(f'[start_train_model] Start Training model')
+    app.logger.info(f'[start_train_model] Finished training model. Send message back to orchestrator')
     
     with DaprClient() as client:
         result = client.publish_event(
-            pubsub_name=AI_PUBSUB,
+            pubsub_name='ai-pubsub',
             topic_name='finished-train-model',
             data=json.dumps({"success":True})
         )
-    app.logger.info(f'Finished sending message back to orchestrator')
+        app.logger.info(f'[start_train_model] result ; {json.dumps(result)}')
+    app.logger.info(f'[start_train_model] Finished sending message back to orchestrator')
     return "success", 200
 
 # @app.route('/randomNumber', methods=['GET'])
