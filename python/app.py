@@ -17,10 +17,6 @@ from utils.downloaddata import BlobRelatedClass
 from flask_dapr.app import DaprApp
 from dapr.clients import DaprClient
 
-
-
-
-
 app = flask.Flask(__name__)
 app.logger.setLevel(logging.DEBUG)
 x = DaprApp(app)
@@ -61,7 +57,7 @@ def download_data_from_azure( ):
     app.logger.info(f'Finished sending message back to orchestrator')
     return "success", 200
 
-x.subscribe(AI_PUBSUB, 'start-train-model', dead_letter_topic='dead_letter')
+x.subscribe(AI_PUBSUB, 'start-train-model')
 def start_train_model():
     app.logger.info(f'Start Training model')
     app.logger.info(f'Finished training model. Send message back to orchestrator')
@@ -69,7 +65,8 @@ def start_train_model():
     with DaprClient() as client:
         result = client.publish_event(
             pubsub_name=AI_PUBSUB,
-            topic_name='finished-train-model'
+            topic_name='finished-train-model',
+            data=json.dumps({"success":True})
         )
     app.logger.info(f'Finished sending message back to orchestrator')
     return "success", 200
