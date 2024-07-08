@@ -54,7 +54,8 @@ def download_data_from_azure( ):
     with DaprClient() as client:
         result = client.publish_event(
             pubsub_name='ai-pubsub',
-            topic_name="finished-download-data"
+            topic_name="finished-download-data",
+            data=json.dumps({"success": True})
         )
     
     app.logger.info(f'Finished sending message back to orchestrator')
