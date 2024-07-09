@@ -36,7 +36,7 @@ class BlobRelatedClass:
         folderExists = os.path.exists(folder)
         if not folderExists:
             logger.info('Folder didnt exist. So Create it')
-            os.makedirs(folder)
+            os.makedirs(folder)˝
             
         if folderExists:
             logger.info(f'Start deleting file in folder python/data')
@@ -61,6 +61,7 @@ class BlobRelatedClass:
             b.write(download_stream.readall())
             
     def list_blobs_flat(self, blob_service_client: BlobServiceClient, container_name):
+        
         container_client = blob_service_client.get_container_client(container=container_name)
 
         blob_list = container_client.list_blobs()
@@ -78,21 +79,23 @@ class BlobRelatedClass:
         # Read and concatenate all CSV files
         df_list = [pd.read_csv(file) for file in csv_files]
         merged_df = pd.concat(df_list, ignore_index=True)
-        print(merged_df)
         print('-------')
 
         # Convert the date column to datetime
         merged_df['date'] = pd.to_datetime(merged_df['Time'])
         print(f'merged ')
-        print(merged_df)
         print('------')
 
         # Sort the DataFrame by date
         sorted_df = merged_df.sort_values(by='date')
-        print(sorted_df)
+        print('sorted')        
+        print('-------')
 
+        filename = f'{base_path}/merged_and_sorted_file.csv'
+        if os.path.exists(filename):
+            os.remove(filename)
         # Save the sorted DataFrame to a new CSV file
-        sorted_df.to_csv(f'{base_path}/merged_and_sorted_file.csv', index=False)
+        sorted_df.to_csv(filename, index=False)
         
 
 def main():
