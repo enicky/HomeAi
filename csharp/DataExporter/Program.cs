@@ -16,8 +16,9 @@ internal class Program
         builder.Services.AddLogging(loggingBuilder =>{
             loggingBuilder.ClearProviders();
             loggingBuilder.AddSimpleConsole(options => {
-                options.IncludeScopes = true;
-                options.TimestampFormat = "HH:mm:ss";
+                options.IncludeScopes = false;
+                options.SingleLine = true;
+                options.TimestampFormat = "HH:mm:ss ";
             });
         });
         // Add services to the container.

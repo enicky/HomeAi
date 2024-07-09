@@ -23,8 +23,9 @@ public class Program
             loggingBuilder.ClearProviders();
             loggingBuilder.AddSimpleConsole(options =>
             {
-                options.IncludeScopes = true;
-                options.TimestampFormat = "HH:mm:ss";
+                options.IncludeScopes = false;
+                options.SingleLine = true;
+                options.TimestampFormat = "HH:mm:ss ";
             });
         });
 
