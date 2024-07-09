@@ -12,6 +12,14 @@ internal class Program
         #endif
         builder.Configuration.AddEnvironmentVariables();
         builder.Configuration.AddCommandLine(args);
+
+        builder.Services.AddLogging(loggingBuilder =>{
+            loggingBuilder.ClearProviders();
+            loggingBuilder.AddSimpleConsole(options => {
+                options.IncludeScopes = true;
+                options.TimestampFormat = "HH:mm:ss";
+            });
+        });
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddControllers().AddDapr();
