@@ -445,6 +445,8 @@ def prepare_config(_params, _script_mode=False):
         logger.info('Get parameters from _params')
         # load optimized parameters from _params
         # basic config
+        if 'itr' in _params:
+            _args.itr= _params['itr']
         if 'task_name' in _params:
             _args.task_name = _params['task_name']
         if 'is_training' in _params:
