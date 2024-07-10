@@ -36,7 +36,7 @@ class BlobRelatedClass:
         folderExists = os.path.exists(folder)
         if not folderExists:
             logger.info('Folder didnt exist. So Create it')
-            os.makedirs(folder)˝
+            os.makedirs(folder)
             
         if folderExists:
             logger.info(f'Start deleting file in folder python/data')
