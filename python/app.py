@@ -47,6 +47,9 @@ dictConfig(
     }
 )
 
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
+logging.getLogger('matplotlib.pyplot').setLevel(logging.WARNING)
+logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
 
 app = flask.Flask(__name__)
 dapr_app = DaprApp(app)
