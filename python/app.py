@@ -122,6 +122,7 @@ def start_train_model():
         'use_gpu': f'{use_gpu}',
         'gpu': f'{gpu}'    ,
         
+        'devices': '0',
         'freq': 'h',
         'lag': 0,
         'reindex': 0,
