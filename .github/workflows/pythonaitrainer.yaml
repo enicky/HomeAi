@@ -33,6 +33,7 @@ jobs:
           file: ./python/Dockerfile
           platforms: |
             linux/arm64
+            linux/amd64
           push: true
           tags: neichmann/pythonaitrainer:app-${{ github.run_number }},neichmann/pythonaitrainer:latest
           cache-from: type=gha
