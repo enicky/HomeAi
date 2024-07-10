@@ -219,8 +219,14 @@ def start_train_model():
         
     }
     app.logger.info(f'Start search and training model ... {perform_training}')
-    if perform_training:
-        h.start_search(prepare_config_params=prep_configs)
+    try:
+        if perform_training:
+            h.start_search(prepare_config_params=prep_configs)
+    except Exception as e:
+        app.logger.error('there was an issue training data ... ',exc_info=True)
+        app.logger.info(e)
+    
+    
     app.logger.info('Finished start search on finding model ')
     result = {
         "success" : True
