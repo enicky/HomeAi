@@ -94,7 +94,7 @@ def start_train_model():
 
     prep_configs = {
         'task_name': 'long_term_forecast',
-        'is_training': '1',
+        'is_training': 1,
         'model_id':f'LSTM_{seq_len}_96',
         'model': 'LSTM',
         'data': 'custom',
@@ -104,8 +104,8 @@ def start_train_model():
         'target':'Watt',
         'scaler':'StandardScaler',
         'seq_len':seq_len,
-        'label_len':'0',
-        'pred_len':'96',
+        'label_len':0,
+        'pred_len':96,
         'enc_in':enc_in,
         'c_out': c_out,
         'd_model':d_model,
