@@ -417,7 +417,14 @@ def prepare_config(_params, _script_mode=False):
     
     _args.use_gpu = True
     _args.use_multi_gpu = False
-
+    _args.target = _params['target']
+    _args.seq_len = _params['seq_len']
+    _args.task_name = _params['task_name']
+    _args.is_training = _params['is_training']
+    _args.model_id = _params['model_id']
+    _args.model = _params['model']
+    _args.data = _params['data']
+    
     # load device config
     # _args.use_gpu = True if torch.cuda.is_available() else False
     _args.use_gpu = True if torch.cuda.is_available() and _args.use_gpu else False
