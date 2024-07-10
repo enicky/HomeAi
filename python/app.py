@@ -63,6 +63,9 @@ def download_data_from_azure( ):
 def start_train_model():
     app.logger.info(f'[start_train_model] Start Training model')
     app.logger.info(f'[start_train_model] Finished training model. Send message back to orchestrator')
+    perform_training = os.getenv('perform_training', False)
+    app.logger.info(f'[start_train_model] Actually perform training : {perform_training}')
+        
     
     h = HyperParameterOptimizer(script_mode=True )
     h.config_optimizer_settings(root_path='.',
@@ -184,8 +187,9 @@ def start_train_model():
         'custom_params': ''
         
     }
-    app.logger.info(f'Start search and training model ... ')
-    h.start_search(prepare_config_params=prep_configs)
+    app.logger.info(f'Start search and training model ... {perform_training}')
+    if perform_training:
+        h.start_search(prepare_config_params=prep_configs)
     app.logger.info('Finished start search on finding model ')
     result = {
         "success" : True
