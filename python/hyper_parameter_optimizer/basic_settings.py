@@ -412,7 +412,11 @@ def prepare_config(_params, _script_mode=False):
     
     logger.info('do not parse launch paraneters ... use the ones in _params')
     #_args = parse_launch_parameters(_script_mode)
-    _args = {}
+    _args = {
+        'use_gpu': True,
+        'use_multi_gpu': False
+
+    }
 
     # load device config
     # _args.use_gpu = True if torch.cuda.is_available() else False
