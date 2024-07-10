@@ -117,9 +117,9 @@ def start_train_model():
     d_ff=32
     down_sampling_layers=3
     down_sampling_window=2
-    train_epochs=50
+    train_epochs=int(os.getenv('train_epochs',50))
     batch_size=128
-    patience=10
+    patience=int(os.getenv('patience', 5)) #10
     learning_rate=0.01
     use_gpu=1
     gpu=0

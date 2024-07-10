@@ -21,6 +21,9 @@ from utils.tools import set_times_new_roman_font
 
 from utils.print_args import print_args
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class HyperParameterOptimizer(object):
     def __init__(self, script_mode, models=None, get_search_space=None, prepare_config=None, build_setting=None,
@@ -843,11 +846,18 @@ class HyperParameterOptimizer(object):
         return False
 
     def _save_config_dict(self, file_path, _config):
+        logger.info(f'check folder etc for file: {file_path}')
+        folder = os.path.dirname(file_path)
+        logger.info(f'check if folder {folder} exists')
+        if not os.path.exists(folder):
+            logger.info(f'folder {folder} didnt exit. Create it')
+            os.makedirs(folder)
+        
         # delete the fieldnames in _config that not in _fieldnames
         for key in list(_config.keys()):
             if key not in self.all_fieldnames:
                 del _config[key]
-
+        
         with open(file_path, 'a', newline='') as csvfile:
             _writer = csv.DictWriter(csvfile, fieldnames=self.all_fieldnames)
             _writer.writerow(_config)
