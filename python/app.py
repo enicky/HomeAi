@@ -63,7 +63,7 @@ def download_data_from_azure( ):
 def start_train_model():
     app.logger.info(f'[start_train_model] Start Training model')
     app.logger.info(f'[start_train_model] Finished training model. Send message back to orchestrator')
-    perform_training = os.getenv('perform_training', False)
+    perform_training = os.getenv('perform_training', "False").lower() == "true"
     app.logger.info(f'[start_train_model] Actually perform training : {perform_training}')
         
     
