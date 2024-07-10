@@ -185,7 +185,7 @@ def start_train_model():
         
     }
     app.logger.info(f'Start search and training model ... ')
-    h.start_search(prepare_config_params=prep_configs)
+    #h.start_search(prepare_config_params=prep_configs)
     app.logger.info('Finished start search on finding model ')
     result = {
         "success" : True
