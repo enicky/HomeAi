@@ -419,6 +419,7 @@ def prepare_config(_params, _script_mode=False):
     _args.use_multi_gpu = False
     _args.target = _params['target']
     _args.seq_len = _params['seq_len']
+    _args.pred_len = _params['pred_len']
     _args.task_name = _params['task_name']
     _args.is_training = _params['is_training']
     _args.model_id = _params['model_id']
