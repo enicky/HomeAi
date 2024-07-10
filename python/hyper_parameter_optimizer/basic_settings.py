@@ -5,6 +5,8 @@ import os
 import torch
 from colorama import Fore
 
+import logging
+logger = logging.getLogger(__name__)
 
 # noinspection DuplicatedCode
 def parse_launch_parameters(_script_mode):
@@ -407,7 +409,10 @@ def set_args(_args, _config):
 # noinspection DuplicatedCode
 def prepare_config(_params, _script_mode=False):
     # parse launch parameters
-    _args = parse_launch_parameters(_script_mode)
+    
+    logger.info('do not parse launch paraneters ... use the ones in _params')
+    #_args = parse_launch_parameters(_script_mode)
+    _args = {}
 
     # load device config
     # _args.use_gpu = True if torch.cuda.is_available() else False
@@ -420,10 +425,12 @@ def prepare_config(_params, _script_mode=False):
 
     # build model_id for interface
     _args.model_id = f'{_args.target}_{_args.seq_len}_{_args.pred_len}'
-
+    logger.info('Force script mode to false => so we take the params file')
+    _script_mode = False
     if _script_mode is True or _params is None:
         return _args
     else:
+        logger.info('Get parameters from _params')
         # load optimized parameters from _params
         # basic config
         if 'task_name' in _params:
