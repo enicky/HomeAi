@@ -4,6 +4,7 @@ import os
 
 import torch
 from colorama import Fore
+import types
 
 import logging
 logger = logging.getLogger(__name__)
@@ -412,8 +413,8 @@ def prepare_config(_params, _script_mode=False):
     
     logger.info('do not parse launch paraneters ... use the ones in _params')
     #_args = parse_launch_parameters(_script_mode)
-    _args = { 
-    }
+    _args = types.SimpleNamespace()
+    
     _args.use_gpu = True
     _args.use_multi_gpu = False
 
