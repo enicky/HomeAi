@@ -2,7 +2,6 @@
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.DataContracts;
 using System.Text.Json.Serialization;
-using Common.Models.Influx;
 
 namespace Common.Models.Responses;
 
@@ -18,4 +17,6 @@ public class RetrieveDataResponse{
 
     [JsonPropertyName("success")]
     public bool Success { get; set; }
+    [JsonPropertyName("starttrainingmodel")]
+    public bool StartTrainingModel { get; set; }
 }

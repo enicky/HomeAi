@@ -127,15 +127,20 @@ namespace InfluxController.Controllers
             var retrieveDataResponse = new RetrieveDataResponse
             {
                 Success = true,
-                //Value = response,
-                GeneratedFileName = generatedFileName
+                GeneratedFileName = generatedFileName,
+                StartTrainingModel = false
+
+            };
+            var ce = new CloudEvent<RetrieveDataResponse>(retrieveDataResponse);
+            var metaData = new Dictionary<string, string>(){
+                { "test", "value"},
             };
             
 
             using var client = new DaprClientBuilder().Build();
             await client.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME,
                             NameConsts.INFLUX_FINISHED_RETRIEVE_DATA,
-                            retrieveDataResponse,
+                            ce,metaData,
                             token);
 
             _logger.LogInformation($"Sent that retrieve of file to azaure has been finished");
