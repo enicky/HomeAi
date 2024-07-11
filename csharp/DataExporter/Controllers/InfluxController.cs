@@ -127,7 +127,7 @@ namespace InfluxController.Controllers
             var retrieveDataResponse = new RetrieveDataResponse
             {
                 Success = true,
-                Value = response,
+                //Value = response,
                 GeneratedFileName = generatedFileName
             };
             
