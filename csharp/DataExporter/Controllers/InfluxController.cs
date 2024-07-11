@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Net.Mime;
+using System.Text.Json;
 using app.Services;
 using Common.Helpers;
 using Common.Models.Influx;
@@ -136,12 +138,20 @@ namespace InfluxController.Controllers
                 { "test", "value"},
             };
             
-
+            var content = JsonSerializer.SerializeToUtf8Bytes(ce);
+            
             using var client = new DaprClientBuilder().Build();
-            await client.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME,
-                            NameConsts.INFLUX_FINISHED_RETRIEVE_DATA,
-                            ce,metaData,
-                            token);
+            await client.PublishByteEventAsync(NameConsts.INFLUX_PUBSUB_NAME, 
+                                NameConsts.INFLUX_FINISHED_RETRIEVE_DATA, 
+                                content.AsMemory(), 
+                                MediaTypeNames.Application.Json, 
+                                metaData, token);
+            
+            
+            // await client.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME,
+            //                 NameConsts.INFLUX_FINISHED_RETRIEVE_DATA,
+            //                 ce,metaData,
+            //                 token);
 
             _logger.LogInformation($"Sent that retrieve of file to azaure has been finished");
 
