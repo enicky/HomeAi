@@ -15,6 +15,7 @@ public class Program
         builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
         builder.Configuration.AddEnvironmentVariables();
         builder.Configuration.AddCommandLine(args);
+        builder.Services.AddDaprClient();
         builder.Services.AddControllers().AddDapr();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
@@ -74,13 +75,16 @@ public class Program
         app.UseSwaggerUI();
         //}
 
-        app.MapSubscribeHandler();
+        
         app.MapControllers();
+        app.MapSubscribeHandler();
         var cts = new CancellationTokenSource();
 
         app.UseHangfireDashboard();
         RecurringJob.AddOrUpdate<TriggerRetrieveDataForAi>("trigger_ai_job", x => x.RunAsync(cts.Token), schedule, new RecurringJobOptions { TimeZone = TimeZoneInfo.Local });
         RecurringJob.AddOrUpdate<TriggerTrainAiModel>("trigger_train_model", x => x.RunAsync(cts.Token), schedule_train_model, new RecurringJobOptions { TimeZone = TimeZoneInfo.Local });
+        RecurringJob.AddOrUpdate<TriggerTestDapr>("trigger_test_dapr", x => x.RunAsync(cts.Token), schedule, new RecurringJobOptions{ TimeZone = TimeZoneInfo.Utc});
+
 
         app.MapHealthChecks("/healthz");
         app.UseAuthorization();

@@ -3,6 +3,7 @@ using System.Net.Mime;
 using System.Text.Json;
 using app.Services;
 using Common.Helpers;
+using Common.Models;
 using Common.Models.Influx;
 using Common.Models.Responses;
 using CsvHelper;
@@ -91,6 +92,17 @@ namespace InfluxController.Controllers
             _logger.LogInformation($"Finished uploading to Azure");
 
         }
+
+        [Dapr.Topic(NameConsts.INFLUX_PUBSUB_NAME, "test" )]
+        [HttpPost("test")]
+        public IActionResult Test([FromBody] Order o){
+            if(o is not null){
+                _logger.LogInformation($"Reeived order {o.Id} -> {o.Title}");
+                return Ok();
+            }
+            return BadRequest();
+        }
+
 
         [Topic(pubsubName: NameConsts.INFLUX_PUBSUB_NAME, name: NameConsts.INFLUX_RETRIEVE_DATA)]
         [HttpPost("retrievedata")]
