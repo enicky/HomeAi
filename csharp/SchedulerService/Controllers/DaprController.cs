@@ -3,6 +3,7 @@ using Common.Models.Responses;
 using Dapr;
 using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace SchedulerService.Controllers;
 
@@ -21,8 +22,8 @@ public class DaprController: ControllerBase
     [Topic(pubsubName:NameConsts.INFLUX_PUBSUB_NAME, name:NameConsts.INFLUX_FINISHED_RETRIEVE_DATA)]
     [HttpPost("DownloadDataHasFinished")]
     public async Task DownloadDataHasFinished(CloudEvent<RetrieveDataResponse> response,  CancellationToken token = default){
-        
-        logger.LogInformation($"Retrieved info that download has been completed {response.Data.Success} in filename {response.Data.GeneratedFileName}");
+        logger.LogInformation($"Response value : {JsonConvert.SerializeObject(response)}");
+        logger.LogInformation($"Retrieved info that download has been completed {response?.Data?.Success} in filename {response?.Data?.GeneratedFileName}");
         logger.LogInformation("Start triggering of downloading data to python training container");
         using var client = new DaprClientBuilder().Build();
         await client.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_DOWNLOAD_DATA, token);
