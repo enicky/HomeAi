@@ -30,7 +30,7 @@ internal class Program
         builder.Services.AddScoped<IFileService, FileService>();
 
         var app = builder.Build();
-
+        app.UseCloudEvents();
         app.UseSwagger();
         app.UseSwaggerUI();
 
