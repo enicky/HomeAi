@@ -68,26 +68,26 @@ public class DaprController : ControllerBase
 
     [Topic(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_FINISHED_DOWNLOAD_DATA)]
     [HttpPost("AiDownloadFinishedStartTraining")]
-    public async Task AiDownloadFinishedStartTraining([FromBody] AiDownloadResponse aiDownloadResponse)
+    public async Task AiDownloadFinishedStartTraining()
     {
         logger.LogInformation("Retrieved from python module that download of data has been finished");
-        logger.LogInformation($"Success : {aiDownloadResponse.Success}. Can Start Training : {aiDownloadResponse.CanStartTraining}");
-        if (!aiDownloadResponse.Success)
-        {
-            logger.LogWarning($"Download was no success. Quit processing.");
-            return;
-        }
-        if (aiDownloadResponse.Success && aiDownloadResponse.CanStartTraining)
-        {
+        logger.LogInformation($"Success : . Can Start Training : ");
+        // if (!aiDownloadResponse.Success)
+        // {
+        //     logger.LogWarning($"Download was no success. Quit processing.");
+        //     return;
+        // }
+        // if (aiDownloadResponse.Success && aiDownloadResponse.CanStartTraining)
+        //{
             logger.LogInformation("Send message to start training model on AI container");
             await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_TRAIN_MODEL);
             logger.LogInformation("Finished sending message to AI container to start training model");
-        }
-        else
-        {
-            logger.LogInformation("Not needed to start training. Download was enough");
-            logger.LogInformation("Finished processing");
-        }
+        // }
+        // else
+        // {
+        //     logger.LogInformation("Not needed to start training. Download was enough");
+        //     logger.LogInformation("Finished processing");
+        // }
     }
 
     [Topic(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_FINISHED_TRAIN_MODEL)]
