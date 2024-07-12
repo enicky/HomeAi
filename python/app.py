@@ -19,6 +19,14 @@ from dapr.clients import DaprClient
 from hyper_parameter_optimizer.optimizer import HyperParameterOptimizer
 from logging.config import dictConfig
 
+class SingletonClass(object):
+    isRunning = False
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(SingletonClass, cls).__new__(cls)
+        return cls.instance
+
+singleton = SingletonClass()
 
 dictConfig(
     {
@@ -92,6 +100,12 @@ def download_data_from_azure( ):
 
 @dapr_app.subscribe(AI_PUBSUB, 'start-train-model')
 def start_train_model():
+    if singleton.isRunning: 
+        app.logger.info(f'[start_train_model] Instane was already running ... so just return ok')
+        return "success", 200
+    else:
+        singleton.isRunning = True
+        
     app.logger.info(f'[start_train_model] Start Training model')
     app.logger.info(f'[start_train_model] Finished training model. Send message back to orchestrator')
     perform_training = os.getenv('perform_training', "False").lower() == "true"
@@ -242,6 +256,7 @@ def start_train_model():
         )
         app.logger.info(f'[start_train_model] result ; {result}')
     app.logger.info(f'[start_train_model] Finished sending message back to orchestrator')
+    singleton.isRunning = False
     return "success", 200
 
 # @app.route('/randomNumber', methods=['GET'])
