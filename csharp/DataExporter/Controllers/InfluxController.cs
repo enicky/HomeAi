@@ -104,7 +104,7 @@ namespace InfluxController.Controllers
         public async Task<IActionResult> Test([FromBody] Order o){
             if(o is not null){
                 _logger.LogInformation($"Reeived order {o.Id} -> {o.Title}");
-                await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, "testreply", new RetrieveDataResponse{Success=true, GeneratedFileName="test.csv", StartTrainingModel=false});
+                await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, "testreply", new RetrieveDataResponse{Success=true, GeneratedFileName="test.csv", StartAiProcess=false});
                 _logger.LogInformation("Replied success to topic testreply");
                 return Ok();
             }
@@ -150,7 +150,7 @@ namespace InfluxController.Controllers
             {
                 Success = true,
                 GeneratedFileName = generatedFileName,
-                StartTrainingModel = false
+                StartAiProcess = true
 
             };
             var metaData = new Dictionary<string, string>(){
@@ -160,16 +160,8 @@ namespace InfluxController.Controllers
             await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, 
                                 NameConsts.INFLUX_FINISHED_RETRIEVE_DATA, 
                                 retrieveDataResponse);
-            
-            
-            // await client.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME,
-            //                 NameConsts.INFLUX_FINISHED_RETRIEVE_DATA,
-            //                 ce,metaData,
-            //                 token);
 
             _logger.LogInformation($"Sent that retrieve of file to azaure has been finished");
-
-
         }
     }
 }

@@ -17,6 +17,6 @@ public class RetrieveDataResponse{
 
     [JsonPropertyName("success")]
     public bool Success { get; set; }
-    [JsonPropertyName("starttrainingmodel")]
-    public bool StartTrainingModel { get; set; }
+    [JsonPropertyName("startaiprocess")]
+    public bool StartAiProcess { get; set; }
 }

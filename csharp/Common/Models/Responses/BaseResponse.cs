@@ -1,9 +1,9 @@
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
-namespace Common.Models.Responses
+namespace Common.Models.Responses;
+
+public abstract class BaseResponse
 {
-    public abstract class BaseResponse{
-        [DataMember]
-        public bool Success{get;set;} = false;
-    }
+    [JsonPropertyName("success")]
+    public bool Success { get; set; } = false;
 }

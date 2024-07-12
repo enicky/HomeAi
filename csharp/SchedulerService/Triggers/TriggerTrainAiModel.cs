@@ -1,14 +1,16 @@
+using Common.Helpers;
+using Dapr.Client;
 using SchedulerService.Service;
 
 namespace SchedulerService.Triggers;
 
 public class TriggerTrainAiModel{
     private readonly ILogger<TriggerTrainAiModel> _logger;
-    private readonly IInvokeDaprService _invokeDaprService;
+    private readonly DaprClient _daprClient;    
 
-    public TriggerTrainAiModel(ILogger<TriggerTrainAiModel> logger,  IInvokeDaprService invokeDaprService){
+    public TriggerTrainAiModel(ILogger<TriggerTrainAiModel> logger,  DaprClient daprClient){
         _logger = logger;
-        _invokeDaprService = invokeDaprService;
+        _daprClient = daprClient;
     }
 
      public async Task RunAsync(CancellationToken token)
@@ -16,7 +18,7 @@ public class TriggerTrainAiModel{
         const string logPrefix = "[TriggerTrainAiModel:RunAsync]";
 
         _logger.LogInformation($"{logPrefix} Start triggering training of AI model" );
-        await _invokeDaprService.TriggerTrainingOfAiModel();
+        await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_TRAIN_MODEL);
         _logger.LogInformation($"{logPrefix} Finished trigger");
     }
 
