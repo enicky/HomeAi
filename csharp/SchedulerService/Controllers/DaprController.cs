@@ -70,7 +70,7 @@ public class DaprController : ControllerBase
     [HttpPost("AiDownloadFinishedStartTraining")]
     public async Task AiDownloadFinishedStartTraining([FromBody] AiDownloadResponse aiDownloadResponse)
     {
-        logger.LogInformation("Retrieved info that download of data has been finished");
+        logger.LogInformation("Retrieved from python module that download of data has been finished");
         logger.LogInformation($"Success : {aiDownloadResponse.Success}. Can Start Training : {aiDownloadResponse.CanStartTraining}");
         if (!aiDownloadResponse.Success)
         {
