@@ -1,6 +1,4 @@
-using System.Threading.Tasks.Dataflow;
 using Common.Helpers;
-using Common.Models;
 using Common.Models.Responses;
 using Dapr;
 using Dapr.Client;
@@ -14,10 +12,12 @@ namespace SchedulerService.Controllers;
 public class DaprController : ControllerBase
 {
     private readonly ILogger<DaprController> logger;
+    private readonly DaprClient _daprClient;
 
-    public DaprController(ILogger<DaprController> logger)
+    public DaprController(ILogger<DaprController> logger, DaprClient daprClient)
     {
         this.logger = logger;
+        _daprClient=  daprClient;
     }
 
     [Topic(NameConsts.INFLUX_PUBSUB_NAME, "testreply")]
@@ -25,7 +25,8 @@ public class DaprController : ControllerBase
     public IActionResult TestReply([FromBody] RetrieveDataResponse o)
     {
         logger.LogInformation($"TestReply got triggered");
-        if(o is not null){
+        if (o is not null)
+        {
             logger.LogInformation($"Received RetrieveDataResponse response : {o.Success} for id {o.GeneratedFileName} -> {o.StartTrainingModel}");
             return Ok();
         }
@@ -35,22 +36,25 @@ public class DaprController : ControllerBase
 
     [Topic(pubsubName: NameConsts.INFLUX_PUBSUB_NAME, name: NameConsts.INFLUX_FINISHED_RETRIEVE_DATA)]
     [HttpPost("DownloadDataHasFinished")]
-    public async Task DownloadDataHasFinished(CloudEvent<RetrieveDataResponse> response, CancellationToken token = default)
+    public async Task DownloadDataHasFinished([FromBody] RetrieveDataResponse response)
     {
         logger.LogInformation($"Response value : {JsonConvert.SerializeObject(response)}");
-        logger.LogInformation($"Retrieved info that download has been completed {response?.Data?.Success} in filename {response?.Data?.GeneratedFileName}");
-        logger.LogInformation($"Start Training ai model ? {response?.Data?.StartTrainingModel}");
+        logger.LogInformation($"Retrieved info that download has been completed {response?.Success} in filename {response?.GeneratedFileName}");
+        logger.LogInformation($"Start Training ai model ? {response?.StartTrainingModel}");
         var mustTrainModel = false;
-        if (response!.Data != null && response.Data.StartTrainingModel != null && response.Data.StartTrainingModel == true)
-        { mustTrainModel = true; }
+        if (response != null && response?.StartTrainingModel != null && response.StartTrainingModel == true)
+        {
+            logger.LogInformation("Start training model was true => set boolean val");
+            mustTrainModel = true;
+        }
 
         if (mustTrainModel)
         {
             logger.LogInformation("Start triggering of downloading data to python training container");
-
-            using var client = new DaprClientBuilder().Build();
-            await client.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_DOWNLOAD_DATA, token);
+            await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_DOWNLOAD_DATA);
             logger.LogInformation("Sent message to AI container to start Downloading data and prepare it to start training model");
+        }else{
+            logger.LogInformation("Training model was not needed so skipped");
         }
         logger.LogInformation($"Finished exchanging messages");
     }
@@ -61,14 +65,13 @@ public class DaprController : ControllerBase
     {
         logger.LogInformation("Retrieved info that download of data has been finished");
         logger.LogInformation("Send message to start training model on AI container");
-        using var client = new DaprClientBuilder().Build();
-        await client.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_TRAIN_MODEL);
+        await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_TRAIN_MODEL);
         logger.LogInformation("Finished sending message to AI container to start training model");
     }
 
     [Topic(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_FINISHED_TRAIN_MODEL)]
     [HttpPost("AiFinishedTrainingModel")]
-    public Task AiFinishedTrainingModel(CancellationToken token = default)
+    public Task AiFinishedTrainingModel()
     {
         logger.LogInformation($"Retrieved message that training of model has been finished");
         return Task.CompletedTask;

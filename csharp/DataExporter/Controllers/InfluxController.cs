@@ -113,8 +113,8 @@ namespace InfluxController.Controllers
 
 
         [Topic(pubsubName: NameConsts.INFLUX_PUBSUB_NAME, name: NameConsts.INFLUX_RETRIEVE_DATA)]
-        [HttpPost("retrievedata")]
-        public async Task RetrieveData(CancellationToken token)
+        [HttpPost(NameConsts.INFLUX_RETRIEVE_DATA)]
+        public async Task RetrieveData()
         {
             _logger.LogInformation("Trigger received to retrieve data from influx");
             var response = await influxDBService.QueryAsync(async query =>
@@ -141,9 +141,9 @@ namespace InfluxController.Controllers
                 csv.WriteRecords(response);
             }
             _logger.LogInformation("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
-            var result = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
-            _logger.LogInformation("Result of ensureContainer : {result}. Start uploading to Azure", result);
-            await _fileService.UploadFromFileAsync(result, generatedFileName);
+            var blobContainerClient = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
+            _logger.LogInformation("Result of ensureContainer : {result}. Start uploading to Azure", blobContainerClient);
+            await _fileService.UploadFromFileAsync(blobContainerClient, generatedFileName);
             _logger.LogInformation($"Finished uploading to Azure");
 
             var retrieveDataResponse = new RetrieveDataResponse
@@ -153,19 +153,13 @@ namespace InfluxController.Controllers
                 StartTrainingModel = false
 
             };
-            var ce = new CloudEvent<RetrieveDataResponse>(retrieveDataResponse);
             var metaData = new Dictionary<string, string>(){
                 { "test", "value"},
             };
             
-            var content = JsonSerializer.SerializeToUtf8Bytes(ce);
-            
-            using var client = new DaprClientBuilder().Build();
-            await client.PublishByteEventAsync(NameConsts.INFLUX_PUBSUB_NAME, 
+            await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, 
                                 NameConsts.INFLUX_FINISHED_RETRIEVE_DATA, 
-                                content.AsMemory(), 
-                                MediaTypeNames.Application.Json, 
-                                metaData, token);
+                                retrieveDataResponse);
             
             
             // await client.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME,
