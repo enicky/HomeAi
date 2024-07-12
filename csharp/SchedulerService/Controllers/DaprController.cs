@@ -1,5 +1,6 @@
 using System.Threading.Tasks.Dataflow;
 using Common.Helpers;
+using Common.Models;
 using Common.Models.Responses;
 using Dapr;
 using Dapr.Client;
@@ -19,6 +20,18 @@ public class DaprController : ControllerBase
         this.logger = logger;
     }
 
+    [Topic(NameConsts.INFLUX_PUBSUB_NAME, "testreply")]
+    [HttpPost("testreply")]
+    public IActionResult TestReply([FromBody] OrderReceived o)
+    {
+        logger.LogInformation($"TestReply got triggered");
+        if(o is not null){
+            logger.LogInformation($"Received OrderReceived response : {o.Success} for id {o.OrderId}");
+            return Ok();
+        }
+        return BadRequest();
+    }
+
 
     [Topic(pubsubName: NameConsts.INFLUX_PUBSUB_NAME, name: NameConsts.INFLUX_FINISHED_RETRIEVE_DATA)]
     [HttpPost("DownloadDataHasFinished")]
@@ -28,8 +41,8 @@ public class DaprController : ControllerBase
         logger.LogInformation($"Retrieved info that download has been completed {response?.Data?.Success} in filename {response?.Data?.GeneratedFileName}");
         logger.LogInformation($"Start Training ai model ? {response?.Data?.StartTrainingModel}");
         var mustTrainModel = false;
-        if(response!.Data != null && response.Data.StartTrainingModel != null && response.Data.StartTrainingModel == true)
-        {}mustTrainModel = true;
+        if (response!.Data != null && response.Data.StartTrainingModel != null && response.Data.StartTrainingModel == true)
+        { mustTrainModel = true; }
 
         if (mustTrainModel)
         {

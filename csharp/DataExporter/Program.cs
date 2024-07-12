@@ -21,6 +21,7 @@ internal class Program
                 options.TimestampFormat = "HH:mm:ss ";
             });
         });
+        builder.Services.AddDaprClient();
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddControllers().AddDapr();

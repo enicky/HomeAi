@@ -34,13 +34,19 @@ namespace InfluxController.Controllers
         private readonly string _org;
         private readonly IFileService _fileService;
         private readonly ILogger<InfluxController> _logger;
+        private readonly DaprClient _daprClient;
 
-        public InfluxController(InfluxDBService influxDBService, IFileService fileService, IConfiguration configuration, ILogger<InfluxController> logger)
+        public InfluxController(InfluxDBService influxDBService, 
+                    IFileService fileService, 
+                    IConfiguration configuration,
+                    DaprClient daprClient,
+                    ILogger<InfluxController> logger)
         {
             this.influxDBService = influxDBService;
             _org = configuration.GetValue<string>("InfluxDB:Org")!;
             _fileService = fileService;
             _logger = logger;
+            _daprClient = daprClient;
 
         }
 
@@ -95,9 +101,11 @@ namespace InfluxController.Controllers
 
         [Dapr.Topic(NameConsts.INFLUX_PUBSUB_NAME, "test" )]
         [HttpPost("test")]
-        public IActionResult Test([FromBody] Order o){
+        public async Task<IActionResult> Test([FromBody] Order o){
             if(o is not null){
                 _logger.LogInformation($"Reeived order {o.Id} -> {o.Title}");
+                await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, "testreply", new OrderReceived{Success=true, OrderId = o.Id});
+                _logger.LogInformation("Replied success to topic testreply");
                 return Ok();
             }
             return BadRequest();
