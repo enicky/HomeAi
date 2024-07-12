@@ -22,11 +22,11 @@ public class DaprController : ControllerBase
 
     [Topic(NameConsts.INFLUX_PUBSUB_NAME, "testreply")]
     [HttpPost("testreply")]
-    public IActionResult TestReply([FromBody] OrderReceived o)
+    public IActionResult TestReply([FromBody] RetrieveDataResponse o)
     {
         logger.LogInformation($"TestReply got triggered");
         if(o is not null){
-            logger.LogInformation($"Received OrderReceived response : {o.Success} for id {o.OrderId}");
+            logger.LogInformation($"Received RetrieveDataResponse response : {o.Success} for id {o.GeneratedFileName} -> {o.StartTrainingModel}");
             return Ok();
         }
         return BadRequest();

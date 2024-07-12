@@ -104,7 +104,7 @@ namespace InfluxController.Controllers
         public async Task<IActionResult> Test([FromBody] Order o){
             if(o is not null){
                 _logger.LogInformation($"Reeived order {o.Id} -> {o.Title}");
-                await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, "testreply", new OrderReceived{Success=true, OrderId = o.Id});
+                await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, "testreply", new RetrieveDataResponse{Success=true, GeneratedFileName="test.csv", StartTrainingModel=false});
                 _logger.LogInformation("Replied success to topic testreply");
                 return Ok();
             }
