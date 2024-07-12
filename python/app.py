@@ -58,6 +58,7 @@ dictConfig(
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 logging.getLogger('matplotlib.pyplot').setLevel(logging.WARNING)
 logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
+logging.getLogger('matplotlib.backends.backend_pdf').setLevel(logging.WARNING)
 
 app = flask.Flask(__name__)
 dapr_app = DaprApp(app)
@@ -137,8 +138,8 @@ def start_train_model():
     learning_rate=0.01
     use_gpu=1
     gpu=0
-    lstm_hidden_size=1
-    lstm_layers=2
+    lstm_hidden_size=512
+    lstm_layers=1
 
     prep_configs = {
         'task_name': 'long_term_forecast',
@@ -236,6 +237,7 @@ def start_train_model():
     try:
         if perform_training:
             h.start_search(prepare_config_params=prep_configs)
+        app.logger.info(f'Start Search finished. And no exception was thrown')
     except Exception as e:
         app.logger.error('there was an issue training data ... ',exc_info=True)
         app.logger.info(e)
@@ -250,44 +252,14 @@ def start_train_model():
     
     with DaprClient() as client:
         result = client.publish_event(
-            pubsub_name='ai-pubsub',
+            pubsub_name=AI_PUBSUB,
             topic_name='finished-train-model',
             data=strResult
         )
         app.logger.info(f'[start_train_model] result ; {result}')
     app.logger.info(f'[start_train_model] Finished sending message back to orchestrator')
     singleton.isRunning = False
+    app.logger.info('isRunning was set to false => Can start processing again!')
     return "success", 200
-
-# @app.route('/randomNumber', methods=['GET'])
-# def random_number():
-#     return jsonify(random.randint(0, 101))
-
-# @app.route('/saveNumber', methods=['POST'])
-# def save_number():
-#     content = request.json
-#     number = content['number']
-#     response = requests.post(state_url, json=[{"key": "savedNumber", "value": number}])
-#     print(response, flush="true")
-#     return "OK"
-
-# @app.route('/savedNumber', methods=['GET'])
-# def get_saved_number():
-#     response=requests.get(f'{state_url}/savedNumber')
-#     return json.dumps(response.json()), 200, {'ContentType':'application/json'} 
-
-# @app.route('/dapr/subscribe', methods=['GET'])
-# def subscribe():
-#     return jsonify(["A", "B"])
-
-# @app.route('/A', methods=['POST'])
-# def topicAHandler():
-#     print(f'A: {request.json}', flush=True)
-#     return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
-
-# @app.route('/B', methods=['POST'])
-# def topicBHandler():
-#     print(f'B: {request.json}', flush=True)
-#     return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
 
 app.run(host='0.0.0.0', port=5001)
