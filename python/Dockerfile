@@ -14,7 +14,8 @@
 # ENTRYPOINT ["python"]
 # CMD ["app.py"]
 
-FROM dustynv/l4t-pytorch:r35.3.1
+#FROM dustynv/l4t-pytorch:r35.3.1
+FROM nvcr.io/nvidia/pytorch:24.06-py3
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 
