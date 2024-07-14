@@ -3,11 +3,15 @@ on:
   workflow_dispatch:
   push:
     branches: ['main']
-    paths: ['python/**', '.github/workflows/pythonaitrainer.yaml']
+    paths:
+      - 'python/**'
+      - '.github/workflows/pythonaitrainer.yaml'
+      - '!python/Dockerfile.base'
 permissions:
   contents: read
 jobs:
   docker:
+    name: Build Docker Image for PythonAI
     runs-on: self-hosted
     steps:
       - name: checkout
