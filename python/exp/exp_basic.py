@@ -88,7 +88,8 @@ class Exp_Basic(object):
                 self.args.gpu) if not self.args.use_multi_gpu else self.args.devices
             device = torch.device('cuda:{}'.format(self.args.gpu))
             if torch.backends.cudnn.is_available():
-                torch.backends.cudnn.benchmark = True
+                if not torch.backends.cudnn.benchmark:
+                    torch.backends.cudnn.benchmark = True
             if not try_model:
                 if self.save_process:
                     self.print_content('Use GPU: cuda:{}'.format(self.args.gpu))
