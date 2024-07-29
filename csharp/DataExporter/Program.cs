@@ -1,4 +1,5 @@
 using app.Services;
+using DataExporter.Services;
 
 internal class Program
 {
@@ -29,6 +30,7 @@ internal class Program
         builder.Services.AddSwaggerGen();
         builder.Services.AddSingleton<InfluxDBService>();
         builder.Services.AddScoped<IFileService, FileService>();
+        builder.Services.AddTransient<ICleanupService, CleanupService>();
 
         var app = builder.Build();
         app.UseCloudEvents();
@@ -43,7 +45,3 @@ internal class Program
     }
 }
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

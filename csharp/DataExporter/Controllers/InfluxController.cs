@@ -9,6 +9,7 @@ using Common.Models.Responses;
 using CsvHelper;
 using Dapr;
 using Dapr.Client;
+using DataExporter.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InfluxController.Controllers
@@ -35,10 +36,12 @@ namespace InfluxController.Controllers
         private readonly IFileService _fileService;
         private readonly ILogger<InfluxController> _logger;
         private readonly DaprClient _daprClient;
+        private readonly ICleanupService _cleanupService;
 
         public InfluxController(InfluxDBService influxDBService, 
                     IFileService fileService, 
                     IConfiguration configuration,
+                    ICleanupService cleanupService,
                     DaprClient daprClient,
                     ILogger<InfluxController> logger)
         {
@@ -47,6 +50,7 @@ namespace InfluxController.Controllers
             _fileService = fileService;
             _logger = logger;
             _daprClient = daprClient;
+            _cleanupService = cleanupService;
 
         }
 
@@ -83,13 +87,14 @@ namespace InfluxController.Controllers
 
                          }));
             });
+            var cleanedUpResponses = _cleanupService.Cleanup(response.ToList());
             var currentDate = startDate.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
             _logger.LogInformation($"Start writing file to {generatedFileName}");
             using (var writer = new StreamWriter(generatedFileName))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                csv.WriteRecords(response);
+                csv.WriteRecords(cleanedUpResponses);
             }
             _logger.LogInformation("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
             var result = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
@@ -132,13 +137,14 @@ namespace InfluxController.Controllers
 
                          }));
             });
+            var cleanedUpResponses = _cleanupService.Cleanup(response.ToList());
             var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
             _logger.LogInformation($"Start writing file to {generatedFileName}");
             using (var writer = new StreamWriter(generatedFileName))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                csv.WriteRecords(response);
+                csv.WriteRecords(cleanedUpResponses);
             }
             _logger.LogInformation("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
             var blobContainerClient = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
