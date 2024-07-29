@@ -27,6 +27,7 @@ jobs:
           file: ./csharp/DataExporter/Dockerfile
           platforms: |
             linux/arm64
+            linux/amd64
           push: true
           tags: neichmann/dataexporter:app-${{ github.run_number }}
   modifygit:
