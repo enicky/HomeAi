@@ -1,6 +1,8 @@
 using app.Services;
 using DataExporter.Services;
 
+namespace DataExporter;
+
 internal class Program
 {
     private static void Main(string[] args)

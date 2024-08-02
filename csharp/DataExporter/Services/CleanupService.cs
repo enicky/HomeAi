@@ -11,6 +11,7 @@ public interface ICleanupService
 public class CleanupService : ICleanupService
 {
     private readonly ILogger<CleanupService> _logger;
+    private readonly double epsilon = 0.001;
 
     public CleanupService(ILogger<CleanupService> logger)
     {
@@ -32,9 +33,10 @@ public class CleanupService : ICleanupService
 
     private float GetValidWatt(float watt, List<InfluxRecord> data)
     {
+        
         if(watt > 0) return watt;
         data.Sort((x, y) => DateTime.Compare(x.Time, y.Time));
-        var firstValidValue = data.First(q => q.Watt != 0);
+        var firstValidValue = data.First(q => Math.Abs( q.Watt) >= epsilon);
         if (firstValidValue == null)
         {
             _logger.LogError("No valid Watt found for today!!");
@@ -48,7 +50,7 @@ public class CleanupService : ICleanupService
     {
         if(temperature > 0) return temperature;
         data.Sort((x, y) => DateTime.Compare(x.Time, y.Time));
-        var firstValidValue = data.First(q => q.Temperature != 0);
+        var firstValidValue = data.First(q => Math.Abs(q.Temperature) >= epsilon);
         if (firstValidValue == null)
         {
             _logger.LogError("No valid temperature found for today!!");
@@ -62,7 +64,7 @@ public class CleanupService : ICleanupService
     {
         if(pressure > 100) return pressure;
         data.Sort((x, y) => DateTime.Compare(x.Time, y.Time));
-        var firstValidValue = data.First(q => q.Pressure != 0);
+        var firstValidValue = data.First(q => Math.Abs(q.Pressure) >= epsilon);
         //_logger.LogInformation("Found valid pressure : {pressure}", firstValidValue.Pressure);
         if (firstValidValue == null)
         {
@@ -80,7 +82,7 @@ public class CleanupService : ICleanupService
         // get the first valid value from the list
         //_logger.LogInformation("No Valid humidity found. Search for the first(next) valid one.");
         data.Sort((x, y) => DateTime.Compare(x.Time, y.Time));
-        var firstValidValue = data.FirstOrDefault(q => q.Humidity != 0);
+        var firstValidValue = data.FirstOrDefault(q => Math.Abs(q.Humidity) >= epsilon);
         //_logger.LogInformation("Found valid humidity : {humidity}", firstValidValue.Humidity);
         if (firstValidValue == null)
         {

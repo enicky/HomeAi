@@ -94,7 +94,7 @@ namespace InfluxController.Controllers
             using (var writer = new StreamWriter(generatedFileName))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                csv.WriteRecords(cleanedUpResponses);
+                await csv.WriteRecordsAsync(cleanedUpResponses);
             }
             _logger.LogInformation("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
             var result = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
@@ -144,7 +144,7 @@ namespace InfluxController.Controllers
             using (var writer = new StreamWriter(generatedFileName))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                csv.WriteRecords(cleanedUpResponses);
+                await csv.WriteRecordsAsync(cleanedUpResponses);
             }
             _logger.LogInformation("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
             var blobContainerClient = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
