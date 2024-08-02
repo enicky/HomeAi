@@ -1,6 +1,4 @@
 using System.Globalization;
-using System.Net.Mime;
-using System.Text.Json;
 using app.Services;
 using Common.Helpers;
 using Common.Models;
@@ -57,7 +55,7 @@ namespace InfluxController.Controllers
         [HttpGet("ExportDataForDate")]
         public async Task ExportDataForDate(DateTime startDate, CancellationToken token){
             var strDateTime = startDate.ToStartDayString();
-            _logger.LogInformation($"Start export data for date {strDateTime}");
+            _logger.LogDebug("Start export data for date {startDate}", strDateTime);
             var strStartDate = startDate.AddDays(-1).ToStartDayString();
             var strTomorrowStartDate = startDate.ToStartDayString();
 
@@ -73,7 +71,7 @@ namespace InfluxController.Controllers
             "     rowKey: [\"_time\"], columnKey: [\"_measurement\", \"_field\"], valueColumn: \"_value\")" +
 
             " |> yield(name: \"values\")";
-            _logger.LogInformation($"Using the following query : {q}");
+            _logger.LogDebug("Using the following query : {query}", q);
             var response = await influxDBService.QueryAsync(async query => {
                 var data = await query.QueryAsync(q, _org);
                 return data.SelectMany(table =>
@@ -91,17 +89,17 @@ namespace InfluxController.Controllers
             var cleanedUpResponses = _cleanupService.Cleanup(response.ToList());
             var currentDate = startDate.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
-            _logger.LogInformation($"Start writing file to {generatedFileName}");
+            _logger.LogDebug("Start writing file to {GeneratedFileName}", generatedFileName);
             using (var writer = new StreamWriter(generatedFileName))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
                 await csv.WriteRecordsAsync(cleanedUpResponses, token);
             }
-            _logger.LogInformation("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
+            _logger.LogDebug("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
             var result = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
-            _logger.LogInformation("Result of ensureContainer : {result}. Start uploading to Azure", result);
+            _logger.LogDebug("Result of ensureContainer : {result}. Start uploading to Azure", result);
             await _fileService.UploadFromFileAsync(result, generatedFileName);
-            _logger.LogInformation($"Finished uploading to Azure");
+            _logger.LogDebug($"Finished uploading to Azure");
 
         }
 
@@ -109,9 +107,9 @@ namespace InfluxController.Controllers
         [HttpPost("test")]
         public async Task<IActionResult> Test([FromBody] Order o){
             if(o is not null){
-                _logger.LogInformation($"Reeived order {o.Id.ToString()} -> {o.Title.ToString()}");
+                _logger.LogDebug("Reeived order {OrderId} -> {OrderTitle}", o.Id.ToString(), o.Title);
                 await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, "testreply", new RetrieveDataResponse{Success=true, GeneratedFileName="test.csv", StartAiProcess=false});
-                _logger.LogInformation("Replied success to topic testreply");
+                _logger.LogDebug("Replied success to topic testreply");
                 return Ok();
             }
             return BadRequest();
@@ -122,7 +120,7 @@ namespace InfluxController.Controllers
         [HttpPost(NameConsts.INFLUX_RETRIEVE_DATA)]
         public async Task RetrieveData()
         {
-            _logger.LogInformation("Trigger received to retrieve data from influx");
+            _logger.LogDebug("Trigger received to retrieve data from influx");
             var response = await influxDBService.QueryAsync(async query =>
             {
                 var data = await query.QueryAsync(queryString, _org);
@@ -141,17 +139,17 @@ namespace InfluxController.Controllers
             var cleanedUpResponses = _cleanupService.Cleanup(response.ToList());
             var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
-            _logger.LogInformation($"Start writing file to {generatedFileName}");
+            _logger.LogDebug("Start writing file to {GeneratedFileName}", generatedFileName);
             using (var writer = new StreamWriter(generatedFileName))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
                 await csv.WriteRecordsAsync(cleanedUpResponses);
             }
-            _logger.LogInformation("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
+            _logger.LogDebug("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
             var blobContainerClient = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
-            _logger.LogInformation("Result of ensureContainer : {result}. Start uploading to Azure", blobContainerClient);
+            _logger.LogDebug("Result of ensureContainer : {result}. Start uploading to Azure", blobContainerClient);
             await _fileService.UploadFromFileAsync(blobContainerClient, generatedFileName);
-            _logger.LogInformation($"Finished uploading to Azure");
+            _logger.LogDebug($"Finished uploading to Azure");
 
             var retrieveDataResponse = new RetrieveDataResponse
             {
@@ -160,15 +158,12 @@ namespace InfluxController.Controllers
                 StartAiProcess = true
 
             };
-            var metaData = new Dictionary<string, string>(){
-                { "test", "value"},
-            };
             
             await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, 
                                 NameConsts.INFLUX_FINISHED_RETRIEVE_DATA, 
                                 retrieveDataResponse);
 
-            _logger.LogInformation($"Sent that retrieve of file to azaure has been finished");
+            _logger.LogDebug($"Sent that retrieve of file to azaure has been finished");
         }
     }
 }
