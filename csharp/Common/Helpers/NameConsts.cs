@@ -1,6 +1,6 @@
 namespace Common.Helpers;
 
-public class NameConsts{
+public static class NameConsts{
     // INFLUX related consts
     public const string INFLUX_PUBSUB_NAME = "influx-data-pubsub";
     public const string INFLUX_RETRIEVE_DATA = "retrieve-data";
