@@ -56,7 +56,8 @@ namespace InfluxController.Controllers
 
         [HttpGet("ExportDataForDate")]
         public async Task ExportDataForDate(DateTime startDate, CancellationToken token){
-            _logger.LogInformation($"Start export data for date {startDate}");
+            var strDateTime = startDate.ToStartDayString();
+            _logger.LogInformation($"Start export data for date {strDateTime}");
             var strStartDate = startDate.AddDays(-1).ToStartDayString();
             var strTomorrowStartDate = startDate.ToStartDayString();
 
@@ -94,7 +95,7 @@ namespace InfluxController.Controllers
             using (var writer = new StreamWriter(generatedFileName))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                await csv.WriteRecordsAsync(cleanedUpResponses);
+                await csv.WriteRecordsAsync(cleanedUpResponses, token);
             }
             _logger.LogInformation("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
             var result = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
@@ -108,7 +109,7 @@ namespace InfluxController.Controllers
         [HttpPost("test")]
         public async Task<IActionResult> Test([FromBody] Order o){
             if(o is not null){
-                _logger.LogInformation($"Reeived order {o.Id} -> {o.Title}");
+                _logger.LogInformation($"Reeived order {o.Id.ToString()} -> {o.Title.ToString()}");
                 await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, "testreply", new RetrieveDataResponse{Success=true, GeneratedFileName="test.csv", StartAiProcess=false});
                 _logger.LogInformation("Replied success to topic testreply");
                 return Ok();
