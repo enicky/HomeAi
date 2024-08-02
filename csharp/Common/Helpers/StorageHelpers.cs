@@ -1,7 +1,5 @@
 namespace Common.Helpers;
 
-public class StorageHelpers{
-    public static string ContainerName = "sensordata";
-
-    
+public static class StorageHelpers{
+    public const string ContainerName = "sensordata";    
 }
