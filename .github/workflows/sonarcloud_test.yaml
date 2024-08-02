@@ -49,5 +49,5 @@ jobs:
         run: |-
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"homeai_dataexporter" /o:"enicky" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
           dotnet build ./csharp/DataExporter/DataExporter.csproj --no-incremental
-          dotnet-coverage collect "dotnet test ./csharp/Tests/DataExporter.Tests/DataExporter.Tests.csproj" -f xml -o "coverage.xml"
+          dotnet-coverage collect "dotnet test --no-build --no-restore ./csharp/Tests/DataExporter.Tests/DataExporter.Tests.csproj" -f xml -o "coverage.xml"
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"

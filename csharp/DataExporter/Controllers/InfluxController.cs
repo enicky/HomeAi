@@ -71,7 +71,6 @@ namespace InfluxController.Controllers
             "     rowKey: [\"_time\"], columnKey: [\"_measurement\", \"_field\"], valueColumn: \"_value\")" +
 
             " |> yield(name: \"values\")";
-            _logger.LogDebug("Using the following query : {query}", q);
             var response = await influxDBService.QueryAsync(async query => {
                 var data = await query.QueryAsync(q, _org);
                 return data.SelectMany(table =>
@@ -89,15 +88,12 @@ namespace InfluxController.Controllers
             var cleanedUpResponses = _cleanupService.Cleanup(response.ToList());
             var currentDate = startDate.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
-            _logger.LogDebug("Start writing file to {GeneratedFileName}", generatedFileName);
             using (var writer = new StreamWriter(generatedFileName))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
                 await csv.WriteRecordsAsync(cleanedUpResponses, token);
             }
-            _logger.LogDebug("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
             var result = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
-            _logger.LogDebug("Result of ensureContainer : {result}. Start uploading to Azure", result);
             await _fileService.UploadFromFileAsync(result, generatedFileName);
             _logger.LogDebug($"Finished uploading to Azure");
 
@@ -139,25 +135,21 @@ namespace InfluxController.Controllers
             var cleanedUpResponses = _cleanupService.Cleanup(response.ToList());
             var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
-            _logger.LogDebug("Start writing file to {GeneratedFileName}", generatedFileName);
             using (var writer = new StreamWriter(generatedFileName))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
                 await csv.WriteRecordsAsync(cleanedUpResponses);
             }
-            _logger.LogDebug("Ensuring container exists {containerName}", StorageHelpers.ContainerName);
             var blobContainerClient = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
-            _logger.LogDebug("Result of ensureContainer : {result}. Start uploading to Azure", blobContainerClient);
             await _fileService.UploadFromFileAsync(blobContainerClient, generatedFileName);
-            _logger.LogDebug($"Finished uploading to Azure");
-
+            
             var retrieveDataResponse = new RetrieveDataResponse
             {
                 Success = true,
                 GeneratedFileName = generatedFileName,
                 StartAiProcess = true
 
-            };
+            };  
             
             await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, 
                                 NameConsts.INFLUX_FINISHED_RETRIEVE_DATA, 
