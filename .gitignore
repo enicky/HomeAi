@@ -15,3 +15,5 @@ prob_results
 test_results
 python/results
 python/process
+dapr.yaml
+**/dapr*
