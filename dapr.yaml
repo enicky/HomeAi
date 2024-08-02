@@ -15,7 +15,6 @@ apps:
     containerImage: neichmann/schedulerservice:latest
     createService: true
     env:
-      SQL_CONFIG: "Server=192.168.1.154; Database=HomeAi; User Id=sa;Password=Aveve2008;Encrypt=False"
       SCHEDULE: "* 8 * * *"
     command: ["dotnet","SchedulerService.dll"]
 
