@@ -1,3 +1,4 @@
+using System.Globalization;
 using Common.Models.Influx;
 using InfluxDB.Client;
 
@@ -7,7 +8,7 @@ namespace app.Services
     public interface IInfluxDbService
     {
         void Write(Action<WriteApi> action);
-        Task<List<InfluxRecord>> QueryAsync(string query, string organisation);
+        Task<List<InfluxRecord>> QueryAsync(string queryString, string organisation);
     }
 
     public class InfluxDBService : IInfluxDbService
@@ -37,7 +38,7 @@ namespace app.Services
                         table.Records.Select(record =>
                          new InfluxRecord
                          {
-                             Time = DateTime.Parse(record!.GetTime()?.ToString()!),
+                             Time = DateTime.Parse(record!.GetTime()?.ToString()!, new CultureInfo("nl-BE")),
                              Watt = string.IsNullOrEmpty(record.GetValueByKey("W_value")?.ToString()) ? 0 : float.Parse(record.GetValueByKey("W_value").ToString()!),
                              Pressure = string.IsNullOrEmpty(record.GetValueByKey("state_pressure")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_pressure").ToString()!),
                              Humidity = string.IsNullOrEmpty(record.GetValueByKey("state_humidity")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_humidity").ToString()!),
@@ -46,7 +47,6 @@ namespace app.Services
                          })).ToList();
 
             return paraseddata;
-            //return await action(query);
         }
     }
 }

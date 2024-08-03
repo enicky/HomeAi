@@ -1,17 +1,13 @@
-using Azure.Identity;
 using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using Azure.Storage.Blobs.Specialized;
 using Azure.Storage;
 using Azure;
 using Common.Helpers;
+using Common.Exceptions;
 
 namespace app.Services;
 
 public interface IFileService
 {
-    //Task UploadFromFileAsync(BlobContainerClient containerClient, string localFilePath);
-    //Task<BlobContainerClient?> EnsureContainer(string containerName);
     Task UploadToAzure(string containerName, string generatedFileName);
 }
 
@@ -63,7 +59,7 @@ public class FileService : IFileService
 
         return containerClient;
     }
-    private async Task UploadFromFileAsync(
+    private static async Task UploadFromFileAsync(
                                 BlobContainerClient containerClient,
                                 string localFilePath)
     {
@@ -76,7 +72,7 @@ public class FileService : IFileService
 
     public async Task UploadToAzure(string containerName, string generatedFileName)
     {
-        var result = await EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
+        var result = await EnsureContainer(StorageHelpers.ContainerName) ?? throw new EnsureContainerException("result is null");
         await UploadFromFileAsync(result, generatedFileName);
     }
 }
