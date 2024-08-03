@@ -132,8 +132,6 @@ namespace InfluxController.Controllers
                 await csv.WriteRecordsAsync(cleanedUpResponses);
             }
             await _fileService.UploadToAzure(StorageHelpers.ContainerName, generatedFileName);
-            // var blobContainerClient = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
-            // await _fileService.UploadFromFileAsync(blobContainerClient, generatedFileName);
             
             var retrieveDataResponse = new RetrieveDataResponse
             {
