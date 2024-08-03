@@ -41,7 +41,7 @@ public class InfluxControllerTests: IClassFixture<TestSetup>
         _mockedDaprClient.Verify(x => 
             x.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, NameConsts.INFLUX_FINISHED_RETRIEVE_DATA, It.IsAny<RetrieveDataResponse>(), default), Times.Once());
 
-
+        _output.WriteLine("finished");
     }
 
     private InfluxController.Controllers.InfluxController CreateSut()
