@@ -51,6 +51,6 @@ jobs:
           dotnet build ./csharp/DataExporter/DataExporter.csproj --no-incremental
           dotnet-coverage collect "dotnet test ./csharp/Tests/DataExporter.Tests/DataExporter.Tests.csproj" -f xml -o "coverage.xml"
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-      - uses: actions/upload-artifact
+      - uses: actions/upload-artifact@v4
         with:
           path: coverage.xml
