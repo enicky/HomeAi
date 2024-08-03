@@ -4,28 +4,33 @@ using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs.Specialized;
 using Azure.Storage;
 using Azure;
+using Common.Helpers;
 
 namespace app.Services;
 
 public interface IFileService
 {
-    Task UploadFromFileAsync(BlobContainerClient containerClient, string localFilePath);
-    Task<BlobContainerClient?> EnsureContainer(string containerName);
+    //Task UploadFromFileAsync(BlobContainerClient containerClient, string localFilePath);
+    //Task<BlobContainerClient?> EnsureContainer(string containerName);
+    Task UploadToAzure(string containerName, string generatedFileName);
 }
 
 public class FileService : IFileService
 {
     private readonly BlobServiceClient _blobServiceClient;
-    public FileService(IConfiguration configuration){
+    public FileService(IConfiguration configuration)
+    {
         var _accountName = configuration.GetValue<string>("accountName");
-        if(string.IsNullOrEmpty(_accountName)){
+        if (string.IsNullOrEmpty(_accountName))
+        {
             throw new NullReferenceException("FileStorage:accountName cannot be NULL");
         }
         var _accountKey = configuration.GetValue<string>("accountKey");
-        if(string.IsNullOrEmpty(_accountKey)) throw new NullReferenceException("FileStorage:accountKey cannot be NULL");
+        if (string.IsNullOrEmpty(_accountKey)) throw new NullReferenceException("FileStorage:accountKey cannot be NULL");
 
         _blobServiceClient = GetBlobServiceClient(_accountName, _accountKey);
     }
+
     private BlobServiceClient GetBlobServiceClient(string accountName, string accountKey)
     {
         StorageSharedKeyCredential sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
@@ -35,14 +40,14 @@ public class FileService : IFileService
         return client;
     }
 
-    public async Task<BlobContainerClient?> EnsureContainer(string containerName)
+    private async Task<BlobContainerClient?> EnsureContainer(string containerName)
     {
         var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
 
         try
         {
             // Create the container
-            
+
             await containerClient.CreateIfNotExistsAsync();
             if (await containerClient.ExistsAsync())
             {
@@ -58,7 +63,7 @@ public class FileService : IFileService
 
         return containerClient;
     }
-    public async Task UploadFromFileAsync(
+    private async Task UploadFromFileAsync(
                                 BlobContainerClient containerClient,
                                 string localFilePath)
     {
@@ -67,5 +72,11 @@ public class FileService : IFileService
         BlobClient blobClient = containerClient.GetBlobClient(fileName);
 
         await blobClient.UploadAsync(localFilePath, true);
+    }
+
+    public async Task UploadToAzure(string containerName, string generatedFileName)
+    {
+        var result = await EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
+        await UploadFromFileAsync(result, generatedFileName);
     }
 }

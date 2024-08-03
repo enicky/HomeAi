@@ -29,18 +29,20 @@ namespace InfluxController.Controllers
 
             " |> yield(name: \"values\")";
 
-        private readonly InfluxDBService influxDBService;
+        private readonly IInfluxDbService influxDBService;
         private readonly string _org;
         private readonly IFileService _fileService;
         private readonly ILogger<InfluxController> _logger;
         private readonly DaprClient _daprClient;
         private readonly ICleanupService _cleanupService;
+        private readonly ILocalFileService _localFileService;
 
-        public InfluxController(InfluxDBService influxDBService, 
+        public InfluxController(IInfluxDbService influxDBService, 
                     IFileService fileService, 
                     IConfiguration configuration,
                     ICleanupService cleanupService,
                     DaprClient daprClient,
+                    ILocalFileService localFileService,
                     ILogger<InfluxController> logger)
         {
             this.influxDBService = influxDBService;
@@ -49,11 +51,12 @@ namespace InfluxController.Controllers
             _logger = logger;
             _daprClient = daprClient;
             _cleanupService = cleanupService;
+            _localFileService = localFileService;
 
         }
 
         [HttpGet("ExportDataForDate")]
-        public async Task ExportDataForDate(DateTime startDate, CancellationToken token){
+        public async Task<IActionResult> ExportDataForDate(DateTime startDate, CancellationToken token){
             var strDateTime = startDate.ToStartDayString();
             _logger.LogDebug("Start export data for date {startDate}", strDateTime);
             var strStartDate = startDate.AddDays(-1).ToStartDayString();
@@ -71,31 +74,30 @@ namespace InfluxController.Controllers
             "     rowKey: [\"_time\"], columnKey: [\"_measurement\", \"_field\"], valueColumn: \"_value\")" +
 
             " |> yield(name: \"values\")";
-            var response = await influxDBService.QueryAsync(async query => {
-                var data = await query.QueryAsync(q, _org);
-                return data.SelectMany(table =>
-                        table.Records.Select(record =>
-                         new InfluxRecord
-                         {
-                             Time = DateTime.Parse(record!.GetTime()?.ToString()!),
-                             Watt = string.IsNullOrEmpty(record.GetValueByKey("W_value")?.ToString()) ? 0 : float.Parse(record.GetValueByKey("W_value").ToString()!),
-                             Pressure = string.IsNullOrEmpty(record.GetValueByKey("state_pressure")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_pressure").ToString()!),
-                             Humidity = string.IsNullOrEmpty(record.GetValueByKey("state_humidity")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_humidity").ToString()!),
-                             Temperature = string.IsNullOrEmpty(record.GetValueByKey("°C_value")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("°C_value").ToString()!),
 
-                         }));
-            });
+            var response = await influxDBService.QueryAsync(q, _org);
+            // var response = await influxDBService.QueryAsync(async query => {
+            //     var data = await query.QueryAsync(q, _org);
+            //     return data.SelectMany(table =>
+            //             table.Records.Select(record =>
+            //              new InfluxRecord
+            //              {
+            //                  Time = DateTime.Parse(record!.GetTime()?.ToString()!),
+            //                  Watt = string.IsNullOrEmpty(record.GetValueByKey("W_value")?.ToString()) ? 0 : float.Parse(record.GetValueByKey("W_value").ToString()!),
+            //                  Pressure = string.IsNullOrEmpty(record.GetValueByKey("state_pressure")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_pressure").ToString()!),
+            //                  Humidity = string.IsNullOrEmpty(record.GetValueByKey("state_humidity")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_humidity").ToString()!),
+            //                  Temperature = string.IsNullOrEmpty(record.GetValueByKey("°C_value")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("°C_value").ToString()!),
+
+            //              }));
+            // });
             var cleanedUpResponses = _cleanupService.Cleanup(response.ToList());
             var currentDate = startDate.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
-            using (var writer = new StreamWriter(generatedFileName))
-            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-            {
-                await csv.WriteRecordsAsync(cleanedUpResponses, token);
-            }
-            var result = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
-            await _fileService.UploadFromFileAsync(result, generatedFileName);
+            await _localFileService.WriteToFile(generatedFileName, cleanedUpResponses,token );
+            await _fileService.UploadToAzure(StorageHelpers.ContainerName, generatedFileName);
+           
             _logger.LogDebug($"Finished uploading to Azure");
+            return Ok();
 
         }
 
@@ -117,22 +119,11 @@ namespace InfluxController.Controllers
         public async Task RetrieveData()
         {
             _logger.LogDebug("Trigger received to retrieve data from influx");
-            var response = await influxDBService.QueryAsync(async query =>
-            {
-                var data = await query.QueryAsync(queryString, _org);
-                return data.SelectMany(table =>
-                        table.Records.Select(record =>
-                         new InfluxRecord
-                         {
-                             Time = DateTime.Parse(record!.GetTime()?.ToString()!),
-                             Watt = string.IsNullOrEmpty(record.GetValueByKey("W_value")?.ToString()) ? 0 : float.Parse(record.GetValueByKey("W_value").ToString()!),
-                             Pressure = string.IsNullOrEmpty(record.GetValueByKey("state_pressure")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_pressure").ToString()!),
-                             Humidity = string.IsNullOrEmpty(record.GetValueByKey("state_humidity")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_humidity").ToString()!),
-                             Temperature = string.IsNullOrEmpty(record.GetValueByKey("°C_value")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("°C_value").ToString()!),
 
-                         }));
-            });
-            var cleanedUpResponses = _cleanupService.Cleanup(response.ToList());
+            var response = await influxDBService.QueryAsync(queryString, _org);
+
+           
+            var cleanedUpResponses = _cleanupService.Cleanup(response);
             var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
             using (var writer = new StreamWriter(generatedFileName))
@@ -140,8 +131,9 @@ namespace InfluxController.Controllers
             {
                 await csv.WriteRecordsAsync(cleanedUpResponses);
             }
-            var blobContainerClient = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
-            await _fileService.UploadFromFileAsync(blobContainerClient, generatedFileName);
+            await _fileService.UploadToAzure(StorageHelpers.ContainerName, generatedFileName);
+            // var blobContainerClient = await _fileService.EnsureContainer(StorageHelpers.ContainerName) ?? throw new Exception("result is null");
+            // await _fileService.UploadFromFileAsync(blobContainerClient, generatedFileName);
             
             var retrieveDataResponse = new RetrieveDataResponse
             {
