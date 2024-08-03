@@ -76,20 +76,6 @@ namespace InfluxController.Controllers
             " |> yield(name: \"values\")";
 
             var response = await influxDBService.QueryAsync(q, _org);
-            // var response = await influxDBService.QueryAsync(async query => {
-            //     var data = await query.QueryAsync(q, _org);
-            //     return data.SelectMany(table =>
-            //             table.Records.Select(record =>
-            //              new InfluxRecord
-            //              {
-            //                  Time = DateTime.Parse(record!.GetTime()?.ToString()!),
-            //                  Watt = string.IsNullOrEmpty(record.GetValueByKey("W_value")?.ToString()) ? 0 : float.Parse(record.GetValueByKey("W_value").ToString()!),
-            //                  Pressure = string.IsNullOrEmpty(record.GetValueByKey("state_pressure")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_pressure").ToString()!),
-            //                  Humidity = string.IsNullOrEmpty(record.GetValueByKey("state_humidity")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_humidity").ToString()!),
-            //                  Temperature = string.IsNullOrEmpty(record.GetValueByKey("°C_value")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("°C_value").ToString()!),
-
-            //              }));
-            // });
             var cleanedUpResponses = _cleanupService.Cleanup(response.ToList());
             var currentDate = startDate.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
@@ -103,7 +89,7 @@ namespace InfluxController.Controllers
 
         [Dapr.Topic(NameConsts.INFLUX_PUBSUB_NAME, "test" )]
         [HttpPost("test")]
-        public async Task<IActionResult> Test([FromBody] Order o){
+        public async Task<IActionResult> Test([FromBody] Order? o){
             if(o is not null){
                 _logger.LogDebug("Reeived order {OrderId} -> {OrderTitle}", o.Id.ToString(), o.Title);
                 await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, "testreply", new RetrieveDataResponse{Success=true, GeneratedFileName="test.csv", StartAiProcess=false});
