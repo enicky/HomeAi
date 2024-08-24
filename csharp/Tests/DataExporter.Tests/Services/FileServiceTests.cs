@@ -82,6 +82,7 @@ public class FileServiceTests : IClassFixture<TestSetup>
 
     }
 
+    [Fact]
     public async Task UploadToAzure_AndContainerDoesNotExist_ShouldCreateContainerAndShouldStoreFileInAzure()
     {
         var cts = new CancellationTokenSource();
@@ -130,6 +131,6 @@ public class FileServiceTests : IClassFixture<TestSetup>
         {
             new FileService(emptyConfiguration, _mockBlobServiceClientFactory.Object, _logger);
         });
-        
+
     }
 }

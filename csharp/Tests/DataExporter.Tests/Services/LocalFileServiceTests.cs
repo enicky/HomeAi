@@ -37,7 +37,7 @@ public class LocalFileServiceTests: IClassFixture<TestSetup>
         return $"{(char)0x0D}{(char)0x0A}";
     }
 
-    private ILocalFileService CreateSut(){
+    private LocalFileService CreateSut(){
         var sut = new LocalFileService(_mockFileSystem); 
         return sut;
     }

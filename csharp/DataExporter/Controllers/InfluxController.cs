@@ -80,7 +80,7 @@ namespace InfluxController.Controllers
             var currentDate = startDate.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
             await _localFileService.WriteToFile(generatedFileName, cleanedUpResponses,token );
-            await _fileService.UploadToAzure(StorageHelpers.ContainerName, generatedFileName);
+            await _fileService.UploadToAzure(StorageHelpers.ContainerName, generatedFileName, token);
            
             _logger.LogDebug($"Finished uploading to Azure");
             return Ok();
