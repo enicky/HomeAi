@@ -25,14 +25,14 @@ public class FileService : IFileService
         var _accountName = configuration.GetValue<string>("accountName");
         if (string.IsNullOrEmpty(_accountName))
         {
-            throw new NullReferenceException("FileStorage:accountName cannot be NULL");
+            throw new ArgumentNullException("FileStorage:accountName cannot be NULL");
         }
         var _accountKey = configuration.GetValue<string>("accountKey");
-        if (string.IsNullOrEmpty(_accountKey)) throw new NullReferenceException("FileStorage:accountKey cannot be NULL");
+        if (string.IsNullOrEmpty(_accountKey)) {
+            throw new ArgumentNullException("FileStorage:accountKey cannot be NULL");
+        }
 
         _blobServiceClient = blobServiceClientFactory.Create(_accountName, _accountKey);
-
-        //_blobServiceClient = GetBlobServiceClient(_accountName, _accountKey);
     }
 
 
@@ -57,8 +57,8 @@ public class FileService : IFileService
         }
         catch (RequestFailedException e)
         {
-            _logger.LogError("[EnsureContainer] HTTP error code {0}: {1}", e.Status, e.ErrorCode);
-            _logger.LogError($"[EnsureContainer] {e.Message}");
+            _logger.LogError(e,"[EnsureContainer] HTTP error code {Status}: {ErrorCode}, {Message}", e.Status, e.ErrorCode, e.Message);
+            
         }
         _logger.LogInformation("[EnsureContainer] Pretty weird I end up here ");
         return containerClient;
@@ -70,18 +70,18 @@ public class FileService : IFileService
     {
 
         string fileName = Path.GetFileName(localFilePath);
-        _logger.LogInformation($"[UploadFromFileASync] Uploading file {fileName}");
+        _logger.LogInformation("[UploadFromFileASync] Uploading file {fileName}", fileName);
         BlobClient blobClient = containerClient.GetBlobClient(fileName);
-        _logger.LogInformation($"[UploadFromFileASync] Start uploading async");
+        _logger.LogInformation("[UploadFromFileASync] Start uploading async");
         var uploadResult = await blobClient.UploadAsync(localFilePath, true, token);
-        _logger.LogInformation($"[UploadFromFileASync] Finished uploading ... result : {uploadResult}");
+        _logger.LogInformation("[UploadFromFileASync] Finished uploading ... result : {uploadResult}", uploadResult);
     }
 
     public async Task UploadToAzure(string containerName, string generatedFileName, CancellationToken token)
     {
-        _logger.LogInformation($"[UploadToAzure] Start uploading to azure using {containerName} and file {generatedFileName}");
+        _logger.LogInformation("[UploadToAzure] Start uploading to azure using {containerName} and file {generatedFileName}", containerName, generatedFileName);
         var result = await EnsureContainer(StorageHelpers.ContainerName, token) ?? throw new EnsureContainerException("result is null");
-        _logger.LogInformation($"[UploadToAzure] Ensuring of container finished : {result}");
+        _logger.LogInformation("[UploadToAzure] Ensuring of container finished : {result}", result);
         await UploadFromFileAsync(result, generatedFileName, token);
         _logger.LogInformation("[UploadToAzure] Finished upload to Azure");
     }

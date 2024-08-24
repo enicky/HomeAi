@@ -1,8 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using app.Services;
 using DataExporter.Services;
 
 namespace DataExporter;
-
+[ExcludeFromCodeCoverage]
 internal class Program
 {
     private static void Main(string[] args)

@@ -32,7 +32,7 @@ public class FileServiceTests : IClassFixture<TestSetup>
         _serviceProvider = testSetup.ServiceProvider;
         testSetup.ServiceCollection.AddSingleton<ILoggerProvider>(new XUnitLoggerProvider(testOutputHelper, true));
         _serviceProvider = testSetup.ServiceCollection.BuildServiceProvider();
-        
+
         _configuration = _serviceProvider.GetRequiredService<IConfiguration>();
         _testSetup = testSetup;
 
@@ -55,7 +55,7 @@ public class FileServiceTests : IClassFixture<TestSetup>
         _mockBlobContainerClient.Setup(x => x.GetBlobClient(It.IsAny<string>()))
             .Returns(_mockBlobClient.Object);
         _mockBlobContainerClient.Setup(x => x.Name).Returns("testContainer");
-        
+
         var mockResponse = new Mock<Response<bool>>();
         mockResponse.SetupGet(x => x.Value).Returns(true);
 
@@ -66,7 +66,7 @@ public class FileServiceTests : IClassFixture<TestSetup>
         _mockBlobClient
             .Setup(x => x.UploadAsync("test.txt", true, cts.Token))
             .Returns(Task.FromResult(Mock.Of<Response<BlobContentInfo>>()));
-        var  _logger = XUnitLogger.CreateLogger<FileService>(_output);
+        var _logger = XUnitLogger.CreateLogger<FileService>(_output);
 
         var sut = new FileService(_configuration, _mockBlobServiceClientFactory.Object, _logger);
         var containerName = "testContainer";
@@ -74,16 +74,17 @@ public class FileServiceTests : IClassFixture<TestSetup>
 
         await sut.UploadToAzure(containerName, generatedFileName, cts.Token);
 
-        _mockBlobContainerClient.Verify(x => x.CreateIfNotExistsAsync(PublicAccessType.None, null, null, cts.Token ), Times.Once());
+        _mockBlobContainerClient.Verify(x => x.CreateIfNotExistsAsync(PublicAccessType.None, null, null, cts.Token), Times.Once());
         _mockBlobContainerClient.Verify(x => x.ExistsAsync(cts.Token), Times.Once());
         mockResponse.Verify(x => x.Value, Times.Once());
 
-        _mockBlobClient.Verify(x => x.UploadAsync(generatedFileName,true, cts.Token), Times.Once());      
+        _mockBlobClient.Verify(x => x.UploadAsync(generatedFileName, true, cts.Token), Times.Once());
 
     }
 
-    public async Task UploadToAzure_AndContainerDoesNotExist_ShouldCreateContainerAndShouldStoreFileInAzure(){
- var cts = new CancellationTokenSource();
+    public async Task UploadToAzure_AndContainerDoesNotExist_ShouldCreateContainerAndShouldStoreFileInAzure()
+    {
+        var cts = new CancellationTokenSource();
         _mockBlobServiceClientFactory.Setup(f => f.Create(It.IsAny<string>(), It.IsAny<string>()))
                            .Returns(_mockBlobServiceClient.Object);
 
@@ -93,7 +94,7 @@ public class FileServiceTests : IClassFixture<TestSetup>
         _mockBlobContainerClient.Setup(x => x.GetBlobClient(It.IsAny<string>()))
             .Returns(_mockBlobClient.Object);
         _mockBlobContainerClient.Setup(x => x.Name).Returns("testContainer");
-        
+
         var mockResponse = new Mock<Response<bool>>();
         mockResponse.SetupGet(x => x.Value).Returns(false);
 
@@ -104,7 +105,7 @@ public class FileServiceTests : IClassFixture<TestSetup>
         _mockBlobClient
             .Setup(x => x.UploadAsync("test.txt", true, cts.Token))
             .Returns(Task.FromResult(Mock.Of<Response<BlobContentInfo>>()));
-        var  _logger = XUnitLogger.CreateLogger<FileService>(_output);
+        var _logger = XUnitLogger.CreateLogger<FileService>(_output);
 
         var sut = new FileService(_configuration, _mockBlobServiceClientFactory.Object, _logger);
         var containerName = "testContainer";
@@ -112,11 +113,23 @@ public class FileServiceTests : IClassFixture<TestSetup>
 
         await sut.UploadToAzure(containerName, generatedFileName, cts.Token);
 
-        _mockBlobContainerClient.Verify(x => x.CreateIfNotExistsAsync(PublicAccessType.None, null, null, cts.Token ), Times.Once());
+        _mockBlobContainerClient.Verify(x => x.CreateIfNotExistsAsync(PublicAccessType.None, null, null, cts.Token), Times.Once());
         _mockBlobContainerClient.Verify(x => x.ExistsAsync(cts.Token), Times.Once());
         mockResponse.Verify(x => x.Value, Times.Once());
 
-        _mockBlobClient.Verify(x => x.UploadAsync(generatedFileName,true, cts.Token), Times.Once());      
+        _mockBlobClient.Verify(x => x.UploadAsync(generatedFileName, true, cts.Token), Times.Once());
 
+    }
+
+    [Fact]
+    public void IfAccountNameIsEmpty_ShouldThrowAnException()
+    {
+        var _logger = XUnitLogger.CreateLogger<FileService>(_output);
+        var emptyConfiguration = new ConfigurationBuilder().Build();
+        Assert.Throws<NullReferenceException>(() =>
+        {
+            new FileService(emptyConfiguration, _mockBlobServiceClientFactory.Object, _logger);
+        });
+        
     }
 }

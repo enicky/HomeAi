@@ -16,7 +16,7 @@ namespace InfluxController.Controllers
     [ApiController]
     public class InfluxController : ControllerBase
     {
-        private string queryString = "import \"experimental\"" +
+        private readonly string queryString = "import \"experimental\"" +
             " from(bucket: \"home_assistant\")" +
             " |> range(start:experimental.subDuration(d: 24h, from: today()), stop: today())" +
             " |> filter(fn: (r) => r[\"entity_id\"] == \"forecast_home_2\" or r[\"entity_id\"] == \"warmtepomp_power\" or r[\"entity_id\"] == \"smoke_detector_device_17_temperature\")" +

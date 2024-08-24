@@ -10,7 +10,7 @@ public class BlobServiceClientFactory : IBlobServiceClientFactory
         return GetBlobServiceClient(accountName, accountKey);
         
     }
-    private BlobServiceClient GetBlobServiceClient(string accountName, string accountKey)
+    private static BlobServiceClient GetBlobServiceClient(string accountName, string accountKey)
     {
         StorageSharedKeyCredential sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
         string blobUri = "https://" + accountName + ".blob.core.windows.net";
