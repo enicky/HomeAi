@@ -84,7 +84,7 @@ public class InfluxControllerTests : IClassFixture<TestSetup>
         await sut.ExportDataForDate(dateTimeToCheck, cts.Token);
 
         _mockedDaprClient.Verify(x => x.PublishEventAsync(It.IsAny<string>(), It.IsAny<string>(), cts.Token), Times.Never());
-        _mockedFileService.Verify(x => x.UploadToAzure(It.IsAny<string>(), It.IsAny<string>()), Times.Once());
+        _mockedFileService.Verify(x => x.UploadToAzure(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once());
 
 
     }
@@ -99,7 +99,7 @@ public class InfluxControllerTests : IClassFixture<TestSetup>
         };
         _mockedInfluxDbService.Setup(x => x.QueryAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(expected);
 
-        _mockedFileService.Setup(x => x.UploadToAzure(StorageHelpers.ContainerName, It.IsAny<string>())).Returns(Task.CompletedTask);
+        _mockedFileService.Setup(x => x.UploadToAzure(StorageHelpers.ContainerName, It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         _localFileService.Setup(x => x.WriteToFile(It.IsAny<string>(), It.IsAny<List<InfluxRecord>?>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
 
 
