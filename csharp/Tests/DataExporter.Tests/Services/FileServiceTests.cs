@@ -126,7 +126,7 @@ public class FileServiceTests : IClassFixture<TestSetup>
     {
         var _logger = XUnitLogger.CreateLogger<FileService>(_output);
         var emptyConfiguration = new ConfigurationBuilder().Build();
-        Assert.Throws<NullReferenceException>(() =>
+        Assert.Throws<ArgumentNullException>(() =>
         {
             new FileService(emptyConfiguration, _mockBlobServiceClientFactory.Object, _logger);
         });

@@ -4,7 +4,7 @@ using DataExporter.Services;
 
 namespace DataExporter;
 [ExcludeFromCodeCoverage]
-internal class Program
+internal static class Program
 {
     private static void Main(string[] args)
     {

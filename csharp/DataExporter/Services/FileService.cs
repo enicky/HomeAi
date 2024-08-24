@@ -25,11 +25,11 @@ public class FileService : IFileService
         var _accountName = configuration.GetValue<string>("accountName");
         if (string.IsNullOrEmpty(_accountName))
         {
-            throw new ArgumentNullException("FileStorage:accountName cannot be NULL");
+            throw new AccountNameNullException("FileStorage:accountName cannot be NULL");
         }
         var _accountKey = configuration.GetValue<string>("accountKey");
         if (string.IsNullOrEmpty(_accountKey)) {
-            throw new ArgumentNullException("FileStorage:accountKey cannot be NULL");
+            throw new AccountKeyNullException("FileStorage:accountKey cannot be NULL");
         }
 
         _blobServiceClient = blobServiceClientFactory.Create(_accountName, _accountKey);
