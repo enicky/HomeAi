@@ -11,8 +11,6 @@ RUN dotnet restore ./DataExporter/DataExporter.csproj
 # Copy everything else and build
 COPY DataExporter ./DataExporter
 COPY Common ./Common
-RUN ls -la 
-RUN ls -la ./DataExporter/*
 RUN dotnet publish ./DataExporter/DataExporter.csproj -c Release -o out
 
 # Build runtime image

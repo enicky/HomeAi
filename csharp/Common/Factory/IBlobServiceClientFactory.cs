@@ -1,6 +1,6 @@
 using Azure.Storage.Blobs;
 
-namespace DataExporter.Services.Factory;
+namespace Common.Factory;
 
 public interface IBlobServiceClientFactory
 {

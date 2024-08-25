@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Azure.Storage;
 using Azure.Storage.Blobs;
 
-namespace DataExporter.Services.Factory;
+namespace Common.Factory;
 
 [ExcludeFromCodeCoverage]
 public class BlobServiceClientFactory : IBlobServiceClientFactory
@@ -10,7 +10,7 @@ public class BlobServiceClientFactory : IBlobServiceClientFactory
     public BlobServiceClient Create(string accountName, string accountKey)
     {
         return GetBlobServiceClient(accountName, accountKey);
-        
+
     }
     private static BlobServiceClient GetBlobServiceClient(string accountName, string accountKey)
     {

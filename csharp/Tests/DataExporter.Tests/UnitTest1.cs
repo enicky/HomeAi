@@ -29,14 +29,14 @@ public class CleanupServiceTests
         var result = sut.Cleanup(setup);
         Assert.NotNull(result);
         Assert.NotEmpty(result);
-        Assert.Equal(2, result.Count());
+        Assert.Equal(2, result.Count);
         Assert.Equal(10, result.First().Humidity);
         Assert.Equal(10, result.First().Pressure);
         Assert.Equal(10, result.First().Temperature);
         Assert.Equal(10, result.First().Watt);
     }
 
-    private ICleanupService CreateSut()
+    private CleanupService CreateSut()
     {
         var sut = new CleanupService(_logger);
 
