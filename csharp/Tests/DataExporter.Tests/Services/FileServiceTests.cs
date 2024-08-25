@@ -4,6 +4,8 @@ using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Common.Exceptions;
+using Common.Factory;
+using Common.Services;
 using DataExporter.Services.Factory;
 using DataExporter.Tests.ControllerTests;
 using Meziantou.Extensions.Logging.Xunit;

@@ -4,6 +4,7 @@ using Common.Helpers;
 using Common.Models;
 using Common.Models.Influx;
 using Common.Models.Responses;
+using Common.Services;
 using Dapr.Client;
 using DataExporter.Services;
 using Microsoft.AspNetCore.Mvc;
