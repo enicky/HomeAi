@@ -1,71 +1,86 @@
-using Azure.Identity;
 using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using Azure.Storage.Blobs.Specialized;
 using Azure.Storage;
 using Azure;
+using Common.Helpers;
+using Common.Exceptions;
+using DataExporter.Services.Factory;
+using Microsoft.Extensions.Logging;
+using Azure.Storage.Blobs.Models;
 
 namespace app.Services;
 
 public interface IFileService
 {
-    Task UploadFromFileAsync(BlobContainerClient containerClient, string localFilePath);
-    Task<BlobContainerClient?> EnsureContainer(string containerName);
+    Task UploadToAzure(string containerName, string generatedFileName, CancellationToken token = default);
 }
 
 public class FileService : IFileService
 {
     private readonly BlobServiceClient _blobServiceClient;
-    public FileService(IConfiguration configuration){
+    private readonly ILogger<FileService> _logger;
+
+    public FileService(IConfiguration configuration, IBlobServiceClientFactory blobServiceClientFactory, ILogger<FileService> logger)
+    {
+        _logger = logger;
         var _accountName = configuration.GetValue<string>("accountName");
-        if(string.IsNullOrEmpty(_accountName)){
-            throw new NullReferenceException("FileStorage:accountName cannot be NULL");
+        if (string.IsNullOrEmpty(_accountName))
+        {
+            throw new AccountNameNullException("FileStorage:accountName cannot be NULL");
         }
         var _accountKey = configuration.GetValue<string>("accountKey");
-        if(string.IsNullOrEmpty(_accountKey)) throw new NullReferenceException("FileStorage:accountKey cannot be NULL");
+        if (string.IsNullOrEmpty(_accountKey)) {
+            throw new AccountKeyNullException("FileStorage:accountKey cannot be NULL");
+        }
 
-        _blobServiceClient = GetBlobServiceClient(_accountName, _accountKey);
-    }
-    private BlobServiceClient GetBlobServiceClient(string accountName, string accountKey)
-    {
-        StorageSharedKeyCredential sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
-        string blobUri = "https://" + accountName + ".blob.core.windows.net";
-
-        var client = new BlobServiceClient(new Uri(blobUri), sharedKeyCredential);
-        return client;
+        _blobServiceClient = blobServiceClientFactory.Create(_accountName, _accountKey);
     }
 
-    public async Task<BlobContainerClient?> EnsureContainer(string containerName)
+
+
+    private async Task<BlobContainerClient> EnsureContainer(string containerName, CancellationToken token)
     {
+        _logger.LogInformation("[EnsureContainer] get blobContainerClient");
         var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
 
         try
         {
             // Create the container
-            
-            await containerClient.CreateIfNotExistsAsync();
-            if (await containerClient.ExistsAsync())
+            _logger.LogInformation("[EnsureContainer] Start CreateIfNotExistsAsync");
+            await containerClient.CreateIfNotExistsAsync(PublicAccessType.None, null, null, token);
+            _logger.LogInformation("[EnsureContainer] Check if existsasync exists");
+            var containerExists = await containerClient.ExistsAsync(token);
+            if (containerExists.Value)
             {
-                Console.WriteLine("Created container {0}", containerClient.Name);
+                _logger.LogInformation("[EnsureContainer] Created container {Name}", containerClient.Name);
                 return containerClient;
             }
         }
         catch (RequestFailedException e)
         {
-            Console.WriteLine("HTTP error code {0}: {1}", e.Status, e.ErrorCode);
-            Console.WriteLine(e.Message);
+            _logger.LogError(e,"[EnsureContainer] HTTP error code {Status}: {ErrorCode}, {Message}", e.Status, e.ErrorCode, e.Message);
+            
         }
-
+        _logger.LogInformation("[EnsureContainer] Pretty weird I end up here ");
         return containerClient;
     }
-    public async Task UploadFromFileAsync(
+    private async Task UploadFromFileAsync(
                                 BlobContainerClient containerClient,
-                                string localFilePath)
+                                string localFilePath,
+                                CancellationToken token)
     {
 
         string fileName = Path.GetFileName(localFilePath);
+        _logger.LogInformation("[UploadFromFileASync] Uploading file {fileName}", fileName);
         BlobClient blobClient = containerClient.GetBlobClient(fileName);
+        var uploadResult = await blobClient.UploadAsync(localFilePath, true, token);
+        _logger.LogInformation("[UploadFromFileASync] Finished uploading ... result : {uploadResult}", uploadResult);
+    }
 
-        await blobClient.UploadAsync(localFilePath, true);
+    public async Task UploadToAzure(string containerName, string generatedFileName, CancellationToken token = default)
+    {
+        _logger.LogInformation("[UploadToAzure] Start uploading to azure using {containerName} and file {generatedFileName}", containerName, generatedFileName);
+        var result = await EnsureContainer(StorageHelpers.ContainerName, token);
+        await UploadFromFileAsync(result, generatedFileName, token);
+        _logger.LogInformation("[UploadToAzure] Finished upload to Azure");
     }
 }
