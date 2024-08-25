@@ -37,9 +37,10 @@ public class InfluxControllerTests : IClassFixture<TestSetup>
     [Fact]
     public async Task WhenRetrieveDataHasBeenCalled_AndWeHaveData_WeSendDataThroughDapr()
     {
+        var cts = new CancellationTokenSource();
         var sut = CreateSut();
         _output.WriteLine("Start retrieving data");
-        await sut.RetrieveData();
+        await sut.RetrieveData(cts.Token);
         //_mockedLogger.Verify(x => x.LogDebug(It.IsAny<string>()), Times.Exactly(20));
         _mockedDaprClient.Verify(x =>
             x.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, NameConsts.INFLUX_FINISHED_RETRIEVE_DATA, It.IsAny<RetrieveDataResponse>(), default), Times.Once());
@@ -97,7 +98,7 @@ public class InfluxControllerTests : IClassFixture<TestSetup>
                 Pressure = 1, Temperature = 1, Watt = 1, Time = DateTime.Now
             }
         };
-        _mockedInfluxDbService.Setup(x => x.QueryAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(expected);
+        _mockedInfluxDbService.Setup(x => x.QueryAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(expected);
 
         _mockedFileService.Setup(x => x.UploadToAzure(StorageHelpers.ContainerName, It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
         _localFileService.Setup(x => x.WriteToFile(It.IsAny<string>(), It.IsAny<List<InfluxRecord>?>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);

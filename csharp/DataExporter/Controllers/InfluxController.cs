@@ -75,7 +75,7 @@ namespace InfluxController.Controllers
 
             " |> yield(name: \"values\")";
 
-            var response = await influxDBService.QueryAsync(q, _org);
+            var response = await influxDBService.QueryAsync(q, _org, token);
             var cleanedUpResponses = _cleanupService.Cleanup(response.ToList());
             var currentDate = startDate.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
@@ -102,11 +102,11 @@ namespace InfluxController.Controllers
 
         [Topic(pubsubName: NameConsts.INFLUX_PUBSUB_NAME, name: NameConsts.INFLUX_RETRIEVE_DATA)]
         [HttpPost(NameConsts.INFLUX_RETRIEVE_DATA)]
-        public async Task RetrieveData()
+        public async Task RetrieveData(CancellationToken token)
         {
             _logger.LogDebug("Trigger received to retrieve data from influx");
 
-            var response = await influxDBService.QueryAsync(queryString, _org);
+            var response = await influxDBService.QueryAsync(queryString, _org, token);
 
            
             var cleanedUpResponses = _cleanupService.Cleanup(response);

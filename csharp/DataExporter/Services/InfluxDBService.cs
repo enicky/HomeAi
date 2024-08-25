@@ -1,5 +1,6 @@
 using System.Globalization;
 using Common.Models.Influx;
+using DataExporter.Services.Factory;
 using InfluxDB.Client;
 
 
@@ -7,46 +8,40 @@ namespace app.Services
 {
     public interface IInfluxDbService
     {
-        void Write(Action<WriteApi> action);
-        Task<List<InfluxRecord>> QueryAsync(string queryString, string organisation);
+        // void Write(Action<WriteApi> action);
+        Task<List<InfluxRecord>> QueryAsync(string queryString, string organisation, CancellationToken token);
     }
 
     public class InfluxDBService : IInfluxDbService
     {
         private readonly string _token;
         private readonly string _url;
+        private readonly IInfluxDbClientFactory _factory;
+        private readonly ILogger<InfluxDBService> _logger;
 
-        public InfluxDBService(IConfiguration configuration)
+        public InfluxDBService(IConfiguration configuration, IInfluxDbClientFactory factory, ILogger<InfluxDBService> logger)
         {
+            _logger = logger;
+            _factory = factory;
             _token = configuration.GetValue<string>("InfluxDB_TOKEN")!;
             _url = configuration.GetValue<string>("InfluxDB:Url")!;
         }
 
-        public void Write(Action<WriteApi> action)
+        // public void Write(Action<WriteApi> action)
+        // {
+        //     var influxDbClientWrapper = _factory.CreateWrapper(_url, _token);
+        //     using var client = _factory.CreateClient(_url, _token);
+        //     using var write = client.GetWriteApi();
+        //     action(write);
+        // }
+
+        public Task<List<InfluxRecord>> QueryAsync(string queryString, string organisation, CancellationToken token)
         {
-            using var client = new InfluxDBClient(url: _url, token: _token);
-            using var write = client.GetWriteApi();
-            action(write);
-        }
+            _logger.LogInformation($"start query");
+            var wrapper = _factory.CreateWrapper(_url, _token);
+            return wrapper.GetData(queryString, organisation, token);
 
-        public async Task<List<InfluxRecord>> QueryAsync(string queryString, string organisation)
-        {
-            using var client = new InfluxDBClient(url: _url, token: _token);
-            var query = client.GetQueryApi();
-            var data = await query.QueryAsync(queryString, organisation);
-            var paraseddata = data.SelectMany(table =>
-                        table.Records.Select(record =>
-                         new InfluxRecord
-                         {
-                             Time = DateTime.Parse(record!.GetTime()?.ToString()!, new CultureInfo("nl-BE")),
-                             Watt = string.IsNullOrEmpty(record.GetValueByKey("W_value")?.ToString()) ? 0 : float.Parse(record.GetValueByKey("W_value").ToString()!),
-                             Pressure = string.IsNullOrEmpty(record.GetValueByKey("state_pressure")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_pressure").ToString()!),
-                             Humidity = string.IsNullOrEmpty(record.GetValueByKey("state_humidity")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("state_humidity").ToString()!),
-                             Temperature = string.IsNullOrEmpty(record.GetValueByKey("°C_value")?.ToString()) ? 0 : double.Parse(record.GetValueByKey("°C_value").ToString()!),
-
-                         })).ToList();
-
-            return paraseddata;
+            
         }
     }
 }
