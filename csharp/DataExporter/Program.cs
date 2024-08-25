@@ -1,9 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using app.Services;
 using DataExporter.Services;
 
 namespace DataExporter;
-
-internal class Program
+[ExcludeFromCodeCoverage]
+internal static class Program
 {
     private static void Main(string[] args)
     {
@@ -30,9 +31,10 @@ internal class Program
         builder.Services.AddControllers().AddDapr();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        builder.Services.AddSingleton<InfluxDBService>();
+        builder.Services.AddSingleton<IInfluxDbService, InfluxDBService>();
         builder.Services.AddScoped<IFileService, FileService>();
         builder.Services.AddTransient<ICleanupService, CleanupService>();
+        builder.Services.AddTransient<ILocalFileService, LocalFileService>();
 
         var app = builder.Build();
         app.UseCloudEvents();

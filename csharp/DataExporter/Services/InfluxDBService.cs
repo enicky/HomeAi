@@ -1,31 +1,35 @@
+using System.Globalization;
+using Common.Models.Influx;
+using DataExporter.Services.Factory;
 using InfluxDB.Client;
 
 
 namespace app.Services
 {
-    public class InfluxDBService
+    public interface IInfluxDbService
+    {
+        Task<List<InfluxRecord>> QueryAsync(string queryString, string organisation, CancellationToken token);
+    }
+
+    public class InfluxDBService : IInfluxDbService
     {
         private readonly string _token;
         private readonly string _url;
+        private readonly IInfluxDbClientFactory _factory;
+        private readonly ILogger<InfluxDBService> _logger;
 
-        public InfluxDBService(IConfiguration configuration)
+        public InfluxDBService(IConfiguration configuration, IInfluxDbClientFactory factory, ILogger<InfluxDBService> logger)
         {
+            _logger = logger;
+            _factory = factory;
             _token = configuration.GetValue<string>("InfluxDB_TOKEN")!;
             _url = configuration.GetValue<string>("InfluxDB:Url")!;
         }
-
-        public void Write(Action<WriteApi> action)
+        public Task<List<InfluxRecord>> QueryAsync(string queryString, string organisation, CancellationToken token)
         {
-            using var client = new InfluxDBClient(url: _url, token: _token);
-            using var write = client.GetWriteApi();
-            action(write);
-        }
-
-        public async Task<T> QueryAsync<T>(Func<QueryApi, Task<T>> action)
-        {
-            using var client = new InfluxDBClient(url: _url, token: _token);
-            var query = client.GetQueryApi();
-            return await action(query);
+            _logger.LogInformation($"start query");
+            var wrapper = _factory.CreateWrapper(_url, _token);
+            return wrapper.GetData(queryString, organisation, token);            
         }
     }
 }
