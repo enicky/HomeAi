@@ -2,6 +2,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage;
 using Azure;
 using Microsoft.Extensions.Configuration;
+using Common.Exceptions;
 
 namespace Common.Services;
 
@@ -18,14 +19,14 @@ public class FileService : IFileService
         Console.WriteLine($"accountn {configuration.GetValue<string>("FileStorage:accountName")}");
         var _accountName = configuration.GetValue<string>("FileStorage:accountName");
         if(string.IsNullOrEmpty(_accountName)){
-            throw new NullReferenceException("FileStorage:accountName cannot be NULL");
+            throw new AccountNameNullException("FileStorage:accountName cannot be NULL");
         }
         var _accountKey = configuration.GetValue<string>("accountKey");
-        if(string.IsNullOrEmpty(_accountKey)) throw new NullReferenceException("FileStorage:accountKey cannot be NULL");
+        if(string.IsNullOrEmpty(_accountKey)) throw new AccountKeyNullException("FileStorage:accountKey cannot be NULL");
 
         _blobServiceClient = GetBlobServiceClient(_accountName, _accountKey);
     }
-    private BlobServiceClient GetBlobServiceClient(string accountName, string accountKey)
+    private static BlobServiceClient GetBlobServiceClient(string accountName, string accountKey)
     {
         StorageSharedKeyCredential sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
         string blobUri = "https://" + accountName + ".blob.core.windows.net";
