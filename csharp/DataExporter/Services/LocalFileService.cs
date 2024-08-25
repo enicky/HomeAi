@@ -1,4 +1,5 @@
 
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO.Abstractions;
 using Common.Models.Influx;
@@ -14,6 +15,7 @@ public class LocalFileService : ILocalFileService
 {
     private readonly IFileSystem _fileSystem;
 
+    [ExcludeFromCodeCoverage]
     public LocalFileService() : this(new FileSystem()){}
     public LocalFileService(IFileSystem fileSystem){
         _fileSystem = fileSystem;

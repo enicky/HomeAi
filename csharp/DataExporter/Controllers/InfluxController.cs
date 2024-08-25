@@ -115,9 +115,9 @@ namespace InfluxController.Controllers
             using (var writer = new StreamWriter(generatedFileName))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                await csv.WriteRecordsAsync(cleanedUpResponses);
+                await csv.WriteRecordsAsync(cleanedUpResponses, token);
             }
-            await _fileService.UploadToAzure(StorageHelpers.ContainerName, generatedFileName);
+            await _fileService.UploadToAzure(StorageHelpers.ContainerName, generatedFileName, token);
             
             var retrieveDataResponse = new RetrieveDataResponse
             {
@@ -129,7 +129,8 @@ namespace InfluxController.Controllers
             
             await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, 
                                 NameConsts.INFLUX_FINISHED_RETRIEVE_DATA, 
-                                retrieveDataResponse);
+                                retrieveDataResponse,
+                                token);
 
             _logger.LogDebug($"Sent that retrieve of file to azaure has been finished");
         }

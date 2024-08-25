@@ -37,7 +37,7 @@ public class FileService : IFileService
 
 
 
-    private async Task<BlobContainerClient?> EnsureContainer(string containerName, CancellationToken token)
+    private async Task<BlobContainerClient> EnsureContainer(string containerName, CancellationToken token)
     {
         _logger.LogInformation("[EnsureContainer] get blobContainerClient");
         var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
@@ -79,7 +79,7 @@ public class FileService : IFileService
     public async Task UploadToAzure(string containerName, string generatedFileName, CancellationToken token = default)
     {
         _logger.LogInformation("[UploadToAzure] Start uploading to azure using {containerName} and file {generatedFileName}", containerName, generatedFileName);
-        var result = await EnsureContainer(StorageHelpers.ContainerName, token) ?? throw new EnsureContainerException("result is null");
+        var result = await EnsureContainer(StorageHelpers.ContainerName, token);
         await UploadFromFileAsync(result, generatedFileName, token);
         _logger.LogInformation("[UploadToAzure] Finished upload to Azure");
     }

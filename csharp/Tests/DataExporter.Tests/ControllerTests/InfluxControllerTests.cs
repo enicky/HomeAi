@@ -43,7 +43,7 @@ public class InfluxControllerTests : IClassFixture<TestSetup>
         await sut.RetrieveData(cts.Token);
         //_mockedLogger.Verify(x => x.LogDebug(It.IsAny<string>()), Times.Exactly(20));
         _mockedDaprClient.Verify(x =>
-            x.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, NameConsts.INFLUX_FINISHED_RETRIEVE_DATA, It.IsAny<RetrieveDataResponse>(), default), Times.Once());
+            x.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, NameConsts.INFLUX_FINISHED_RETRIEVE_DATA, It.IsAny<RetrieveDataResponse>(), It.IsAny<CancellationToken>()), Times.Once());
 
         _output.WriteLine("finished");
     }

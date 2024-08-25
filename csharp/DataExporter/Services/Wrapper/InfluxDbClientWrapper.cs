@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Common.Models.Influx;
 using InfluxDB.Client;
@@ -8,10 +9,11 @@ public interface IInfluxDbClientWrapper
 {
     Task<List<InfluxRecord>> GetData(string queryString, string organisation, CancellationToken token);
 }
+[ExcludeFromCodeCoverage]
 public class InfluxDbClientWrapper : IInfluxDbClientWrapper
 {
-    private string _url;
-    private string _token;
+    private readonly string _url;
+    private readonly string _token;
 
     public InfluxDbClientWrapper(string url, string token)
     {
