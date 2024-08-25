@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Azure.Storage;
 using Azure.Storage.Blobs;
 
 namespace DataExporter.Services.Factory;
 
+[ExcludeFromCodeCoverage]
 public class BlobServiceClientFactory : IBlobServiceClientFactory
 {
     public BlobServiceClient Create(string accountName, string accountKey)
