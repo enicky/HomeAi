@@ -20,7 +20,8 @@ RUN apt update && \
     apt install -y sudo && \
     addgroup --gid 1000 nonroot && \
     adduser --uid 1000 --gid 1000 --disabled-password --gecos "" nonroot && \
-    echo 'nonroot ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+    echo 'nonroot ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers && \
+    rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --chown=nonroot:nonroot --from=build-env /app/out .
 EXPOSE 8080
