@@ -83,8 +83,7 @@ public class Program
         app.UseHangfireDashboard();
         RecurringJob.AddOrUpdate<TriggerRetrieveDataForAi>("trigger_ai_job", x => x.RunAsync(cts.Token), schedule, new RecurringJobOptions { TimeZone = TimeZoneInfo.Local });
         RecurringJob.AddOrUpdate<TriggerTrainAiModel>("trigger_train_model", x => x.RunAsync(cts.Token), schedule_train_model, new RecurringJobOptions { TimeZone = TimeZoneInfo.Local });
-        RecurringJob.AddOrUpdate<TriggerTestDapr>("trigger_test_dapr", x => x.RunAsync(cts.Token), schedule, new RecurringJobOptions{ TimeZone = TimeZoneInfo.Utc});
-
+            
 
         app.MapHealthChecks("/healthz");
         app.UseAuthorization();
