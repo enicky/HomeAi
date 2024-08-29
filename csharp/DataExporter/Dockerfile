@@ -25,7 +25,8 @@ RUN apt update && \
 
 USER nonroot
 WORKDIR /app
-COPY --chown=nonroot:nonroot --chmod=755  --from=build-env /app/out .
+COPY --chown=nonroot:nonroot --chmod=755 --from=build-env /app/out .
+RUN chmod -R 755  /app
 EXPOSE 8080
 EXPOSE 80
 ENTRYPOINT ["dotnet", "DataExporter.dll"]
