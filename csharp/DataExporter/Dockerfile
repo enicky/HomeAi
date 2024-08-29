@@ -15,8 +15,14 @@ RUN dotnet publish ./DataExporter/DataExporter.csproj -c Release -o out
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
+
+RUN apt update && \
+    apt install -y sudo && \
+    addgroup --gid 1000 nonroot && \
+    adduser --uid 1000 --gid 1000 --disabled-password --gecos "" nonroot && \
+    echo 'nonroot ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 WORKDIR /app
-COPY --from=build-env /app/out .
+COPY --chown=nonroot:nonroot --from=build-env /app/out .
 EXPOSE 8080
 EXPOSE 80
 ENTRYPOINT ["dotnet", "DataExporter.dll"]
