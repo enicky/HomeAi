@@ -88,19 +88,6 @@ namespace InfluxController.Controllers
 
         }
 
-        [Dapr.Topic(NameConsts.INFLUX_PUBSUB_NAME, "test" )]
-        [HttpPost("test")]
-        public async Task<IActionResult> Test([FromBody] Order? o){
-            if(o is not null){
-                _logger.LogDebug("Reeived order {OrderId} -> {OrderTitle}", o.Id.ToString(), o.Title);
-                await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, "testreply", new RetrieveDataResponse{Success=true, GeneratedFileName="test.csv", StartAiProcess=false});
-                _logger.LogDebug("Replied success to topic testreply");
-                return Ok();
-            }
-            return BadRequest();
-        }
-
-
         [Topic(pubsubName: NameConsts.INFLUX_PUBSUB_NAME, name: NameConsts.INFLUX_RETRIEVE_DATA)]
         [HttpPost(NameConsts.INFLUX_RETRIEVE_DATA)]
         public async Task RetrieveData(CancellationToken token)
