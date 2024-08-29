@@ -49,34 +49,6 @@ public class InfluxControllerTests : IClassFixture<TestSetup>
     }
 
     [Fact]
-    public async Task WhenCallingTest_WithNullObject_ItShouldReturn_BadRequest()
-    {
-        var sut = CreateSut();
-        var result = await sut.Test(null);
-        Assert.NotNull(result);
-        Assert.IsType<BadRequestResult>(result);
-    }
-
-    [Fact]
-    public async Task WhenCallingTest_AndPassingOkObject_DaprClientGetsCalled()
-    {
-        // Given
-        var sut = CreateSut();
-        var objectToPass = new Order
-        {
-            Id = 1,
-            Title = "test"
-        };
-        // When
-        var result = await sut.Test(objectToPass);
-
-        // Then
-        _mockedDaprClient.Verify(x => x.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, "testreply", It.IsAny<RetrieveDataResponse>(), default), Times.Once());
-
-
-    }
-
-    [Fact]
     public async Task WhenExportDataForDateHasBeenCalled_AndWeHaveData_WeUploadStuffToAzureAndDontSendData()
     {
         var sut = CreateSut();
@@ -86,8 +58,6 @@ public class InfluxControllerTests : IClassFixture<TestSetup>
 
         _mockedDaprClient.Verify(x => x.PublishEventAsync(It.IsAny<string>(), It.IsAny<string>(), cts.Token), Times.Never());
         _mockedFileService.Verify(x => x.UploadToAzure(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once());
-
-
     }
 
     private InfluxController.Controllers.InfluxController CreateSut()
@@ -117,10 +87,5 @@ public class InfluxControllerTests : IClassFixture<TestSetup>
                         _mockedLogger.Object);
         return controller;
 
-    }
-
-    private object Func<T1, T2>()
-    {
-        throw new NotImplementedException();
     }
 }

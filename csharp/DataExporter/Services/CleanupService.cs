@@ -81,6 +81,7 @@ public class CleanupService : ICleanupService
         // get the first valid value from the list
         data.Sort((x, y) => DateTime.Compare(x.Time, y.Time));
         var firstValidValue = data.Find(q => Math.Abs(q.Humidity) >= epsilon);
+        _logger.LogInformation($"FirstValue : {firstValidValue}");
         if (firstValidValue == null)
         {
             _logger.LogError($"No valid humidity found for today ... is this correct ??");
