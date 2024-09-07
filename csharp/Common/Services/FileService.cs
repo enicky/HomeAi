@@ -1,5 +1,4 @@
 using Azure.Storage.Blobs;
-using Azure.Storage;
 using Azure;
 using Microsoft.Extensions.Configuration;
 using Common.Exceptions;
@@ -7,13 +6,12 @@ using Common.Factory;
 using Common.Helpers;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Logging;
-using Common.Models.Influx;
 
 namespace Common.Services;
 
 public interface IFileService
 {
-    Task<string> RetrieveParsedFile(string v, string containerName);
+    Task<string> RetrieveParsedFile(string fileName, string containerName);
     Task UploadToAzure(string containerName, string generatedFileName, CancellationToken token = default);
 }
 
@@ -38,8 +36,6 @@ public class FileService : IFileService
 
         _blobServiceClient = blobServiceClientFactory.Create(_accountName, _accountKey);
     }
-
-
 
     private async Task<BlobContainerClient> EnsureContainer(string containerName, CancellationToken token)
     {
@@ -92,10 +88,7 @@ public class FileService : IFileService
     {
         var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
         var blobClient = containerClient.GetBlobClient(fileName);
-        //var result = await blobClient.DownloadContentAsync();
-        await blobClient.DownloadToAsync(fileName);
-        
-        
+        await blobClient.DownloadToAsync(fileName);      
         return fileName;
         
     }

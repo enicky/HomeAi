@@ -23,9 +23,33 @@ public class CleanupServiceTests : IClassFixture<TestSetup>
         var service = new CleanupService(_logger);
         var dataToClean = new List<InfluxRecord>() { new InfluxRecord() { Humidity = 0, Pressure = 1, Temperature = 1, Time = DateTime.Now , Watt = 1}};
 
-        Assert.Throws<InvalidDataException> (() => service.Cleanup(dataToClean));
-
+        Assert.Throws<InvalidDataException> (() => service.Cleanup(dataToClean, null));
     }
+
+    [Fact]
+    public void WhenUsingCleanupService_AndNoPrevousDataUsed_ThrowsException(){
+         var _logger = XUnitLogger.CreateLogger<CleanupService>(_output);
+
+        var service = new CleanupService(_logger);
+        var dataToClean = new List<InfluxRecord>() { new InfluxRecord() { Humidity = 0, Pressure = 1, Temperature = 1, Time = DateTime.Now , Watt = 1}};
+        var dataYesterday = new List<InfluxRecord>() { new InfluxRecord{ Humidity = 0, Pressure = 1, Temperature = 1, Time = DateTime.Now.AddDays(-1) , Watt = 1}};
+
+        Assert.Throws<InvalidDataException> (() => service.Cleanup(dataToClean, dataYesterday));
+    }
+
+    [Fact]
+    public void WhenUsingCleanupService_AndPrevousDataUsed_ThrowsNoException(){
+         var _logger = XUnitLogger.CreateLogger<CleanupService>(_output);
+
+        var service = new CleanupService(_logger);
+        var dataToClean = new List<InfluxRecord>() { new InfluxRecord() { Humidity = 0, Pressure = 1, Temperature = 1, Time = DateTime.Now , Watt = 1}};
+        var dataYesterday = new List<InfluxRecord>() { new InfluxRecord{ Humidity = 10, Pressure = 1, Temperature = 1, Time = DateTime.Now.AddDays(-1) , Watt = 1}};
+
+        service.Cleanup(dataToClean, dataYesterday);
+        Assert.Equal(10, dataToClean.First().Humidity);
+    }
+
+
 
 
     [Fact]
@@ -35,7 +59,7 @@ public class CleanupServiceTests : IClassFixture<TestSetup>
         var service = new CleanupService(_logger);
         var dataToClean = new List<InfluxRecord>() { new InfluxRecord() { Humidity = 1, Pressure = 0, Temperature = 1, Time = DateTime.Now , Watt = 1}};
 
-        Assert.Throws<InvalidDataException> (() => service.Cleanup(dataToClean));
+        Assert.Throws<InvalidDataException> (() => service.Cleanup(dataToClean, null));
 
     }
 
@@ -46,7 +70,7 @@ public class CleanupServiceTests : IClassFixture<TestSetup>
         var service = new CleanupService(_logger);
         var dataToClean = new List<InfluxRecord>() { new InfluxRecord() { Humidity = 1, Pressure = 1, Temperature = 0, Time = DateTime.Now , Watt = 1}};
 
-        Assert.Throws<InvalidDataException> (() => service.Cleanup(dataToClean));
+        Assert.Throws<InvalidDataException> (() => service.Cleanup(dataToClean, null));
 
     }
 
@@ -57,7 +81,7 @@ public class CleanupServiceTests : IClassFixture<TestSetup>
         var service = new CleanupService(_logger);
         var dataToClean = new List<InfluxRecord>() { new InfluxRecord() { Humidity = 1, Pressure = 1, Temperature = 1, Time = DateTime.Now , Watt = 0}};
 
-        Assert.Throws<InvalidDataException> (() => service.Cleanup(dataToClean));
+        Assert.Throws<InvalidDataException> (() => service.Cleanup(dataToClean, null));
 
     }
 }
