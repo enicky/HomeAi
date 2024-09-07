@@ -10,6 +10,7 @@ namespace DataExporter.Services;
 public interface ILocalFileService
 {
     Task WriteToFile(string generatedFileName, List<InfluxRecord>? cleanedUpResponses, CancellationToken token);
+    List<InfluxRecord> ReadFromFile(string fileName);
 }
 public class LocalFileService : ILocalFileService
 {
@@ -25,5 +26,13 @@ public class LocalFileService : ILocalFileService
         using var writer = _fileSystem.File.CreateText(generatedFileName);
         using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
         await csv.WriteRecordsAsync(cleanedUpResponses, token);
+    }
+
+    public List<InfluxRecord> ReadFromFile(string fileName)
+    {
+        using var reader = new StreamReader(fileName);
+        using var csvreader = new CsvReader(reader, CultureInfo.InvariantCulture);
+        var records = csvreader.GetRecords<InfluxRecord>();
+        return records.ToList();
     }
 }

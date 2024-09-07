@@ -7,11 +7,13 @@ using Common.Factory;
 using Common.Helpers;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Logging;
+using Common.Models.Influx;
 
 namespace Common.Services;
 
 public interface IFileService
 {
+    Task<string> RetrieveParsedFile(string v, string containerName);
     Task UploadToAzure(string containerName, string generatedFileName, CancellationToken token = default);
 }
 
@@ -29,7 +31,8 @@ public class FileService : IFileService
             throw new AccountNameNullException("FileStorage:accountName cannot be NULL");
         }
         var _accountKey = configuration.GetValue<string>("accountKey");
-        if (string.IsNullOrEmpty(_accountKey)) {
+        if (string.IsNullOrEmpty(_accountKey))
+        {
             throw new AccountKeyNullException("FileStorage:accountKey cannot be NULL");
         }
 
@@ -58,8 +61,8 @@ public class FileService : IFileService
         }
         catch (RequestFailedException e)
         {
-            _logger.LogError(e,"[EnsureContainer] HTTP error code {Status}: {ErrorCode}, {Message}", e.Status, e.ErrorCode, e.Message);
-            
+            _logger.LogError(e, "[EnsureContainer] HTTP error code {Status}: {ErrorCode}, {Message}", e.Status, e.ErrorCode, e.Message);
+
         }
         _logger.LogInformation("[EnsureContainer] Pretty weird I end up here ");
         return containerClient;
@@ -83,5 +86,17 @@ public class FileService : IFileService
         var result = await EnsureContainer(StorageHelpers.ContainerName, token);
         await UploadFromFileAsync(result, generatedFileName, token);
         _logger.LogInformation("[UploadToAzure] Finished upload to Azure");
+    }
+
+    public async Task<string> RetrieveParsedFile(string fileName, string containerName)
+    {
+        var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+        var blobClient = containerClient.GetBlobClient(fileName);
+        //var result = await blobClient.DownloadContentAsync();
+        await blobClient.DownloadToAsync(fileName);
+        
+        
+        return fileName;
+        
     }
 }
