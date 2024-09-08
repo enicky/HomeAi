@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using app.Services;
 using Common.Factory;
 using Common.Services;
@@ -6,6 +7,7 @@ using DataExporter.Services.Factory;
 
 namespace DataExporter.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddServices(this IServiceCollection services)
