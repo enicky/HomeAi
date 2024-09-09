@@ -193,4 +193,9 @@ public class FileServiceTests : IClassFixture<TestSetup>
         _mockBlobClient.Verify(x => x.UploadAsync(generatedFileName, true, cts.Token), Times.Once());
 
     }
+
+    [Fact]
+    public async Task DownloadFromAzureShouldWork(){
+        
+    }
 }

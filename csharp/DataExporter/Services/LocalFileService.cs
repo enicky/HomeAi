@@ -30,7 +30,7 @@ public class LocalFileService : ILocalFileService
 
     public List<InfluxRecord> ReadFromFile(string fileName)
     {
-        using var reader = new StreamReader(fileName);
+        using var reader = _fileSystem.File.OpenText(fileName);
         using var csvreader = new CsvReader(reader, CultureInfo.InvariantCulture);
         var records = csvreader.GetRecords<InfluxRecord>();
         return records.ToList();
