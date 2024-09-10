@@ -26,7 +26,7 @@ public class CleanupServiceTests
                 Humidity = 10, Pressure = 10, Temperature = 10, Watt = 10, Time = System.DateTime.Now.AddHours(1)
             },
         };
-        var result = sut.Cleanup(setup);
+        var result = sut.Cleanup(setup, null);
         Assert.NotNull(result);
         Assert.NotEmpty(result);
         Assert.Equal(2, result.Count);

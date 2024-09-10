@@ -129,10 +129,10 @@ public class FileServiceTests : IClassFixture<TestSetup>
     public void IfAccountNameIsEmpty_ShouldThrowAnException()
     {
         var _logger = XUnitLogger.CreateLogger<FileService>(_output);
-       
-        
+
+
         var emptyConfiguration = new ConfigurationBuilder().Build();
-        
+
         Assert.Throws<AccountNameNullException>(() =>
         {
             new FileService(emptyConfiguration, _mockBlobServiceClientFactory.Object, _logger);
@@ -141,19 +141,22 @@ public class FileServiceTests : IClassFixture<TestSetup>
     }
 
     [Fact]
-    public void IfAccountKeyIsEmpty_ShouldThrowAnException(){
+    public void IfAccountKeyIsEmpty_ShouldThrowAnException()
+    {
         var _logger = XUnitLogger.CreateLogger<FileService>(_output);
-         IEnumerable<KeyValuePair<string, string?>> inMemorySettings = new List<KeyValuePair<string, string?>>{
+        IEnumerable<KeyValuePair<string, string?>> inMemorySettings = new List<KeyValuePair<string, string?>>{
             new("accountName", "test")
         };
         var emptyConfiguration = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings).Build();
-        Assert.Throws<AccountKeyNullException>(() =>{
+        Assert.Throws<AccountKeyNullException>(() =>
+        {
             new FileService(emptyConfiguration, _mockBlobServiceClientFactory.Object, _logger);
         });
     }
 
     [Fact]
-    public async Task WhenStorageCallsThrowAnException_AndExceptionGetsCaught_PerformRestOfCode(){
+    public async Task WhenStorageCallsThrowAnException_AndExceptionGetsCaught_PerformRestOfCode()
+    {
         var cts = new CancellationTokenSource();
         _mockBlobServiceClientFactory.Setup(f => f.Create(It.IsAny<string>(), It.IsAny<string>()))
                            .Returns(_mockBlobServiceClient.Object);
@@ -192,5 +195,25 @@ public class FileServiceTests : IClassFixture<TestSetup>
 
         _mockBlobClient.Verify(x => x.UploadAsync(generatedFileName, true, cts.Token), Times.Once());
 
+    }
+
+    [Fact]
+    public async Task DownloadFromAzureShouldWork()
+    {
+        var cts = new CancellationTokenSource();
+        _mockBlobServiceClientFactory.Setup(f => f.Create(It.IsAny<string>(), It.IsAny<string>()))
+                           .Returns(_mockBlobServiceClient.Object);
+
+        _mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(It.IsAny<string>()))
+                    .Returns(_mockBlobContainerClient.Object);
+        _mockBlobContainerClient.Setup(x => x.GetBlobClient(It.IsAny<string>()))
+                    .Returns(_mockBlobClient.Object);
+
+        _mockBlobClient.Setup(x => x.DownloadToAsync(It.IsAny<string>())).Returns(Task.FromResult(Mock.Of<Response>()));
+        var _logger = XUnitLogger.CreateLogger<FileService>(_output);
+
+        var sut = new FileService(_configuration, _mockBlobServiceClientFactory.Object, _logger);
+        var exception = await Record.ExceptionAsync(() => sut.RetrieveParsedFile("test", "test"));
+        Assert.Null(exception);
     }
 }

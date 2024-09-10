@@ -77,7 +77,10 @@ namespace InfluxController.Controllers
             " |> yield(name: \"values\")";
 
             var response = await influxDBService.QueryAsync(q, _org, token);
-            var cleanedUpResponses = _cleanupService.Cleanup(response.ToList());
+            var fileName = await _fileService.RetrieveParsedFile($"export-{startDate.AddDays(-1).ToString("yyyy-MM-dd")}.csv", StorageHelpers.ContainerName);
+            var records = _localFileService.ReadFromFile(fileName);
+            var cleanedUpResponses = _cleanupService.Cleanup(response.ToList(), records);
+            
             var currentDate = startDate.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
             await _localFileService.WriteToFile(generatedFileName, cleanedUpResponses,token );
@@ -96,8 +99,10 @@ namespace InfluxController.Controllers
 
             var response = await influxDBService.QueryAsync(queryString, _org, token);
 
-           
-            var cleanedUpResponses = _cleanupService.Cleanup(response);
+            var fileName = await _fileService.RetrieveParsedFile($"export-{DateTime.Now.AddDays(-1):yyyy-MM-dd}.csv", StorageHelpers.ContainerName);
+            var records = _localFileService.ReadFromFile(fileName);
+            
+            var cleanedUpResponses = _cleanupService.Cleanup(response, records);
             var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
             using (var writer = new StreamWriter(generatedFileName))
