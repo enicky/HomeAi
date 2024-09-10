@@ -18,7 +18,7 @@ public class CleanupService : ICleanupService
         _logger = logger;
 
     }
-    public List<InfluxRecord> Cleanup(List<InfluxRecord> lst, List<InfluxRecord> recordsDayMinusOne)
+    public List<InfluxRecord> Cleanup(List<InfluxRecord> lst, List<InfluxRecord>? recordsDayMinusOne)
     {
         var cleaned = lst.Select(x =>
         {

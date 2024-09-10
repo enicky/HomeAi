@@ -213,6 +213,7 @@ public class FileServiceTests : IClassFixture<TestSetup>
         var _logger = XUnitLogger.CreateLogger<FileService>(_output);
 
         var sut = new FileService(_configuration, _mockBlobServiceClientFactory.Object, _logger);
-        await sut.RetrieveParsedFile("test", "test");
+        var exception = await Record.ExceptionAsync(() => sut.RetrieveParsedFile("test", "test"));
+        Assert.Null(exception);
     }
 }
