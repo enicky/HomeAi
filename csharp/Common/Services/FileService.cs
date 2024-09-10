@@ -71,15 +71,15 @@ public class FileService : IFileService
     {
 
         string fileName = Path.GetFileName(localFilePath);
-        _logger.LogInformation("[UploadFromFileASync] Uploading file {fileName}", fileName);
+        _logger.LogInformation("[UploadFromFileASync] Uploading file {FileName}", fileName);
         BlobClient blobClient = containerClient.GetBlobClient(fileName);
         var uploadResult = await blobClient.UploadAsync(localFilePath, true, token);
-        _logger.LogInformation("[UploadFromFileASync] Finished uploading ... result : {uploadResult}", uploadResult);
+        _logger.LogInformation("[UploadFromFileASync] Finished uploading ... result : {UploadResult}", uploadResult);
     }
 
     public async Task UploadToAzure(string containerName, string generatedFileName, CancellationToken token = default)
     {
-        _logger.LogInformation("[UploadToAzure] Start uploading to azure using {containerName} and file {generatedFileName}", containerName, generatedFileName);
+        _logger.LogInformation("[UploadToAzure] Start uploading to azure using {ContainerName} and file {GeneratedFileName}", containerName, generatedFileName);
         var result = await EnsureContainer(StorageHelpers.ContainerName, token);
         await UploadFromFileAsync(result, generatedFileName, token);
         _logger.LogInformation("[UploadToAzure] Finished upload to Azure");
