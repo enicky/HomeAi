@@ -10,6 +10,7 @@ import json
 import math
 import os
 import random
+import matplotlib.pyplot
 import requests
 import sys
 import logging
@@ -18,6 +19,10 @@ from flask_dapr.app import DaprApp
 from dapr.clients import DaprClient
 from hyper_parameter_optimizer.optimizer import HyperParameterOptimizer
 from logging.config import dictConfig
+import matplotlib
+
+matplotlib.pyplot.set_loglevel(level ="error")
+
 
 class SingletonClass(object):
     isRunning = False
@@ -59,6 +64,7 @@ logging.getLogger('matplotlib').setLevel(logging.WARNING)
 logging.getLogger('matplotlib.pyplot').setLevel(logging.WARNING)
 logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
 logging.getLogger('matplotlib.backends.backend_pdf').setLevel(logging.WARNING)
+logging.getLogger('numba.core.ssa').setLevel(logging.WARNING)
 
 app = flask.Flask(__name__)
 dapr_app = DaprApp(app)
