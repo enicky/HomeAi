@@ -1,6 +1,8 @@
 name: SonarCloud
 on:
   push:
+    paths:
+      - 'csharp/**'
     branches:
       - main
   pull_request:
