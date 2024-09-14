@@ -571,7 +571,7 @@ class HyperParameterOptimizer(object):
 
             # return the results
             return valid
-
+        best_model_path = ''
         if _args.is_training:
             # build the experiment
             exp = self.Exp(self.root_path, _args, try_model=False, save_process=self.save_process)
@@ -621,7 +621,7 @@ class HyperParameterOptimizer(object):
         print('total cost time: {}'.format(exp_time))
         print('>>>>>>>({}) end experiment<<<<<<<'.format(exp_end_run_time))
 
-        return eva_config, exp_train_time, exp_setting, stop_epochs
+        return eva_config, exp_train_time, exp_setting, stop_epochs, best_model_path
 
     def _get_run_time(self):
         current_time = time.localtime()
@@ -633,7 +633,7 @@ class HyperParameterOptimizer(object):
 
     def _save_experiment(self, config, _experiment_result):
         # unpack the experiment result
-        eva_config, exp_start_run_time, setting, stop_epochs = _experiment_result
+        eva_config, exp_start_run_time, setting, stop_epochs, best_model_path = _experiment_result
 
         # phase criteria and save data
         if eva_config is not None:
