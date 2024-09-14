@@ -62,17 +62,17 @@ class EarlyStopping:
         score = -val_loss
         if self.best_score is None:
             self.best_score = score
-            _ = self.save_checkpoint(val_loss, model, path)
+            _, best_model_path = self.save_checkpoint(val_loss, model, path)
         elif score < self.best_score + self.delta:
             self.counter += 1
-            _ = f'EarlyStopping counter: {self.counter} out of {self.patience}'
+            _, best_model_path = f'EarlyStopping counter: {self.counter} out of {self.patience}'
             if self.counter >= self.patience:
                 self.early_stop = True
         else:
             self.best_score = score
-            _ = self.save_checkpoint(val_loss, model, path)
+            _, best_model_path = self.save_checkpoint(val_loss, model, path)
             self.counter = 0
-        return _
+        return _, best_model_path
 
     def save_checkpoint(self, val_loss, model, path):
         best_model_path = path + '/' + self.checkpoints_file
@@ -85,7 +85,7 @@ class EarlyStopping:
             os.makedirs(path)
         torch.save(model.state_dict(), best_model_path)
         self.val_loss_min = val_loss
-        return _
+        return _, best_model_path
 
 
 class dotdict(dict):

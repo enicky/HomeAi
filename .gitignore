@@ -17,3 +17,4 @@ python/results
 python/process
 dapr.yaml
 **/dapr*
+flask.log

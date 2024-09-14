@@ -567,7 +567,7 @@ class HyperParameterOptimizer(object):
             exp = self.Exp(self.root_path, _args, try_model=True, save_process=False)
 
             # validate the model
-            valid = exp.train(exp_setting, check_folder=True)
+            valid, best_model_path = exp.train(exp_setting, check_folder=True)
 
             # return the results
             return valid
@@ -575,7 +575,7 @@ class HyperParameterOptimizer(object):
         if _args.is_training:
             # build the experiment
             exp = self.Exp(self.root_path, _args, try_model=False, save_process=self.save_process)
-
+            
             # print info of the experiment
             if _parameter is not None:
                 exp.print_content(f'Optimizing params in experiment:{_parameter}')
@@ -585,8 +585,9 @@ class HyperParameterOptimizer(object):
             # start training
             _, exp_train_run_time = self._get_run_time()
             exp.print_content('>>>>>>>({}) start training: {}<<<<<<<'.format(exp_train_run_time, exp_setting))
-            stop_epochs = exp.train(exp_setting, check_folder=_check_folder)
-
+            stop_epochs, best_model_path = exp.train(exp_setting, check_folder=_check_folder)
+            exp.print_content(f"[_start_experiment] Best model path {best_model_path}")
+            
             # start testing
             _, exp_test_run_time = self._get_run_time()
             exp.print_content('>>>>>>>({}) start testing: {}<<<<<<<'.format(exp_test_run_time, exp_setting))
@@ -607,7 +608,8 @@ class HyperParameterOptimizer(object):
             # start testing
             _, exp_test_run_time = self._get_run_time()
             exp.print_content('>>>>>>>({}) start testing: {}<<<<<<<'.format(exp_test_run_time, exp_setting))
-            stop_epochs = exp.train(exp_setting, check_folder=_check_folder, only_init=True)
+            stop_epochs, best_model_path = exp.train(exp_setting, check_folder=_check_folder, only_init=True)
+            exp.print_content(f"[_start_experiment] Best model path {best_model_path}")
             eva_config = exp.test(exp_setting, test=True, check_folder=_check_folder)
 
             # clean cuda cache
