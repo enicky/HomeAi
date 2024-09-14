@@ -567,15 +567,15 @@ class HyperParameterOptimizer(object):
             exp = self.Exp(self.root_path, _args, try_model=True, save_process=False)
 
             # validate the model
-            valid = exp.train(exp_setting, check_folder=True)
+            valid, best_model_path = exp.train(exp_setting, check_folder=True)
 
             # return the results
             return valid
-
+        best_model_path = ''
         if _args.is_training:
             # build the experiment
             exp = self.Exp(self.root_path, _args, try_model=False, save_process=self.save_process)
-
+            
             # print info of the experiment
             if _parameter is not None:
                 exp.print_content(f'Optimizing params in experiment:{_parameter}')
@@ -585,8 +585,9 @@ class HyperParameterOptimizer(object):
             # start training
             _, exp_train_run_time = self._get_run_time()
             exp.print_content('>>>>>>>({}) start training: {}<<<<<<<'.format(exp_train_run_time, exp_setting))
-            stop_epochs = exp.train(exp_setting, check_folder=_check_folder)
-
+            stop_epochs, best_model_path = exp.train(exp_setting, check_folder=_check_folder)
+            exp.print_content(f"[_start_experiment] Best model path {best_model_path}")
+            
             # start testing
             _, exp_test_run_time = self._get_run_time()
             exp.print_content('>>>>>>>({}) start testing: {}<<<<<<<'.format(exp_test_run_time, exp_setting))
@@ -607,7 +608,8 @@ class HyperParameterOptimizer(object):
             # start testing
             _, exp_test_run_time = self._get_run_time()
             exp.print_content('>>>>>>>({}) start testing: {}<<<<<<<'.format(exp_test_run_time, exp_setting))
-            stop_epochs = exp.train(exp_setting, check_folder=_check_folder, only_init=True)
+            stop_epochs, best_model_path = exp.train(exp_setting, check_folder=_check_folder, only_init=True)
+            exp.print_content(f"[_start_experiment] Best model path {best_model_path}")
             eva_config = exp.test(exp_setting, test=True, check_folder=_check_folder)
 
             # clean cuda cache
@@ -619,7 +621,7 @@ class HyperParameterOptimizer(object):
         print('total cost time: {}'.format(exp_time))
         print('>>>>>>>({}) end experiment<<<<<<<'.format(exp_end_run_time))
 
-        return eva_config, exp_train_time, exp_setting, stop_epochs
+        return eva_config, exp_train_time, exp_setting, stop_epochs, best_model_path
 
     def _get_run_time(self):
         current_time = time.localtime()
@@ -631,7 +633,7 @@ class HyperParameterOptimizer(object):
 
     def _save_experiment(self, config, _experiment_result):
         # unpack the experiment result
-        eva_config, exp_start_run_time, setting, stop_epochs = _experiment_result
+        eva_config, exp_start_run_time, setting, stop_epochs, best_model_path = _experiment_result
 
         # phase criteria and save data
         if eva_config is not None:

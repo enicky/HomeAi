@@ -56,15 +56,34 @@ dictConfig(
                 "formatter": "default",
             },
         },
-        "root": {"level": "DEBUG", "handlers": ["console", "time-rotate"]},
+        "root": {"level": "WARNING", "handlers": ["console", "time-rotate"]},
+        'app': {'level': 'DEBUG', "handlers": ['console', 'time-rotate']},
+        "werkzeug": {  # Flask
+            "handlers": ["console", " time-rotate"],
+            "level": logging.WARNING,
+            "propagate": False,
+        },
+        "matplotlib": {  # Flask
+            "handlers": ["console", "time-rotate"],
+            "level": logging.WARNING,
+            "propagate": False,
+        },
+        "numba": {  # Flask
+            "handlers": ["console", "time-rotate"],
+            "level": logging.WARNING,
+            "propagate": False,
+        },
+        
     }
 )
 
-logging.getLogger('matplotlib').setLevel(logging.WARNING)
-logging.getLogger('matplotlib.pyplot').setLevel(logging.WARNING)
-logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
-logging.getLogger('matplotlib.backends.backend_pdf').setLevel(logging.WARNING)
-logging.getLogger('numba.core.ssa').setLevel(logging.WARNING)
+
+
+# logging.getLogger('matplotlib').setLevel(logging.WARNING)
+# logging.getLogger('matplotlib.pyplot').setLevel(logging.WARNING)
+# logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
+# logging.getLogger('matplotlib.backends.backend_pdf').setLevel(logging.WARNING)
+# logging.getLogger('numba.core.ssa').setLevel(logging.WARNING)
 
 app = flask.Flask(__name__)
 dapr_app = DaprApp(app)
@@ -268,4 +287,5 @@ def start_train_model():
     app.logger.info('isRunning was set to false => Can start processing again!')
     return "success", 200
 
-app.run(host='0.0.0.0', port=5001)
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5001)

@@ -175,12 +175,12 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 stop_epochs = epoch + 1
                 break
 
-            _ = early_stopping(vali_loss, self.model, checkpoints_path)
+            _, best_model_path_ = early_stopping(vali_loss, self.model, checkpoints_path)
             if _ is not None:
                 self.print_content(_)
 
             if early_stopping.early_stop:
-                self.print_content("Early stopping")
+                self.print_content(f"Early stopping => best model path {best_model_path_}")
                 stop_epochs = epoch + 1
                 break
 
@@ -191,6 +191,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         self.print_content("", True)
 
         best_model_path = checkpoints_path + '/' + self.checkpoints_file
+        self.print_content(f"best model path : {best_model_path}",True)
         if os.path.exists(best_model_path):
             if self.device == torch.device('cpu'):
                 self.model.load_state_dict(torch.load(best_model_path, map_location=torch.device('cpu')))
@@ -199,7 +200,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
         if stop_epochs == 0:
             stop_epochs = self.args.train_epochs
-        return stop_epochs
+        return stop_epochs, best_model_path
 
     def vali(self, vali_data, vali_loader, criterion):
         total_loss = []
