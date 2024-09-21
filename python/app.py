@@ -68,9 +68,9 @@ dictConfig(
             "level": logging.WARNING,
             "propagate": False,
         },
-        "numba": {  # Flask
+        "numba.core.ssa": {  # Flask
             "handlers": ["console", "time-rotate"],
-            "level": logging.WARNING,
+            "level": logging.ERROR,
             "propagate": False,
         },
         
@@ -107,8 +107,8 @@ def train_model():
     return jsonify(objectToReturn)
 
 
-#@app.route('/download_data', methods=['GET'])
 @dapr_app.subscribe(AI_PUBSUB, 'start-download-data')
+@app.route('/download_data', methods=['GET'])
 def download_data_from_azure( ):
     app.logger.info(f'[download_data_from_azure] Downloading data from azure to process ')
     b = BlobRelatedClass()
@@ -125,6 +125,7 @@ def download_data_from_azure( ):
     return "success", 200
 
 @dapr_app.subscribe(AI_PUBSUB, 'start-train-model')
+@app.route('/start_train_model', methods=['GET'])
 def start_train_model():
     if singleton.isRunning: 
         app.logger.info(f'[start_train_model] Instane was already running ... so just return ok')

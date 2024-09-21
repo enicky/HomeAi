@@ -18,7 +18,7 @@ from utils.timefeatures import time_features
 warnings.filterwarnings('ignore')
 
 import logging
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
+#logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
