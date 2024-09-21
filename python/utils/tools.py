@@ -60,6 +60,7 @@ class EarlyStopping:
 
     def __call__(self, val_loss, model, path):
         score = -val_loss
+        best_model_path = ''
         if self.best_score is None:
             self.best_score = score
             _, best_model_path = self.save_checkpoint(val_loss, model, path)
