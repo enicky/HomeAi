@@ -38,7 +38,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         test_data, test_loader = self._get_data(data_flag='test', enter_flag='train', _try_model=self.try_model)
 
         if only_init:
-            return
+            print(f'[long_term:train] only init ... return ... ')
+            return None , ''
 
         time_now = time.time()
 
@@ -267,6 +268,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             self.print_content('loading model')
             path = os.path.join(self.root_checkpoints_path, setting)
             best_model_path = path + '/' + self.checkpoints_file
+            self.print_content(f'[exp:test] best_model_path = {best_model_path}')
             if os.path.exists(best_model_path):
                 if self.device == torch.device('cpu'):
                     self.model.load_state_dict(torch.load(best_model_path, map_location=torch.device('cpu')))
@@ -274,7 +276,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     self.model.load_state_dict(torch.load(best_model_path))
             else:
                 raise FileNotFoundError('You need to train this model before testing it!')
-
+        self.print_content(f'[exp:test] Model loaded!')
         if check_folder:
             self._check_folders([self.root_test_results_path, self.root_results_path])
 
@@ -292,7 +294,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         batch_size = test_loader.batch_size
         pred_value = torch.zeros(length).to(self.device)
         true_value = torch.zeros(length).to(self.device)
-
+        self.print_content(f'[exp:test] start eval of model')
         self.model.eval()
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(tqdm(test_loader)):

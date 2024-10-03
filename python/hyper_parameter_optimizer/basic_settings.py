@@ -694,6 +694,8 @@ def build_setting(_root_path, _args, _run_time, _format, _get_custom_test_time, 
     custom_time = None if _get_custom_test_time is None else _get_custom_test_time(_args)
 
     if not _args.is_training:
+        cwd = os.getcwd()
+        print(f'Current working dir : {cwd}')
         checkpoints = os.listdir(checkpoints_folder)
         latest_time = None
         for checkpoint in checkpoints:

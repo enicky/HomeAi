@@ -315,7 +315,7 @@ class Dataset_Custom(Dataset):
     def __read_data__(self):
         logPrefix = '[Dataset_Custom:__read_data__]'
         # read raw data
-        #print(f'[Dataset_Custom:__read_data__] start reading from {self.path}')
+        print(f'[Dataset_Custom:__read_data__] start reading from {os.getcwd()}/{self.path}')
         df_raw = pd.read_csv(self.path)
         logger.debug(f'{logPrefix} read data : ')
         logger.debug(df_raw.head())
