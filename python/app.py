@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 # ------------------------------------------------------------
-
+import traceback    
 import flask
 from flask import request, jsonify, Response
 from flask_cors import CORS
@@ -14,6 +14,7 @@ import matplotlib.pyplot
 import requests
 import sys
 import logging
+from optimizers.optimizerwrapper import OptimizerWrapper
 from utils.downloaddata import BlobRelatedClass
 from flask_dapr.app import DaprApp
 from dapr.clients import DaprClient
@@ -98,6 +99,7 @@ AI_PUBSUB='ai-pubsub'
 @app.route('/healtz', methods=['GET'])
 def health():
     return jsonify({'success' : True})
+
 @app.route('/train_model', methods=['GET'])
 def train_model():
     app.logger.info(f'Start Training model on data')
@@ -122,6 +124,25 @@ def download_data_from_azure( ):
         )
     
     app.logger.info(f'[download_data_from_azure]Finished sending message back to orchestrator')
+    return "success", 200
+
+@app.route('/test_model', methods=['GET'])
+def start_test_model():
+    if singleton.isRunning:
+        app.logger.info(f'[start_test_model] Instance was already running... So cant start Test')
+        return "success", 200
+    else:
+        singleton.isRunning = True
+    
+    app.logger.info(f'[start_test_model] Start testing model')
+    try: 
+        optimizer = OptimizerWrapper(is_training=0)
+        optimizer.start_testing()
+    except Exception as error:
+        app.logger.error(f'There was an error testing {error}')
+        app.logger.error(traceback.format_exc())
+        singleton.isRunning = False
+        return "non-success", 500
     return "success", 200
 
 @dapr_app.subscribe(AI_PUBSUB, 'start-train-model')
