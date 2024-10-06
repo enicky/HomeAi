@@ -21,6 +21,25 @@ from dapr.clients import DaprClient
 from hyper_parameter_optimizer.optimizer import HyperParameterOptimizer
 from logging.config import dictConfig
 import matplotlib
+from flask_swagger_ui import get_swaggerui_blueprint
+from flask_swagger_generator.generators import Generator
+from flask_swagger_generator.utils import SwaggerVersion
+
+generator = Generator.of(SwaggerVersion.VERSION_THREE)
+swagger_destination_path = '/static/swagger.yaml'
+
+
+SWAGGER_URL="/swagger"
+API_URL="./static/swagger.json"
+
+
+swagger_ui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        'app_name': 'Access API'
+    }
+)
 
 matplotlib.pyplot.set_loglevel(level ="error")
 
@@ -86,7 +105,9 @@ dictConfig(
 # logging.getLogger('matplotlib.backends.backend_pdf').setLevel(logging.WARNING)
 # logging.getLogger('numba.core.ssa').setLevel(logging.WARNING)
 
-app = flask.Flask(__name__)
+app = flask.Flask(__name__, static_url_path='/static', static_folder='./static')
+app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
+
 dapr_app = DaprApp(app)
 
 #CORS(app)
@@ -96,8 +117,21 @@ AI_PUBSUB='ai-pubsub'
 #dapr_port = os.getenv("DAPR_HTTP_PORT", 3500)
 #state_url = "http://localhost:{}/v1.0/state".format(dapr_port)
 
+@generator.response(200, schema={})
 @app.route('/healtz', methods=['GET'])
 def health():
+    """
+    This is an example endpoint that returns 'Hello, World!'
+    ---
+    tags:
+        - Greetings
+    description: Returns a friendly greeting.
+    responses:
+        200:
+            description: A successful response
+            examples:
+                application/json: "Hello, World!"
+    """
     return jsonify({'success' : True})
 
 @app.route('/train_model', methods=['GET'])
@@ -308,6 +342,8 @@ def start_train_model():
     singleton.isRunning = False
     app.logger.info('isRunning was set to false => Can start processing again!')
     return "success", 200
+
+generator.generate_swagger(app, destination_path='./static/swagger.yaml')
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001)
