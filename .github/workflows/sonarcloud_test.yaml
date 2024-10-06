@@ -1,10 +1,8 @@
 name: SonarCloud
 on:
   push:
-    paths:
-      - 'csharp/**'
-    branches:
-      - main
+    paths: ['csharp/**']
+    branches: ['main']
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
