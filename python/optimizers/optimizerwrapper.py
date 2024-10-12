@@ -113,8 +113,10 @@ class OptimizerWrapper(object):
             'custom_params': ''
             
         }
+    
     def build_setting(self, root_path, args, exp_start_run_time,time_format,   get_custom_test_time, _try_model):
         return "models", ''
+    
     def start_testing(self):
         h = HyperParameterOptimizer(script_mode=True, build_setting=self.build_setting )
         h.config_optimizer_settings(root_path='.',
@@ -125,5 +127,18 @@ class OptimizerWrapper(object):
                                     scan_all_csv=True,
                                     process_number=1,
                                     save_process=True)
+        
+        h.start_search(prepare_config_params=self.prep_configs)
+    
+    def startTraining(self):
+        h = HyperParameterOptimizer(script_mode=True )
+        h.config_optimizer_settings(root_path='.',
+                                data_dir='data',
+                                jump_csv_file='jump_data.csv',
+                                data_csv_file='merged_and_sorted_file.csv',
+                                data_csv_file_format='merged_and_sorted_file_{}.csv',
+                                scan_all_csv=True,
+                                process_number=1,
+                                save_process=True)
         
         h.start_search(prepare_config_params=self.prep_configs)

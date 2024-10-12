@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: Application
-  description: Generated at 06/10/2024 07:42:26. This is the swagger 
+  description: Generated at 09/10/2024 18:29:54. This is the swagger 
     ui based on the open api 3.0 specification of the Application
   version: 1.0.0 created by the flask swagger generator.
 externalDocs:
@@ -57,6 +57,9 @@ paths:
       tags:
       - None
       operationId: 'train_model'
+      responses:
+        '200':
+          $ref: '#/components/responses/train_model_response'
   '/download_data':
     get:
       tags:
@@ -85,11 +88,19 @@ paths:
 components:
   responses:
     health_response:
-      description: health response
+      description: Health endpoint to return everything is running successfull
       content:
          application/json:
-             schema:
-                 $ref: '#/components/schemas/health_response_schema'
+           schema:
+             $ref: '#/components/schemas/health_response_schema'
+    train_model_response:
+      description: Train Model => nothing happens. Just empty test
+      content:
+         application/json:
+           schema:
+             $ref: '#/components/schemas/train_model_response_schema'
   schemas:
     health_response_schema:
+      type: object
+    train_model_response_schema:
       type: object
