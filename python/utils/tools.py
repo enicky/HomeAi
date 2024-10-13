@@ -73,7 +73,7 @@ class EarlyStopping:
         else:
             self.best_score = score
             _, best_model_path = self.save_checkpoint(val_loss, model, path)
-            self.save_checkpoint(val_loss, model, './checkpoints/models/checkpointpth')
+            self.save_checkpoint(val_loss, model, './checkpoints/models/')
             self.counter = 0
         return _, best_model_path
 
