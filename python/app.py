@@ -82,11 +82,11 @@ dictConfig(
 
 
 
-# logging.getLogger('matplotlib').setLevel(logging.WARNING)
-# logging.getLogger('matplotlib.pyplot').setLevel(logging.WARNING)
-# logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
-# logging.getLogger('matplotlib.backends.backend_pdf').setLevel(logging.WARNING)
-# logging.getLogger('numba.core.ssa').setLevel(logging.WARNING)
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
+logging.getLogger('matplotlib.pyplot').setLevel(logging.WARNING)
+logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
+logging.getLogger('matplotlib.backends.backend_pdf').setLevel(logging.WARNING)
+logging.getLogger('numba.core.ssa').setLevel(logging.WARNING)
 
 app = flask.Flask(__name__, static_url_path='/static', static_folder='./static')
 swagger = Swagger(app)
