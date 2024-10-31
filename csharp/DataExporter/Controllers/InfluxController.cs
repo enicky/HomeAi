@@ -38,8 +38,8 @@ namespace InfluxController.Controllers
         private readonly ICleanupService _cleanupService;
         private readonly ILocalFileService _localFileService;
 
-        public InfluxController(IInfluxDbService influxDBService, 
-                    IFileService fileService, 
+        public InfluxController(IInfluxDbService influxDBService,
+                    IFileService fileService,
                     IConfiguration configuration,
                     ICleanupService cleanupService,
                     DaprClient daprClient,
@@ -57,7 +57,8 @@ namespace InfluxController.Controllers
         }
 
         [HttpGet("ExportDataForDate")]
-        public async Task<IActionResult> ExportDataForDate(DateTime startDate, CancellationToken token){
+        public async Task<IActionResult> ExportDataForDate(DateTime startDate, CancellationToken token)
+        {
             var strDateTime = startDate.ToStartDayString();
             _logger.LogDebug("Start export data for date {startDate}", strDateTime);
             var strStartDate = startDate.AddDays(-1).ToStartDayString();
@@ -65,7 +66,7 @@ namespace InfluxController.Controllers
 
             var q = "import \"experimental\"" +
             " from(bucket: \"home_assistant\")" +
-            " |> range(start: "+strStartDate+", stop: "+strTomorrowStartDate+")" +
+            " |> range(start: " + strStartDate + ", stop: " + strTomorrowStartDate + ")" +
             " |> filter(fn: (r) => r[\"entity_id\"] == \"forecast_home_2\" or r[\"entity_id\"] == \"warmtepomp_power\" or r[\"entity_id\"] == \"smoke_detector_device_17_temperature\")" +
             " |> filter(fn: (r) =>  r[\"_field\"] == \"humidity\" or r[\"_field\"] == \"pressure\" or r[\"_field\"] == \"value\")" +
             " |> aggregateWindow(every: 1m, fn: mean, createEmpty: true)" +
@@ -80,50 +81,63 @@ namespace InfluxController.Controllers
             var fileName = await _fileService.RetrieveParsedFile($"export-{startDate.AddDays(-1).ToString("yyyy-MM-dd")}.csv", StorageHelpers.ContainerName);
             var records = _localFileService.ReadFromFile(fileName);
             var cleanedUpResponses = _cleanupService.Cleanup(response.ToList(), records);
-            
+
             var currentDate = startDate.ToString("yyyy-MM-dd");
             var generatedFileName = $"export-{currentDate}.csv";
-            await _localFileService.WriteToFile(generatedFileName, cleanedUpResponses,token );
+            await _localFileService.WriteToFile(generatedFileName, cleanedUpResponses, token);
             await _fileService.UploadToAzure(StorageHelpers.ContainerName, generatedFileName, token);
-           
+
             _logger.LogDebug($"Finished uploading to Azure");
             return Ok();
 
         }
+        SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+
+
 
         [Topic(pubsubName: NameConsts.INFLUX_PUBSUB_NAME, name: NameConsts.INFLUX_RETRIEVE_DATA)]
         [HttpPost(NameConsts.INFLUX_RETRIEVE_DATA)]
         public async Task RetrieveData(CancellationToken token)
         {
             _logger.LogDebug("Trigger received to retrieve data from influx");
-
-            var response = await influxDBService.QueryAsync(queryString, _org, token);
-
-            var fileName = await _fileService.RetrieveParsedFile($"export-{DateTime.Now.AddDays(-1):yyyy-MM-dd}.csv", StorageHelpers.ContainerName);
-            var records = _localFileService.ReadFromFile(fileName);
-            
-            var cleanedUpResponses = _cleanupService.Cleanup(response, records);
-            var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
-            var generatedFileName = $"export-{currentDate}.csv";
-            using (var writer = new StreamWriter(generatedFileName))
-            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            List<InfluxRecord> records, response;
+            await semaphoreSlim.WaitAsync();
+            try
             {
-                await csv.WriteRecordsAsync(cleanedUpResponses, token);
+
+
+                response = await influxDBService.QueryAsync(queryString, _org, token);
+
+                var fileName = await _fileService.RetrieveParsedFile($"export-{DateTime.Now.AddDays(-1):yyyy-MM-dd}.csv", StorageHelpers.ContainerName);
+                records = _localFileService.ReadFromFile(fileName);
+                var cleanedUpResponses = _cleanupService.Cleanup(response, records);
+                var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
+                var generatedFileName = $"export-{currentDate}.csv";
+                using (var writer = new StreamWriter(generatedFileName))
+                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                {
+                    await csv.WriteRecordsAsync(cleanedUpResponses, token);
+                }
+                await _fileService.UploadToAzure(StorageHelpers.ContainerName, generatedFileName, token);
+                var retrieveDataResponse = new RetrieveDataResponse
+                {
+                    Success = true,
+                    GeneratedFileName = generatedFileName,
+                    StartAiProcess = true
+
+                };
+
+                await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME,
+                                    NameConsts.INFLUX_FINISHED_RETRIEVE_DATA,
+                                    retrieveDataResponse,
+                                    token);
             }
-            await _fileService.UploadToAzure(StorageHelpers.ContainerName, generatedFileName, token);
-            
-            var retrieveDataResponse = new RetrieveDataResponse
+            finally
             {
-                Success = true,
-                GeneratedFileName = generatedFileName,
-                StartAiProcess = true
+                semaphoreSlim.Release();
+            }
 
-            };  
-            
-            await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, 
-                                NameConsts.INFLUX_FINISHED_RETRIEVE_DATA, 
-                                retrieveDataResponse,
-                                token);
+
 
             _logger.LogDebug($"Sent that retrieve of file to azaure has been finished");
         }
