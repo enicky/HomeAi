@@ -37,6 +37,7 @@ namespace InfluxController.Controllers
         private readonly DaprClient _daprClient;
         private readonly ICleanupService _cleanupService;
         private readonly ILocalFileService _localFileService;
+        private readonly SemaphoreSlim semaphoreSlim = new(1, 1);
 
         public InfluxController(IInfluxDbService influxDBService,
                     IFileService fileService,
@@ -91,23 +92,18 @@ namespace InfluxController.Controllers
             return Ok();
 
         }
-        SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
-
-
-
+        
         [Topic(pubsubName: NameConsts.INFLUX_PUBSUB_NAME, name: NameConsts.INFLUX_RETRIEVE_DATA)]
         [HttpPost(NameConsts.INFLUX_RETRIEVE_DATA)]
         public async Task RetrieveData(CancellationToken token)
         {
             _logger.LogDebug("Trigger received to retrieve data from influx");
             List<InfluxRecord> records, response;
-            await semaphoreSlim.WaitAsync();
+            await semaphoreSlim.WaitAsync(token);
             try
             {
-
-
                 response = await influxDBService.QueryAsync(queryString, _org, token);
-
+                
                 var fileName = await _fileService.RetrieveParsedFile($"export-{DateTime.Now.AddDays(-1):yyyy-MM-dd}.csv", StorageHelpers.ContainerName);
                 records = _localFileService.ReadFromFile(fileName);
                 var cleanedUpResponses = _cleanupService.Cleanup(response, records);
