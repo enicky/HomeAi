@@ -25,11 +25,14 @@ namespace app.Services
             _token = configuration.GetValue<string>("InfluxDB_TOKEN")!;
             _url = configuration.GetValue<string>("InfluxDB:Url")!;
         }
-        public Task<List<InfluxRecord>> QueryAsync(string queryString, string organisation, CancellationToken token)
+        public async Task<List<InfluxRecord>> QueryAsync(string queryString, string organisation, CancellationToken token)
         {
             _logger.LogInformation($"start query");
             var wrapper = _factory.CreateWrapper(_url, _token);
-            return wrapper.GetData(queryString, organisation, token);            
+
+            var x = await wrapper.GetData(queryString, organisation, token);        
+            _logger.LogInformation($"Get data result : {x}");
+            return x;    
         }
     }
 }
