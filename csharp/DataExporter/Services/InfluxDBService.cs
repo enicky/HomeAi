@@ -31,7 +31,7 @@ namespace app.Services
             var wrapper = _factory.CreateWrapper(_url, _token);
 
             var x = await wrapper.GetData(queryString, organisation, token);        
-            _logger.LogInformation($"Get data result : {x}");
+            _logger.LogInformation("Get data result : {DataResult}", x);
             return x;    
         }
     }
