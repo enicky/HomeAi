@@ -9,7 +9,7 @@ permissions:
 jobs:
   docker:
     name: Build Docker Image for PythonAI
-    runs-on: self-hosted
+    runs-on: cube03
     #runs-on: ubuntu-latest
     steps:
       - name: checkout
