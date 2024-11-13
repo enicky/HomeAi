@@ -297,7 +297,14 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         self.print_content(f'[exp:test] start eval of model')
         self.model.eval()
         with torch.no_grad():
-            for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(tqdm(test_loader)):
+            #for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(tqdm(test_loader)):
+            # Nicky => remove tqdm for debugging purposes
+            if os.getenv('enable_tqdm', True):
+                enumLoader = enumerate(tqdm(test_loader))
+            else:
+                enumLoader = enumerate(test_loader)
+                
+            for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumLoader:
                 batch_x = batch_x.float().to(self.device)
                 batch_y = batch_y.float().to(self.device)
 

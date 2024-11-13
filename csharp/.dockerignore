@@ -3,3 +3,4 @@ bin
 obj
 Dockerfile
 appsettings.Development.json
+**/*.csv
