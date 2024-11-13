@@ -3,17 +3,14 @@ on:
   workflow_dispatch:
   push:
     branches: ['main']
-    paths:
-      - 'python/**'
-      - '.github/workflows/pythonaitrainer.yaml'
-      - '!python/Dockerfile.base'
+    paths: ['python/**', '.github/workflows/pythonaitrainer.yaml', '!python/Dockerfile.base']
 permissions:
   contents: read
 jobs:
   docker:
     name: Build Docker Image for PythonAI
-    #runs-on: self-hosted
-    runs-on: ubuntu-latest
+    runs-on: cube03
+    #runs-on: ubuntu-latest
     steps:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
