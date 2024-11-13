@@ -12,13 +12,28 @@ jobs:
     runs-on: cube03
     #runs-on: ubuntu-latest
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # this might remove tools that are actually needed,
+          # if set to "true" but frees about 6 GB
+          tool-cache: false
+          
+          # all of these default to true, but feel free to set to
+          # "false" if necessary for your workflow
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
       - name: checkout
         uses: actions/checkout@v4
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
           cd python/
-          ls -la
+            ls -la
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -37,6 +52,7 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
+            linux/aarch64
           push: true
           tags: neichmann/pythonaitrainer:app-${{ github.run_number }},neichmann/pythonaitrainer:latest
           #cache-from: type=gha
