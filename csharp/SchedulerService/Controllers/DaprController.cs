@@ -1,4 +1,5 @@
 using Common.Helpers;
+using Common.Models.AI;
 using Common.Models.Responses;
 using Dapr;
 using Dapr.Client;
@@ -79,11 +80,24 @@ public class DaprController : ControllerBase
 
     [Topic(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_FINISHED_TRAIN_MODEL)]
     [HttpPost("AiFinishedTrainingModel")]
-    public Task AiFinishedTrainingModel([FromBody] TrainAiModelResponse response)
+    public async Task AiFinishedTrainingModel([FromBody] TrainAiModelResponse response)
     {
-        logger.LogInformation($"Retrieved message that training of model has been finished");
-        logger.LogInformation($"Training was a success: {response.Success}");
-        logger.LogInformation("Process finished");
-        return Task.CompletedTask;
+        logger.LogInformation($"[DaprController:AiFinishedTrainingModel] Retrieved message that training of model has been finished");
+        logger.LogInformation($"[DaprController:AiFinishedTrainingModel] Training was a success: {response.Success}");
+
+        if (response != null && !string.IsNullOrEmpty(response.ModelPath))
+        {
+            logger.LogInformation($"[DaprController:AiFinishedTrainingModel] ModelPath = {response.ModelPath}");
+            logger.LogInformation("[DaprController:AiFinishedTrainingModel] Can start uploading model to Azure");
+            var data = new StartUploadModel
+            {
+                ModelPath = response.ModelPath
+            };
+            await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_UPLOAD_MODEL, data);
+            logger.LogInformation($"[DaprController:AiFinishedTrainingModel] Finished sending message to upload model to azure");
+
+        }
+
+        logger.LogInformation("[DaprController:AiFinishedTrainingModel] Process finished");
     }
 }
