@@ -296,12 +296,16 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         true_value = torch.zeros(length).to(self.device)
         self.print_content(f'[exp:test] start eval of model')
         self.model.eval()
+        tqdm_enabled = os.getenv('enable_tqdm', "True").lower() == "true"
+        self.print_content(f'[exp_long_term_forecasting] tqdm ebabled ? {tqdm_enabled}')
         with torch.no_grad():
             #for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(tqdm(test_loader)):
             # Nicky => remove tqdm for debugging purposes
-            if os.getenv('enable_tqdm', True):
+            if tqdm_enabled:
+                self.print_content('[exp_long_term_forecasting] start processing with tqdm')
                 enumLoader = enumerate(tqdm(test_loader))
             else:
+                self.print_content('[exp_long_term_forecasting] start processing without tqdm')
                 enumLoader = enumerate(test_loader)
                 
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumLoader:
