@@ -260,7 +260,7 @@ def start_train_model():
         if perform_training:
             optimizerWrapper = OptimizerWrapper(is_training=(1 if perform_training else 0))
             result = optimizerWrapper.startTraining()
-            app.logger.info(f'[app:start_train_model] Finished result : {json.dumps(result)}')
+            app.logger.info(f'[start_train_model] Finished result : {result}')
         app.logger.info(f'Start Search finished. And no exception was thrown')
     except Exception as e:
         app.logger.error('there was an issue training data ... ',exc_info=True)
