@@ -250,12 +250,17 @@ def start_train_model():
     app.logger.info(f'[start_train_model] Start Training model')
     perform_training = os.getenv('perform_training', "False").lower() == "true"
     
-    training_result = True
+    training_result = {
+        "success" : True,
+        "model_path" : "./checkpoints/models/checkpoint.pth"
+    }
+    
     try:
         app.logger.info(f'[start_train_model] Actually perform training : {perform_training}')
         if perform_training:
             optimizerWrapper = OptimizerWrapper(is_training=(1 if perform_training else 0))
-            optimizerWrapper.startTraining()
+            result = optimizerWrapper.startTraining()
+            app.logger.info(f'[app:start_train_model] Finished result : {json.dumps(result)}')
         app.logger.info(f'Start Search finished. And no exception was thrown')
     except Exception as e:
         app.logger.error('there was an issue training data ... ',exc_info=True)
@@ -264,9 +269,7 @@ def start_train_model():
     
     
     app.logger.info('Finished start search on finding model ')
-    result = {
-        "success" : training_result
-    }
+    
     strResult = json.dumps(result)
     app.logger.info(f'Returning : {strResult}')
     

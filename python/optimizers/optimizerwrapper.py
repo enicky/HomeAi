@@ -141,4 +141,6 @@ class OptimizerWrapper(object):
                                 process_number=1,
                                 save_process=True)
         
-        h.start_search(prepare_config_params=self.prep_configs)
+        search_result = h.start_search(prepare_config_params=self.prep_configs)
+        print('[OptimizerWrapper:startTraining] returning search result')
+        return search_result

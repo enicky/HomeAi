@@ -301,7 +301,7 @@ class HyperParameterOptimizer(object):
             if shutdown_after_done:
                 self._shutdown()
 
-            return
+            return experiment_result
 
         # print info
         print('Hyper-parameter optimizer starts searching under non-script mode!')
