@@ -252,7 +252,8 @@ def start_train_model():
     
     training_result = {
         "success" : True,
-        "model_path" : "./checkpoints/models/checkpoint.pth"
+        "model_path" : "./checkpoints/models/checkpoint.pth",
+        "best_model_path": ""
     }
     
     try:
@@ -260,7 +261,10 @@ def start_train_model():
         if perform_training:
             optimizerWrapper = OptimizerWrapper(is_training=(1 if perform_training else 0))
             result = optimizerWrapper.startTraining()
-            app.logger.info(f'[start_train_model] Finished result : {result}')
+            # unpack the experiment result
+            eva_config, exp_start_run_time, setting, stop_epochs, best_model_path = result
+            app.logger.info(f'[start_train_model] Finished result : {best_model_path}')
+            training_result["best_model_path"] = best_model_path
         app.logger.info(f'Start Search finished. And no exception was thrown')
     except Exception as e:
         app.logger.error('there was an issue training data ... ',exc_info=True)
@@ -270,7 +274,7 @@ def start_train_model():
     
     app.logger.info('Finished start search on finding model ')
     
-    strResult = json.dumps(result)
+    strResult = json.dumps(training_result)
     app.logger.info(f'Returning : {strResult}')
     
     with DaprClient() as client:
@@ -279,7 +283,7 @@ def start_train_model():
             topic_name='finished-train-model',
             data=strResult
         )
-        app.logger.info(f'[start_train_model] result ; {result}')
+        app.logger.info(f'[start_train_model] result ; {strResult}')
     app.logger.info(f'[start_train_model] Finished sending message back to orchestrator')
     singleton.isRunning = False
     app.logger.info('isRunning was set to false => Can start processing again!')
