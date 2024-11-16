@@ -79,7 +79,7 @@ public class FileService : IFileService
     public async Task UploadToAzure(string containerName, string generatedFileName, CancellationToken token = default)
     {
         _logger.LogInformation("[UploadToAzure] Start uploading to azure using {ContainerName} and file {GeneratedFileName}", containerName, generatedFileName);
-        var result = await EnsureContainer(StorageHelpers.ContainerName, token);
+        var result = await EnsureContainer(containerName, token);
         await UploadFromFileAsync(result, generatedFileName, token);
         _logger.LogInformation("[UploadToAzure] Finished upload to Azure");
     }

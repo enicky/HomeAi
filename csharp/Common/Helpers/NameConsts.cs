@@ -1,3 +1,5 @@
+using Microsoft.Identity.Client;
+
 namespace Common.Helpers;
 
 public static class NameConsts{
@@ -14,5 +16,6 @@ public static class NameConsts{
     public const string AI_FINISHED_DOWNLOAD_DATA = "finished-download-data";
     public const string AI_START_TRAIN_MODEL = "start-train-model";
     public const string AI_FINISHED_TRAIN_MODEL = "finished-train-model";
+    public const string AI_START_UPLOAD_MODEL = "start-upload-model";
 
 }
