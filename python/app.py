@@ -150,8 +150,8 @@ def train_model():
         print(f"The file '{filePath}' exists.")
     else:
         print(f"The file '{filePath}' does not exist.")
-    os.chmod(filePath, stat.S_IRWXO )
-    os.chmod(filePath, stat.S_IRWXG )
+    os.chmod(filePath, 0o755 )
+    
     app.logger.info(f'Finished changing owner on checkpoint.pth')
     
     with DaprClient() as client:
