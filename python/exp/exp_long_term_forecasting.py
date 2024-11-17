@@ -206,8 +206,17 @@ class Exp_Long_Term_Forecast(Exp_Basic):
     def vali(self, vali_data, vali_loader, criterion):
         total_loss = []
         self.model.eval()
+        tqdm_enabled = os.getenv('enable_tqdm', "True").lower() == "true"
+        self.print_content(f'[exp_long_term_forecasting] tqdm ebabled ? {tqdm_enabled}')
+        if tqdm_enabled:
+            self.print_content('[exp_long_term_forecasting] start processing with tqdm')
+            enumLoader = enumerate(tqdm(vali_loader))
+        else:
+            self.print_content('[exp_long_term_forecasting] start processing without tqdm')
+            enumLoader = enumerate(vali_loader)
+                
         with torch.no_grad():
-            for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(tqdm(vali_loader)):
+            for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumLoader:
                 batch_x = batch_x.float().to(self.device)
                 batch_y = batch_y.float().to(self.device)
 
