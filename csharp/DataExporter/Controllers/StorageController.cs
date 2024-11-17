@@ -17,7 +17,8 @@ public class StorageController(ILogger<StorageController> logger,
         logger.LogInformation($"[StorageController:StartUploadingModelToAzure] Start uploading model {startUploadModel.ModelPath} to azure");
         // first Rename file to current datetime = model
         string fileName = Path.GetFileName(startUploadModel.ModelPath);
-        var generatedFileName = $"{DateTime.Now.ToString("YYYYMMdd")}-{fileName}";
+        logger.LogInformation($"FileName retrieved from ... {startUploadModel.ModelPath} {fileName}");
+        var generatedFileName = $"{DateTime.Now.ToString("yyyyMMdd")}-{fileName}";
         logger.LogInformation($"[StorageController:StartUploadingModelToAzure] Renaming file to {generatedFileName}");
         System.IO.File.Move(startUploadModel.ModelPath, generatedFileName);
         logger.LogInformation("[StorageController:StartUploadingModelToAzure] Start uploading file");
