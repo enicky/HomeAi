@@ -20,6 +20,12 @@ public class StorageController(ILogger<StorageController> logger,
         logger.LogInformation($"FileName retrieved from ... {startUploadModel.ModelPath} {fileName}");
         var generatedFileName = $"{DateTime.Now.ToString("yyyyMMdd")}-{fileName}";
         logger.LogInformation($"[StorageController:StartUploadingModelToAzure] Renaming file to {generatedFileName}");
+        if (System.IO.File.Exists(generatedFileName)){
+            logger.LogInformation($"File {generatedFileName} already exists. Delete if first");   
+            System.IO.File.Delete(generatedFileName);
+            logger.LogInformation("File deleted");
+            
+        }
         System.IO.File.Move(startUploadModel.ModelPath, generatedFileName);
         logger.LogInformation("[StorageController:StartUploadingModelToAzure] Start uploading file");
         await fileService.UploadToAzure(StorageHelpers.ModelContainerName, generatedFileName, token);
