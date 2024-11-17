@@ -12,7 +12,7 @@ public class StorageController(ILogger<StorageController> logger,
 {
     [Topic(pubsubName: NameConsts.AI_PUBSUB_NAME, name: NameConsts.AI_START_UPLOAD_MODEL)]
     [HttpPost(NameConsts.AI_START_UPLOAD_MODEL)]
-    public async Task StartUploadingModelToAzure(StartUploadModel startUploadModel, [FromServices] DaprClient daprClient, CancellationToken token)
+    public async Task StartUploadingModelToAzure([FromBody] StartUploadModel startUploadModel, [FromServices] DaprClient daprClient, CancellationToken token)
     {
         logger.LogInformation($"[StorageController:StartUploadingModelToAzure] Start uploading model {startUploadModel.ModelPath} to azure");
         // first Rename file to current datetime = model
