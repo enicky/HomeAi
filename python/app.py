@@ -96,6 +96,7 @@ dapr_app = DaprApp(app)
 #CORS(app)
 
 AI_PUBSUB='ai-pubsub'
+AI_FINISHED_TRAIN_MODEL='finished-train-model'
 
 #dapr_port = os.getenv("DAPR_HTTP_PORT", 3500)
 #state_url = "http://localhost:{}/v1.0/state".format(dapr_port)
@@ -144,6 +145,16 @@ def train_model():
     objectToReturn = {
         "success" : True
     }
+    with DaprClient() as client:
+        result = client.publish_event(
+            pubsub_name=AI_PUBSUB,
+            topic_name=AI_FINISHED_TRAIN_MODEL,
+            data=json.dumps(objectToReturn),
+            data_content_type='application/json',
+        )
+        app.logger.info(f'[start_train_model] result ; {result}')
+        
+    
     return jsonify(objectToReturn)
 
 
@@ -280,8 +291,9 @@ def start_train_model():
     with DaprClient() as client:
         result = client.publish_event(
             pubsub_name=AI_PUBSUB,
-            topic_name='finished-train-model',
-            data=strResult
+            topic_name=AI_FINISHED_TRAIN_MODEL,
+            data=strResult,
+            data_content_type='application/json',
         )
         app.logger.info(f'[start_train_model] result ; {strResult}')
     app.logger.info(f'[start_train_model] Finished sending message back to orchestrator')
