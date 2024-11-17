@@ -7,12 +7,9 @@ import flask
 from flask import request, jsonify, Response
 from flask_cors import CORS
 import json
-import math
 import os
-import random
+import stat
 import matplotlib.pyplot
-import requests
-import sys
 import logging
 from optimizers.optimizerwrapper import OptimizerWrapper
 from utils.downloaddata import BlobRelatedClass
@@ -142,10 +139,21 @@ def train_model():
           success: true
     """
     app.logger.info(f'Start Training model on data')
+    filePath = '/app/checkpoints/models/checkpoint.pth'
+    
     objectToReturn = {
         "success" : True,
-        "model_path" : '/app/checkpoints/models/checkpoint.pth'
+        "model_path" : filePath
     }
+    app.logger.info(f'Start chown on checkpoint.pth')
+    if os.path.exists(filePath):
+        print(f"The file '{filePath}' exists.")
+    else:
+        print(f"The file '{filePath}' does not exist.")
+    os.chmod(filePath, stat.S_IRWXO )
+    os.chmod(filePath, stat.S_IRWXG )
+    app.logger.info(f'Finished changing owner on checkpoint.pth')
+    
     with DaprClient() as client:
         result = client.publish_event(
             pubsub_name=AI_PUBSUB,
