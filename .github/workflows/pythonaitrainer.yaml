@@ -52,7 +52,6 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
-            linux/aarch64
           push: true
           tags: neichmann/pythonaitrainer:app-${{ github.run_number }},neichmann/pythonaitrainer:latest
           #cache-from: type=gha

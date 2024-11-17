@@ -143,7 +143,8 @@ def train_model():
     """
     app.logger.info(f'Start Training model on data')
     objectToReturn = {
-        "success" : True
+        "success" : True,
+        "ModelPath" : '/app/checkpoints/models/checkpoint.pth'
     }
     with DaprClient() as client:
         result = client.publish_event(
