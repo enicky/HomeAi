@@ -151,6 +151,8 @@ def train_model():
     else:
         print(f"The file '{filePath}' does not exist.")
     os.chmod(filePath, 0o755 )
+    os.chown('/app/checkpoints/models', 1000, 1000)
+    os.chown(filePath, 1000, 1000) 
     
     app.logger.info(f'Finished changing owner on checkpoint.pth')
     
