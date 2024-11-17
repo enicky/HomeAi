@@ -4,6 +4,7 @@ import numpy as np
 import os
 import torch
 import seaborn as sns
+import stat
 
 plt.switch_backend('agg')
 
@@ -74,6 +75,9 @@ class EarlyStopping:
             self.best_score = score
             _, best_model_path = self.save_checkpoint(val_loss, model, path)
             self.save_checkpoint(val_loss, model, './checkpoints/models/')
+            os.chmod('./checkpoints/models/checkpoint.pth', stat.S_IRWXO )
+            os.chmod('./checkpoints/models/checkpoint.pth', stat.S_IRWXG )
+            
             self.counter = 0
         return _, best_model_path
 
