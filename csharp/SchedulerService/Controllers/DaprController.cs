@@ -84,7 +84,8 @@ public class DaprController : ControllerBase
     {
         logger.LogInformation($"[DaprController:AiFinishedTrainingModel] Retrieved message that training of model has been finished");
         logger.LogInformation($"[DaprController:AiFinishedTrainingModel] Training was a success: {response.Success}");
-
+        logger.LogInformation($"ModelPath to use is : {response.ModelPath}");
+        
         if (response != null && !string.IsNullOrEmpty(response.ModelPath))
         {
             logger.LogInformation($"[DaprController:AiFinishedTrainingModel] ModelPath = {response.ModelPath}");
