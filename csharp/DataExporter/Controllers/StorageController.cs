@@ -18,26 +18,22 @@ public class StorageController(ILogger<StorageController> logger, IFileService f
         CancellationToken token
     )
     {
-        logger.LogInformation(
-            $"[StorageController:StartUploadingModelToAzure] Start uploading model {startUploadModel.ModelPath} to azure"
-        );
+        logger.LogInformation($"[StorageController:StartUploadingModelToAzure] Start uploading model {startUploadModel.ModelPath} to azure");
         try
         {
             string fileName = Path.GetFileName(startUploadModel.ModelPath);
-            logger.LogInformation(
-                $"FileName retrieved from ... {startUploadModel.ModelPath} {fileName}"
-            );
+            logger.LogInformation($"FileName retrieved from ... {startUploadModel.ModelPath} {fileName}");
             var generatedFileName = $"{DateTime.Now.ToString("yyyyMMdd")}-{fileName}";
             logger.LogInformation(
                 $"[StorageController:StartUploadingModelToAzure] Renaming file to {generatedFileName}"
             );
             if (System.IO.File.Exists(generatedFileName))
             {
-                logger.LogInformation($"File {generatedFileName} already exists. Delete if first");
-                System.IO.File.Delete(generatedFileName);
-                logger.LogInformation("File deleted");
+                logger.LogInformation($"File {generatedFileName} already exists. We Can override the target file");
+                //System.IO.File.Delete(generatedFileName);
+                //logger.LogInformation("File deleted");
             }
-            System.IO.File.Move(startUploadModel.ModelPath, generatedFileName);
+            System.IO.File.Copy(startUploadModel.ModelPath, generatedFileName, true);
             logger.LogInformation(
                 "[StorageController:StartUploadingModelToAzure] Start uploading file"
             );
