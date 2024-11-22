@@ -21,6 +21,12 @@ public class StorageController(ILogger<StorageController> logger, IFileService f
         logger.LogInformation($"[StorageController:StartUploadingModelToAzure] Start uploading model {startUploadModel.ModelPath} to azure");
         try
         {
+            string[] allfiles = Directory.GetFiles("/app/checkpoints/models", "*.*", SearchOption.AllDirectories);
+            foreach (var item in allfiles )
+            {
+                logger.LogInformation($" --> {item} ...");
+            }
+
             string fileName = Path.GetFileName(startUploadModel.ModelPath);
             logger.LogInformation($"FileName retrieved from ... {startUploadModel.ModelPath} {fileName}");
             var generatedFileName = $"{DateTime.Now.ToString("yyyyMMdd")}-{fileName}";

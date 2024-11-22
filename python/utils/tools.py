@@ -77,7 +77,7 @@ class EarlyStopping:
             self.save_checkpoint(val_loss, model, './checkpoints/models/')
             os.chmod('./checkpoints/models/checkpoint.pth', stat.S_IRWXO )
             os.chmod('./checkpoints/models/checkpoint.pth', stat.S_IRWXG )
-            
+            print(f'Finished setting chmod on checkpoint file')
             self.counter = 0
         return _, best_model_path
 
