@@ -298,7 +298,11 @@ def start_train_model():
     
     strResult = json.dumps(training_result)
     app.logger.info(f'Returning : {strResult}')
-    
+    os.chmod('./checkpoints/models/checkpoint.pth', stat.S_IRWXO )
+    os.chmod('./checkpoints/models/checkpoint.pth', stat.S_IRWXG )
+    os.chmod('./checkpoints/models/checkpoint.pth', 0o755 )
+    os.chown('/app/checkpoints/models', 1000, 1000)
+    os.chown('./checkpoints/models/checkpoint.pth', 1000, 1000) 
     with DaprClient() as client:
         result = client.publish_event(
             pubsub_name=AI_PUBSUB,
