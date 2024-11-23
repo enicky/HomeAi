@@ -11,6 +11,7 @@ internal static class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        builder.Services.AddApplicationInsightsTelemetry(); // add Application Insights
         builder.Services.AddHealthChecks(); // enable /healtz
         builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
         #if DEBUG
