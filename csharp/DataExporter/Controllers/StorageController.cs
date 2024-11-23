@@ -18,44 +18,27 @@ public class StorageController(ILogger<StorageController> logger, IFileService f
         CancellationToken token
     )
     {
-        logger.LogInformation($"[StorageController:StartUploadingModelToAzure] Start uploading model {startUploadModel.ModelPath} to azure");
+        logger.LogInformation($"Start uploading model {ModelPath} to azure", startUploadModel.ModelPath);
         try
         {
-            string[] allfiles = Directory.GetFiles("/app/checkpoints/models", "*.*", SearchOption.AllDirectories);
-            foreach (var item in allfiles )
-            {
-                logger.LogInformation($" --> {item} ...");
-            }
-
             string fileName = Path.GetFileName(startUploadModel.ModelPath);
-            logger.LogInformation($"FileName retrieved from ... {startUploadModel.ModelPath} {fileName}");
+            logger.LogInformation($"FileName retrieved from ... {ModelPath} {FileName}", startUploadModel.ModelPath, filename);
             var generatedFileName = $"{DateTime.Now.ToString("yyyyMMdd")}-{fileName}";
-            logger.LogInformation(
-                $"[StorageController:StartUploadingModelToAzure] Renaming file to {generatedFileName}"
-            );
-            if (System.IO.File.Exists(generatedFileName))
+            var targetFolder = Path.GetDirectoryName(startUploadModel.ModelPath);
+            var fullPath = Path.Join(targetFolder, generatedFileName);
+            logger.LogInformation($"Renaming file to {FullPath}", fullPath);
+            if (System.IO.File.Exists(fullPath))
             {
-                logger.LogInformation($"File {generatedFileName} already exists. We Can override the target file");
-                //System.IO.File.Delete(generatedFileName);
-                //logger.LogInformation("File deleted");
+                logger.LogInformation($"File {fullPath} already exists. We Can override the target file");
             }
-            System.IO.File.Copy(startUploadModel.ModelPath, generatedFileName, true);
-            logger.LogInformation(
-                "[StorageController:StartUploadingModelToAzure] Start uploading file"
-            );
-            await fileService.UploadToAzure(
-                StorageHelpers.ModelContainerName,
-                generatedFileName,
-                token
-            );
-            logger.LogInformation(
-                "[StorageController:StartUploadingModelToAzure] Finished uploading file to Azure"
-            );
+            System.IO.File.Copy(startUploadModel.ModelPath, fullPath, true);
+            logger.LogInformation("Start uploading file");
+            await fileService.UploadToAzure(StorageHelpers.ModelContainerName,fullPath,token);
+            logger.LogInformation("Finished uploading file to Azure");
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an error processing the model to azure");
         }
-        // first Rename file to current datetime = model
     }
 }
