@@ -11,8 +11,6 @@ internal static class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.Services.AddApplicationInsightsTelemetry(); // add Application Insights
-        builder.Services.AddHealthChecks(); // enable /healtz
         builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
         #if DEBUG
         builder.Configuration.AddJsonFile("appsettings.Development.json", optional: false, reloadOnChange: true);
@@ -20,6 +18,9 @@ internal static class Program
         builder.Configuration.AddEnvironmentVariables();
         builder.Configuration.AddCommandLine(args);
 
+        builder.Services.AddApplicationInsightsTelemetry(); // add Application Insights
+        builder.Services.AddHealthChecks(); // enable /healtz
+        
         builder.Services.AddLogging(loggingBuilder =>{
             loggingBuilder.ClearProviders();
             loggingBuilder.AddSimpleConsole(options => {
