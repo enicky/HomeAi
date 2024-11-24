@@ -20,7 +20,7 @@ internal static class Program
 
         builder.Services.AddApplicationInsightsTelemetry(); // add Application Insights
         builder.Logging.AddApplicationInsights(configureTelemetryConfiguration: (config) => 
-            config.ConnectionString = builder.Configuration.GetConnectionString("APPLICATIONINSIGHTS_CONNECTION_STRING"),
+            config.ConnectionString = builder.Configuration.GetValue("ApplicationInsights:ConnectionString"),
             configureApplicationInsightsLoggerOptions: (options) => { }
         );
         builder.Services.AddHealthChecks(); // enable /healtz
