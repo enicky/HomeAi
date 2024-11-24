@@ -36,7 +36,10 @@ public class Program
                 options.TimestampFormat = "HH:mm:ss ";
             });
         });
-
+        builder.Logging.AddApplicationInsights(configureTelemetryConfiguration: (config) => 
+            config.ConnectionString = builder.Configuration.GetValue<string>("ApplicationInsights:ConnectionString"),
+            configureApplicationInsightsLoggerOptions: (options) => { }
+        );
 
         string sql_config = builder.Configuration.GetValue<string>("SQL_CONFIG")!;
         string sql_USERNAME = builder.Configuration.GetValue<string>("SQL_USERNAME")!;
