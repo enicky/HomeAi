@@ -1,6 +1,9 @@
 using Hangfire;
 using SchedulerService.Service;
 using SchedulerService.Triggers;
+using Microsoft.ApplicationInsights.Extensibility;
+using Common.ApplicationInsights.Filter;
+using Common.ApplicationInsights.Initializers;
 
 namespace SchedulerService;
 
@@ -16,6 +19,8 @@ public class Program
         builder.Configuration.AddCommandLine(args);
         
         builder.Services.AddApplicationInsightsTelemetry();
+        builder.Services.AddApplicationInsightsTelemetryProcessor<SqlDependencyFilter>();
+        builder.Services.AddSingleton<ITelemetryInitializer>( x=> new CustomTelemetryInitializer("SchedulerService"));
         builder.Services.AddHealthChecks();
         builder.Services.AddDaprClient();
         builder.Services.AddControllers().AddDapr();
