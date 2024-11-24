@@ -19,10 +19,7 @@ internal static class Program
         builder.Configuration.AddCommandLine(args);
 
         builder.Services.AddApplicationInsightsTelemetry(); // add Application Insights
-        builder.Logging.AddApplicationInsights(configureTelemetryConfiguration: (config) => 
-            config.ConnectionString = builder.Configuration.GetValue<string>("ApplicationInsights:ConnectionString"),
-            configureApplicationInsightsLoggerOptions: (options) => { }
-        );
+        
         builder.Services.AddHealthChecks(); // enable /healtz
         
         builder.Services.AddLogging(loggingBuilder =>{
@@ -33,6 +30,10 @@ internal static class Program
                 options.TimestampFormat = "HH:mm:ss ";
             });
         });
+        builder.Logging.AddApplicationInsights(configureTelemetryConfiguration: (config) => 
+            config.ConnectionString = builder.Configuration.GetValue<string>("ApplicationInsights:ConnectionString"),
+            configureApplicationInsightsLoggerOptions: (options) => { }
+        );
         builder.Services.AddDaprClient();
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
