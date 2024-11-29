@@ -39,9 +39,10 @@ public class DaprController : ControllerBase
     [HttpPost("DownloadDataHasFinished")]
     public async Task DownloadDataHasFinished([FromBody] RetrieveDataResponse response)
     {
-        logger.LogInformation($"Response value : {JsonConvert.SerializeObject(response)}");
-        logger.LogInformation($"Retrieved info that download has been completed {response?.Success} in filename {response?.GeneratedFileName}");
-        logger.LogInformation($"Start AI Processing ? {response?.StartAiProcess}");
+        logger.LogInformation("Trigger received that download has Finished");
+        logger.LogInformation("Response value : {ResponseValue}", JsonConvert.SerializeObject(response));
+        logger.LogInformation("Completed {IsCompleted}, filename {FileName}",response?.Success, response?.GeneratedFileName);
+        logger.LogInformation("Start AI Processing ? {StartAiProcessing}", response?.StartAiProcess);
         var mustTrainModel = false;
         if (response != null && !response.Success)
         {
@@ -82,23 +83,23 @@ public class DaprController : ControllerBase
     [HttpPost("AiFinishedTrainingModel")]
     public async Task AiFinishedTrainingModel([FromBody] TrainAiModelResponse response)
     {
-        logger.LogInformation($"[DaprController:AiFinishedTrainingModel] Retrieved message that training of model has been finished");
-        logger.LogInformation($"[DaprController:AiFinishedTrainingModel] Training was a success: {response.Success}");
-        logger.LogInformation($"ModelPath to use is : {response.ModelPath}");
+        logger.LogInformation("Retrieved message that training of model has been finished");
+        logger.LogInformation("Training was a success: {IsSuccess}", response.Success);
+        logger.LogInformation("ModelPath to use is : {ModelPath}", response.ModelPath);
         
         if (response != null && !string.IsNullOrEmpty(response.ModelPath))
         {
-            logger.LogInformation($"[DaprController:AiFinishedTrainingModel] ModelPath = {response.ModelPath}");
-            logger.LogInformation("[DaprController:AiFinishedTrainingModel] Can start uploading model to Azure");
+            logger.LogInformation("Can start uploading model to Azure");
             var data = new StartUploadModel
             {
-                ModelPath = response.ModelPath
+                ModelPath = response.ModelPath,
+                TriggerMoment = DateTime.Now
             };
             await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_UPLOAD_MODEL, data);
-            logger.LogInformation($"[DaprController:AiFinishedTrainingModel] Finished sending message to upload model to azure");
+            logger.LogInformation("Finished sending message to upload model to azure");
 
         }
 
-        logger.LogInformation("[DaprController:AiFinishedTrainingModel] Process finished");
+        logger.LogInformation("Process finished");
     }
 }
