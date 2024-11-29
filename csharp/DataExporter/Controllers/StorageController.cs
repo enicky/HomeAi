@@ -18,7 +18,8 @@ public class StorageController(ILogger<StorageController> logger, IFileService f
         CancellationToken token
     )
     {
-        logger.LogInformation("Start uploading model {ModelPath} to azure", startUploadModel.ModelPath);
+        logger.LogInformation("Trigger received to upload model {ModelPath} to azure", startUploadModel.ModelPath);
+        logger.LogInformation("ModelPath : {ModelPath}, TriggerMoment : {DateTime}", startUploadModel.ModelPath, startUploadModel.TriggerMoment);
         try
         {
             string fileName = Path.GetFileName(startUploadModel.ModelPath);

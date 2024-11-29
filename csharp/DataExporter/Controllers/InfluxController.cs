@@ -97,7 +97,6 @@ namespace InfluxController.Controllers
         [HttpPost(NameConsts.INFLUX_RETRIEVE_DATA)]
         public async Task RetrieveData(CancellationToken token)
         {
-            _logger.LogWarning("Lets see if this works");
             _logger.LogInformation("Trigger received to retrieve data from influx");
             List<InfluxRecord> records, response;
             await semaphoreSlim.WaitAsync(token);
