@@ -1,4 +1,12 @@
+
 using Hangfire;
+using SchedulerService.Service;
+using SchedulerService.Triggers;
+using Microsoft.ApplicationInsights.Extensibility;
+using Common.ApplicationInsights.Filter;
+using Common.ApplicationInsights.Initializers;
+using Hangfire;
+using Microsoft.ApplicationInsights.Extensibility;
 using SchedulerService.Service;
 using SchedulerService.Triggers;
 
@@ -6,8 +14,6 @@ namespace SchedulerService;
 
 public class Program
 {
-
-
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +21,21 @@ public class Program
         builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
         builder.Configuration.AddEnvironmentVariables();
         builder.Configuration.AddCommandLine(args);
+        builder.Configuration.AddJsonFile(
+            "appsettings.json",
+            optional: false,
+            reloadOnChange: true
+        );
+        builder.Configuration.AddEnvironmentVariables();
+        builder.Configuration.AddCommandLine(args);
+
+        builder.Services.AddApplicationInsightsTelemetry();
+        builder.Services.AddApplicationInsightsTelemetryProcessor<SqlDependencyFilter>();
+        builder.Services.AddApplicationInsightsTelemetryProcessor<HangfireRequestFilter>();
+        builder.Services.AddSingleton<ITelemetryInitializer>(x => new CustomTelemetryInitializer(
+            "SchedulerService"
+        ));
+        builder.Services.AddHealthChecks();
         builder.Services.AddDaprClient();
         builder.Services.AddControllers().AddDapr();
         builder.Services.AddEndpointsApiExplorer();
@@ -30,34 +51,50 @@ public class Program
             });
         });
 
+        builder.Logging.AddApplicationInsights(
+            configureTelemetryConfiguration: (config) =>
+                config.ConnectionString = builder.Configuration.GetValue<string>(
+                    "ApplicationInsights:ConnectionString"
+                ),
+            configureApplicationInsightsLoggerOptions: (options) => { }
+        );
 
         string sql_config = builder.Configuration.GetValue<string>("SQL_CONFIG")!;
         string sql_USERNAME = builder.Configuration.GetValue<string>("SQL_USERNAME")!;
         string sql_PASSWORD = builder.Configuration.GetValue<string>("SQL_PASSWORD")!;
         string sql_SERVER = builder.Configuration.GetValue<string>("SQL_SERVER")!;
-        sql_config = sql_config.Replace("[SQL_USERNAME]", sql_USERNAME)
-                                .Replace("[SQL_PASSWORD]", sql_PASSWORD)
-                                .Replace("[SQL_SERVER]", sql_SERVER);
+        sql_config = sql_config
+            .Replace("[SQL_USERNAME]", sql_USERNAME)
+            .Replace("[SQL_PASSWORD]", sql_PASSWORD)
+            .Replace("[SQL_SERVER]", sql_SERVER);
 
         string schedule = builder.Configuration.GetValue<string>("SCHEDULE")!;
-        string schedule_train_model = builder.Configuration.GetValue<string>("SCHEDULE_TRAIN_MODEL")!;
+        string schedule_train_model = builder.Configuration.GetValue<string>(
+            "SCHEDULE_TRAIN_MODEL"
+        )!;
+        bool enable_extra_train_model = bool.Parse(
+            builder.Configuration.GetValue("ENABLE_EXTRA_MODEL_TRAIN", "false")!
+        );
 
         if (string.IsNullOrEmpty(schedule))
         {
             schedule = "* 8 * * *"; // every day at 8 AM
         }
-        if (string.IsNullOrEmpty(schedule_train_model)) schedule_train_model = "* 10 * * *"; // every day at 10 AM => Way to fast. But hey ...
+        if (string.IsNullOrEmpty(schedule_train_model))
+            schedule_train_model = "* 10 * * *"; // every day at 10 AM => Way to fast. But hey ...
 
         Console.WriteLine($"using sql config : {sql_config}");
         Console.WriteLine($"Using schedule {schedule}");
 
         // Add services to the container.
         //builder.Services.AddAuthorization();
-        builder.Services.AddHangfire(configuration => configuration
-        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-            .UseSimpleAssemblyNameTypeSerializer()
-            .UseRecommendedSerializerSettings()
-            .UseSqlServerStorage(sql_config));
+        builder.Services.AddHangfire(configuration =>
+            configuration
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(sql_config)
+        );
         builder.Services.AddHangfireServer();
         builder.Services.AddScoped<IInvokeDaprService, InvokeDaprService>();
 
@@ -75,15 +112,27 @@ public class Program
         app.UseSwaggerUI();
         //}
 
-        
+
         app.MapControllers();
         app.MapSubscribeHandler();
         var cts = new CancellationTokenSource();
 
         app.UseHangfireDashboard();
-        RecurringJob.AddOrUpdate<TriggerRetrieveDataForAi>("trigger_ai_job", x => x.RunAsync(cts.Token), schedule, new RecurringJobOptions { TimeZone = TimeZoneInfo.Local });
-        RecurringJob.AddOrUpdate<TriggerTrainAiModel>("trigger_train_model", x => x.RunAsync(cts.Token), schedule_train_model, new RecurringJobOptions { TimeZone = TimeZoneInfo.Local });
-            
+        RecurringJob.AddOrUpdate<TriggerRetrieveDataForAi>(
+            "trigger_ai_job",
+            x => x.RunAsync(cts.Token),
+            schedule,
+            new RecurringJobOptions { TimeZone = TimeZoneInfo.Local }
+        );
+        if (enable_extra_train_model)
+        {
+            RecurringJob.AddOrUpdate<TriggerTrainAiModel>(
+                "trigger_train_model",
+                x => x.RunAsync(cts.Token),
+                schedule_train_model,
+                new RecurringJobOptions { TimeZone = TimeZoneInfo.Local }
+            );
+        }
 
         app.MapHealthChecks("/healthz");
         app.UseAuthorization();
