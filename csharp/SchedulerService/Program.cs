@@ -5,10 +5,6 @@ using SchedulerService.Triggers;
 using Microsoft.ApplicationInsights.Extensibility;
 using Common.ApplicationInsights.Filter;
 using Common.ApplicationInsights.Initializers;
-using Hangfire;
-using Microsoft.ApplicationInsights.Extensibility;
-using SchedulerService.Service;
-using SchedulerService.Triggers;
 
 namespace SchedulerService;
 
