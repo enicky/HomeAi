@@ -97,7 +97,7 @@ namespace InfluxController.Controllers
         [HttpPost(NameConsts.INFLUX_RETRIEVE_DATA)]
         public async Task RetrieveData(CancellationToken token)
         {
-            _logger.LogDebug("Trigger received to retrieve data from influx");
+            _logger.LogInformation("Trigger received to retrieve data from influx");
             List<InfluxRecord> records, response;
             await semaphoreSlim.WaitAsync(token);
             try
@@ -135,7 +135,7 @@ namespace InfluxController.Controllers
 
 
 
-            _logger.LogDebug($"Sent that retrieve of file to azaure has been finished");
+            _logger.LogInformation($"Sent that retrieve of file to azaure has been finished");
         }
     }
 }

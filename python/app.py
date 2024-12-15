@@ -7,12 +7,9 @@ import flask
 from flask import request, jsonify, Response
 from flask_cors import CORS
 import json
-import math
 import os
-import random
+import stat
 import matplotlib.pyplot
-import requests
-import sys
 import logging
 from optimizers.optimizerwrapper import OptimizerWrapper
 from utils.downloaddata import BlobRelatedClass
@@ -142,9 +139,23 @@ def train_model():
           success: true
     """
     app.logger.info(f'Start Training model on data')
+    filePath = '/app/checkpoints/models/checkpoint.pth'
+    
     objectToReturn = {
-        "success" : True
+        "success" : True,
+        "model_path" : filePath
     }
+    app.logger.info(f'Start chown on checkpoint.pth')
+    if os.path.exists(filePath):
+        print(f"The file '{filePath}' exists.")
+    else:
+        print(f"The file '{filePath}' does not exist.")
+    os.chmod(filePath, 0o755 )
+    os.chown('/app/checkpoints/models', 1000, 1000)
+    os.chown(filePath, 1000, 1000) 
+    
+    app.logger.info(f'Finished changing owner on checkpoint.pth')
+    
     with DaprClient() as client:
         result = client.publish_event(
             pubsub_name=AI_PUBSUB,
@@ -287,7 +298,11 @@ def start_train_model():
     
     strResult = json.dumps(training_result)
     app.logger.info(f'Returning : {strResult}')
-    
+    os.chmod('./checkpoints/models/checkpoint.pth', stat.S_IRWXO )
+    os.chmod('./checkpoints/models/checkpoint.pth', stat.S_IRWXG )
+    os.chmod('./checkpoints/models/checkpoint.pth', 0o755 )
+    os.chown('/app/checkpoints/models', 1000, 1000)
+    os.chown('./checkpoints/models/checkpoint.pth', 1000, 1000) 
     with DaprClient() as client:
         result = client.publish_event(
             pubsub_name=AI_PUBSUB,
