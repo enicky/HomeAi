@@ -3,11 +3,13 @@ using Common.Models.AI;
 using Common.Services;
 using Dapr;
 using Dapr.Client;
+using DataExporter.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DataExporter.Controllers;
+
 [ApiController]
-public class StorageController(ILogger<StorageController> logger, IFileService fileService)
+public class StorageController(ILogger<StorageController> logger, IFileService fileService, ILocalFileService localFileService)
     : ControllerBase
 {
     private static string TargetFolder = "/app/checkpoints/";
@@ -20,11 +22,13 @@ public class StorageController(ILogger<StorageController> logger, IFileService f
         CancellationToken token
     )
     {
-        if(ModelState.IsValid)
-        logger.LogInformation(
-            "Trigger received to upload model {ModelPath} to azure",
-            startUploadModel.ModelPath
-        );
+        if (ModelState.IsValid)
+        {
+            logger.LogInformation(
+                "Trigger received to upload model {ModelPath} to azure",
+                startUploadModel.ModelPath
+            );
+        }
         logger.LogInformation(
             "ModelPath : {ModelPath}, TriggerMoment : {DateTime}",
             startUploadModel.ModelPath,
@@ -42,17 +46,19 @@ public class StorageController(ILogger<StorageController> logger, IFileService f
             var targetFolder = Path.GetDirectoryName(startUploadModel.ModelPath)!;
             var fullPath = Path.Join(targetFolder, generatedFileName);
             logger.LogInformation("Renaming file to {FullPath}", fullPath);
-            if (System.IO.File.Exists(fullPath))
-            {
-                logger.LogInformation(
-                    "File {FullPath} already exists. We Can override the target file",
-                    fullPath
-                );
-            }
+
+            // if (System.IO.File.Exists(fullPath))
+            // {
+            //     logger.LogInformation(
+            //         "File {FullPath} already exists. We Can override the target file",
+            //         fullPath
+            //     );
+            // }
             string fPath = Path.GetFullPath(startUploadModel.ModelPath);
             if (fPath.StartsWith(TargetFolder) && fullPath.StartsWith(targetFolder))
             {
-                System.IO.File.Copy(startUploadModel.ModelPath, fullPath, true);
+                await localFileService.CopyFile(startUploadModel.ModelPath, fullPath);
+                //System.IO.File.Copy(startUploadModel.ModelPath, fullPath, true);
                 logger.LogInformation("Start uploading file");
                 await fileService.UploadToAzure(StorageHelpers.ModelContainerName, fullPath, token);
                 logger.LogInformation("Finished uploading file to Azure");

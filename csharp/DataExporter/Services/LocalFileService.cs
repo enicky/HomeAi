@@ -11,15 +11,30 @@ public interface ILocalFileService
 {
     Task WriteToFile(string generatedFileName, List<InfluxRecord>? cleanedUpResponses, CancellationToken token);
     List<InfluxRecord> ReadFromFile(string fileName);
+    Task CopyFile(string source, string target);
 }
 public class LocalFileService : ILocalFileService
 {
     private readonly IFileSystem _fileSystem;
 
     [ExcludeFromCodeCoverage]
-    public LocalFileService() : this(new FileSystem()){}
-    public LocalFileService(IFileSystem fileSystem){
+    public LocalFileService() : this(new FileSystem()) { }
+    public LocalFileService(IFileSystem fileSystem)
+    {
         _fileSystem = fileSystem;
+    }
+
+    public Task CopyFile(string source, string target)
+    {
+        if (_fileSystem.File.Exists(target))
+        {
+            _fileSystem.File.Delete(target);
+        }
+        if (_fileSystem.File.Exists(source))
+        {
+            _fileSystem.File.Copy(source, target,true);
+        }
+        return Task.CompletedTask;
     }
     public async Task WriteToFile(string generatedFileName, List<InfluxRecord>? cleanedUpResponses, CancellationToken token)
     {
