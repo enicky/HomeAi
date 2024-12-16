@@ -38,6 +38,8 @@ public class LocalFileService : ILocalFileService
     }
     public async Task WriteToFile(string generatedFileName, List<InfluxRecord>? cleanedUpResponses, CancellationToken token)
     {
+        if(cleanedUpResponses == null) return;
+        if(cleanedUpResponses.Count == 0) return;
         using var writer = _fileSystem.File.CreateText(generatedFileName);
         using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
         await csv.WriteRecordsAsync(cleanedUpResponses, token);

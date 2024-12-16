@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DataExporter.Controllers;
 
 [ApiController]
+[Route("api/[controller]")]
 public class StorageController(ILogger<StorageController> logger, IFileService fileService, ILocalFileService localFileService)
     : ControllerBase
 {
@@ -47,18 +48,11 @@ public class StorageController(ILogger<StorageController> logger, IFileService f
             var fullPath = Path.Join(targetFolder, generatedFileName);
             logger.LogInformation("Renaming file to {FullPath}", fullPath);
 
-            // if (System.IO.File.Exists(fullPath))
-            // {
-            //     logger.LogInformation(
-            //         "File {FullPath} already exists. We Can override the target file",
-            //         fullPath
-            //     );
-            // }
             string fPath = Path.GetFullPath(startUploadModel.ModelPath);
+            logger.LogInformation($"fPath : {fPath}, TargetFolder : {TargetFolder}, targetFolder : {targetFolder}");
             if (fPath.StartsWith(TargetFolder) && fullPath.StartsWith(targetFolder))
             {
                 await localFileService.CopyFile(startUploadModel.ModelPath, fullPath);
-                //System.IO.File.Copy(startUploadModel.ModelPath, fullPath, true);
                 logger.LogInformation("Start uploading file");
                 await fileService.UploadToAzure(StorageHelpers.ModelContainerName, fullPath, token);
                 logger.LogInformation("Finished uploading file to Azure");
