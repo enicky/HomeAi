@@ -50,7 +50,7 @@ public class StorageController(ILogger<StorageController> logger, IFileService f
 
             string fPath = Path.GetFullPath(startUploadModel.ModelPath);
             logger.LogInformation($"fPath : {fPath}, TargetFolder : {TargetFolder}, targetFolder : {targetFolder}");
-            if (fPath.StartsWith(TargetFolder) && fullPath.StartsWith(targetFolder))
+            if (fPath.Contains(TargetFolder) && fullPath.Contains(targetFolder))
             {
                 await localFileService.CopyFile(startUploadModel.ModelPath, fullPath);
                 logger.LogInformation("Start uploading file");
