@@ -5,7 +5,7 @@ on:
     branches: ['main']
   pull_request:
     types: [opened, synchronize, reopened]
-    paths: ['csharp/**']
+    paths: ['csharp/Common/**', 'csharp/DataExporter/**', 'csharp/Tests/DataExporter.Tests/**']
 jobs:
   build:
     name: Build and analyze

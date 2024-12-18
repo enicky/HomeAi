@@ -5,13 +5,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Dapr.Client" Version="1.13.1" />
-    <PackageReference Include="Dapr.AspNetCore" Version="1.13.1" />
-    <PackageReference Include="Hangfire" Version="1.8.12" />
-    <PackageReference Include="Hangfire.SqlServer" Version="1.8.12" />
+    <PackageReference Include="Dapr.Client" Version="1.14.0" />
+    <PackageReference Include="Dapr.AspNetCore" Version="1.14.0" />
+    <PackageReference Include="Hangfire" Version="1.8.17" />
+    <PackageReference Include="Hangfire.SqlServer" Version="1.8.17" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.5" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.PerfCounterCollector" Version="2.22.0" />
     
