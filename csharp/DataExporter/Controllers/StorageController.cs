@@ -13,7 +13,7 @@ namespace DataExporter.Controllers;
 public class StorageController(ILogger<StorageController> logger, IFileService fileService, ILocalFileService localFileService)
     : ControllerBase
 {
-    private static string TargetFolder = "/app/checkpoints/";
+    private static string TargetFolder =  $"{Path.DirectorySeparatorChar}app{Path.DirectorySeparatorChar}checkpoints{Path.DirectorySeparatorChar}";
 
     [Topic(pubsubName: NameConsts.AI_PUBSUB_NAME, name: NameConsts.AI_START_UPLOAD_MODEL)]
     [HttpPost(NameConsts.AI_START_UPLOAD_MODEL)]
