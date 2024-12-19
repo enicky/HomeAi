@@ -49,7 +49,7 @@ public class StorageController(ILogger<StorageController> logger, IFileService f
             logger.LogInformation("Renaming file to {FullPath}", fullPath);
 
             string fPath = Path.GetFullPath(startUploadModel.ModelPath);
-            logger.LogInformation($"fPath : {fPath}, TargetFolder : {TargetFolder}, targetFolder : {targetFolder}");
+            logger.LogInformation("fPath : {fPath}, TargetFolder : {TargetFolder}, targetFolder : {targetFolder}", fPath, TargetFolder, targetFolder );
             if (fPath.Contains(TargetFolder) && fullPath.Contains(targetFolder))
             {
                 await localFileService.CopyFile(startUploadModel.ModelPath, fullPath);
