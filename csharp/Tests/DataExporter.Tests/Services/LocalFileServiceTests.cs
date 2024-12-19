@@ -8,21 +8,23 @@ using Xunit.Abstractions;
 
 namespace DataExporter.Tests.File;
 
-public class LocalFileServiceTests: IClassFixture<TestSetup>
+public class LocalFileServiceTests : IClassFixture<TestSetup>
 {
     private readonly TestSetup _testSetup;
     private readonly ITestOutputHelper _output;
-    private readonly MockFileSystem _mockFileSystem =new();
-    public LocalFileServiceTests(TestSetup testSetup, ITestOutputHelper testOutputHelper){
+    private readonly MockFileSystem _mockFileSystem = new();
+    public LocalFileServiceTests(TestSetup testSetup, ITestOutputHelper testOutputHelper)
+    {
         _testSetup = testSetup;
-        _output  = testOutputHelper;
+        _output = testOutputHelper;
         _output.WriteLine("Start testing of local file services");
-        
+
     }
     [Fact]
-    public async Task LocalFileService_Should_Return(){
+    public async Task LocalFileService_Should_Return()
+    {
         var sut = CreateSut();
-        var dataToWrite = new List<InfluxRecord> { new InfluxRecord() { Humidity = 1, Pressure = 1, Temperature = 1, Watt = 2, Time = DateTime.Today}};
+        var dataToWrite = new List<InfluxRecord> { new InfluxRecord() { Humidity = 1, Pressure = 1, Temperature = 1, Watt = 2, Time = DateTime.Today } };
         _output.WriteLine($"Start testing write to file with data {JsonConvert.SerializeObject(dataToWrite)}");
         await sut.WriteToFile("test.txt", dataToWrite, default);
         _output.WriteLine("Finished testing writing to file");
@@ -34,15 +36,34 @@ public class LocalFileServiceTests: IClassFixture<TestSetup>
     }
 
     [Fact]
-    public void LocalFileService_ReadFromFile_ShouldWork(){
-        
+    public async Task IfSourceFiles_DoesNotExist_WeDontStartCopying()
+    {
+        var sut = CreateSut();
+        await sut.CopyFile("a", "b");
+    }
+    [Fact]
+    public async Task IfSourceFileDoesExist_WeDoSomethingElse()
+    {
+        var content = $"abc";
+
+        var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>{
+            {"test.txt", new MockFileData(content)}
+        });
+        var sut = new LocalFileService(fileSystem);
+        await sut.CopyFile("test.txt", "test2.txt");
+    }
+
+    [Fact]
+    public void LocalFileService_ReadFromFile_ShouldWork()
+    {
+
         var content = $"Time,Watt,Humidity,Pressure,Temperature{Environment.NewLine}08/18/2024 02:01:00,390.85455,93,1010.1,21";
 
         var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>{
             {"test.txt", new MockFileData(content)}
         });
         var sut = new LocalFileService(fileSystem);
-        var  x = sut.ReadFromFile("test.txt");
+        var x = sut.ReadFromFile("test.txt");
         Assert.NotNull(x);
 
     }
@@ -52,8 +73,9 @@ public class LocalFileServiceTests: IClassFixture<TestSetup>
         return $"{(char)0x0D}{(char)0x0A}";
     }
 
-    private LocalFileService CreateSut(){
-        var sut = new LocalFileService(_mockFileSystem); 
+    private LocalFileService CreateSut()
+    {
+        var sut = new LocalFileService(_mockFileSystem);
         return sut;
     }
 }
