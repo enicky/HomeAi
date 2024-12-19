@@ -54,6 +54,18 @@ public class LocalFileServiceTests : IClassFixture<TestSetup>
     }
 
     [Fact]
+    public async Task IfTargetFileExists_DeleteFile(){
+        var content = $"abc";
+
+        var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>{
+            {"test.txt", new MockFileData(content)},
+            {"target.txt", new MockFileData(content)}
+        });
+        var sut = new LocalFileService(fileSystem);
+        await sut.CopyFile("test.txt", "target.txt");
+    }
+
+    [Fact]
     public void LocalFileService_ReadFromFile_ShouldWork()
     {
 
