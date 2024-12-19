@@ -14,8 +14,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConvertOldData", "..\..\ConvertOldDataToNewFormat\ConvertOldData\ConvertOldData.csproj", "{B32DD8A0-5F44-457A-9161-91031D328301}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{77C9226E-4749-4307-9323-90F598DB17EF}"
+	ProjectSection(SolutionItems) = preProject
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataExporter.Tests", "csharp\Tests\DataExporter.Tests\DataExporter.Tests.csproj", "{B723C7C4-215C-44D7-98F2-7A5E4D1B6FA9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchedulerService.Tests", "csharp\Tests\SchedulerService.Tests\SchedulerService.Tests.csproj", "{242C80A2-F3F0-4EA4-998F-224B9F718586}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +47,10 @@ Global
 		{B723C7C4-215C-44D7-98F2-7A5E4D1B6FA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B723C7C4-215C-44D7-98F2-7A5E4D1B6FA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B723C7C4-215C-44D7-98F2-7A5E4D1B6FA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{242C80A2-F3F0-4EA4-998F-224B9F718586}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{242C80A2-F3F0-4EA4-998F-224B9F718586}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{242C80A2-F3F0-4EA4-998F-224B9F718586}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{242C80A2-F3F0-4EA4-998F-224B9F718586}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,5 +64,6 @@ Global
 		{5BE64E55-D5FD-411F-B2A1-93F907147ED2} = {5D701341-3837-4311-A49B-97FB47B13708}
 		{77C9226E-4749-4307-9323-90F598DB17EF} = {5D701341-3837-4311-A49B-97FB47B13708}
 		{B723C7C4-215C-44D7-98F2-7A5E4D1B6FA9} = {77C9226E-4749-4307-9323-90F598DB17EF}
+		{242C80A2-F3F0-4EA4-998F-224B9F718586} = {77C9226E-4749-4307-9323-90F598DB17EF}
 	EndGlobalSection
 EndGlobal
