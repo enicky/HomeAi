@@ -1,12 +1,8 @@
-using System.Security.Policy;
 using app.Services;
 using Common.Models.Influx;
 using DataExporter.Services.Factory;
 using DataExporter.Services.Wrapper;
 using DataExporter.Tests.ControllerTests;
-using InfluxDB.Client;
-using InfluxDB.Client.Api.Domain;
-using InfluxDB.Client.Core.Flux.Domain;
 using Meziantou.Extensions.Logging.Xunit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,7 +29,7 @@ public class InfluxDbServiceTests : IClassFixture<TestSetup>
     
     // test
     [Fact]
-    public async void Test()
+    public async Task Test()
     {
        var dataToReturn = new List<InfluxRecord>{
         new InfluxRecord{Humidity = 1, Pressure = 1, Temperature = 1, Time = DateTime.Today, Watt = 10}
@@ -58,13 +54,6 @@ public class InfluxDbServiceTests : IClassFixture<TestSetup>
         _mockInfluxDbClientFactory.Setup(f => f.CreateWrapper(It.IsAny<string>(), It.IsAny<string>()))
                            .Returns(_mockInfluxDbClientWrapper.Object);
         _mockInfluxDbClientWrapper.Setup(f => f.GetData(It.IsAny<string>(), orgString, cts.Token)).Returns(Task.FromResult(dataToReturn));
-
-         //_mockInfluxDBClient.Setup(f => f.GetQueryApi(null))
-         //                   .Returns(_mockQueryApi.Object);
-         //_mockQueryApi.Setup(f => f.QueryAsync(It.IsAny<string>(), It.IsAny<string>(), cts.Token))
-         //                    .Returns(Task.FromResult(dataToReturn));
-
-        
 
         var _logger = XUnitLogger.CreateLogger<InfluxDBService>(_output);
         var sut = new InfluxDBService(_configuration, _mockInfluxDbClientFactory.Object, _logger);
