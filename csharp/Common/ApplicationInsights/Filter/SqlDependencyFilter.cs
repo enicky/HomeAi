@@ -24,7 +24,7 @@ public class SqlDependencyFilter : ITelemetryProcessor
     }
 
     // Example: replace with your own criteria.
-    private bool OKtoSend (ITelemetry item)
+    private static bool OKtoSend (ITelemetry item)
     {
         var dependency = item as DependencyTelemetry;
         if (dependency == null) return true;

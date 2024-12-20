@@ -24,6 +24,7 @@ public class    TestSetup
         ServiceCollection.AddTransient<ICleanupService, CleanupService>();
         var l = new Mock<ILogger<CleanupService>>();
         ServiceCollection.AddSingleton<ILogger<CleanupService>>(l.Object);
+        
 
         ServiceProvider = ServiceCollection.BuildServiceProvider();
     }
