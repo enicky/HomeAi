@@ -40,6 +40,7 @@ public class LocalFileServiceTests : IClassFixture<TestSetup>
     {
         var sut = CreateSut();
         await sut.CopyFile("a", "b");
+        Assert.False(_mockFileSystem.FileExists("b"));
     }
     [Fact]
     public async Task IfSourceFileDoesExist_WeDoSomethingElse()
@@ -51,10 +52,12 @@ public class LocalFileServiceTests : IClassFixture<TestSetup>
         });
         var sut = new LocalFileService(fileSystem);
         await sut.CopyFile("test.txt", "test2.txt");
+        Assert.True(_mockFileSystem.File.Exists("test2.txt"));
     }
 
     [Fact]
-    public async Task IfTargetFileExists_DeleteFile(){
+    public async Task IfTargetFileExists_DeleteFile()
+    {
         var content = $"abc";
 
         var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>{
@@ -63,7 +66,8 @@ public class LocalFileServiceTests : IClassFixture<TestSetup>
         });
         var sut = new LocalFileService(fileSystem);
         await sut.CopyFile("test.txt", "target.txt");
-    }
+        Assert.True(_mockFileSystem.File.Exists("target.txt"));
+    }   
 
     [Fact]
     public void LocalFileService_ReadFromFile_ShouldWork()
