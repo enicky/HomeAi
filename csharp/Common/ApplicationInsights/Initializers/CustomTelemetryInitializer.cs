@@ -1,6 +1,4 @@
-using System;
 using Microsoft.ApplicationInsights.Channel;
-using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
 namespace Common.ApplicationInsights.Initializers;
 
