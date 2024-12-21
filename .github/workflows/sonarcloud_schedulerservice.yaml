@@ -1,11 +1,11 @@
 name: SonarCloud
 on:
   push:
-    paths: ['csharp/Common/**', 'csharp/DataExporter/**', 'csharp/Tests/DataExporter.Tests/**']
+    paths: ['csharp/Common/**', 'csharp/SchedulerService/**', 'csharp/Tests/SchedulerService.Tests/**']
     branches: ['main']
   pull_request:
     types: [opened, synchronize, reopened]
-    paths: ['csharp/Common/**', 'csharp/DataExporter/**', 'csharp/Tests/DataExporter.Tests/**']
+    paths: ['csharp/Common/**', 'csharp/SchedulerService/**', 'csharp/Tests/SchedulerService.Tests/**']
 jobs:
   build:
     name: Build and analyze
@@ -48,9 +48,9 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |-
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"homeai_dataexporter" /o:"enicky" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
-          dotnet build ./csharp/DataExporter/DataExporter.csproj --no-incremental
-          dotnet-coverage collect "dotnet test ./csharp/Tests/DataExporter.Tests/DataExporter.Tests.csproj" -f xml -o "coverage.xml"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"enicky_schedulerservice" /o:"enicky" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
+          dotnet build ./csharp/SchedulerService/SchedulerService.csproj --no-incremental
+          dotnet-coverage collect "dotnet test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj" -f xml -o "coverage.xml"
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
       - uses: actions/upload-artifact@v4
         with:
