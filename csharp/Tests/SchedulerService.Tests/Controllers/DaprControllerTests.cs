@@ -92,7 +92,7 @@ public class DaprControllerTests
     }
 
     [Fact]
-    public async void DownloadDataHasFinished_WhenResponseWasNull_JustReturn()
+    public async Task DownloadDataHasFinished_WhenResponseWasNull_JustReturn()
     {
         // Given
         var controller = createSut();
@@ -135,7 +135,7 @@ public class DaprControllerTests
     }
 
     [Fact]
-    public async void AiFinishedTrainingModel_WhenWeReceiveAResponse_AndModelPathIsNull_WeDoNothing()
+    public async Task AiFinishedTrainingModel_WhenWeReceiveAResponse_AndModelPathIsNull_WeDoNothing()
     {
         // Given
         var controller = createSut();
