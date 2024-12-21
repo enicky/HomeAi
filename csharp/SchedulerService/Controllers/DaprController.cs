@@ -23,12 +23,15 @@ public class DaprController : ControllerBase
 
     [Topic(NameConsts.INFLUX_PUBSUB_NAME, "testreply")]
     [HttpPost("testreply")]
-    public IActionResult TestReply([FromBody] RetrieveDataResponse o)
+    public IActionResult TestReply([FromBody] RetrieveDataResponse? o)
     {
         logger.LogInformation($"TestReply got triggered");
         if (o is not null)
         {
-            logger.LogInformation($"Received RetrieveDataResponse response : {o.Success} for id {o.GeneratedFileName} -> {o.StartAiProcess}");
+            var success= o.Success.ToString();
+            var generatedFileName = o.GeneratedFileName.Replace(" ", "_");
+            var startAiProcess = o.StartAiProcess.ToString();
+            logger.LogInformation("Received RetrieveDataResponse response : {Success} for id {GeneratedFileName} -> {StartAiProcess}", success, generatedFileName, startAiProcess);
             return Ok();
         }
         return BadRequest();
@@ -37,19 +40,23 @@ public class DaprController : ControllerBase
 
     [Topic(pubsubName: NameConsts.INFLUX_PUBSUB_NAME, name: NameConsts.INFLUX_FINISHED_RETRIEVE_DATA)]
     [HttpPost("DownloadDataHasFinished")]
-    public async Task DownloadDataHasFinished([FromBody] RetrieveDataResponse response)
+    public async Task DownloadDataHasFinished([FromBody] RetrieveDataResponse? response)
     {
-        logger.LogInformation("Trigger received that download has Finished");
-        logger.LogInformation("Response value : {ResponseValue}", JsonConvert.SerializeObject(response));
+        logger.LogInformation("Trigger received that download has Finished {ResponseValue}", JsonConvert.SerializeObject(response));
         logger.LogInformation("Completed {IsCompleted}, filename {FileName}",response?.Success, response?.GeneratedFileName);
         logger.LogInformation("Start AI Processing ? {StartAiProcessing}", response?.StartAiProcess);
         var mustTrainModel = false;
-        if (response != null && !response.Success)
+        if(response == null)
+        {
+            logger.LogWarning("Response was null");
+            return;
+        }
+        if (!response.Success)
         {
             logger.LogWarning("Download of data pre training AI model failed !!");
             return;
         }
-        if (response != null && response?.StartAiProcess != null && response.StartAiProcess == true)
+        if (response.StartAiProcess)
         {
             logger.LogInformation("Start training model was true => set boolean val");
             mustTrainModel = true;
@@ -65,7 +72,7 @@ public class DaprController : ControllerBase
         {
             logger.LogInformation("Training model was not needed so skipped");
         }
-        logger.LogInformation($"Finished exchanging messages");
+        logger.LogInformation("Finished exchanging messages");
     }
 
     [Topic(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_FINISHED_DOWNLOAD_DATA)]

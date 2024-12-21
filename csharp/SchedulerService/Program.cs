@@ -81,8 +81,6 @@ public class Program
         Console.WriteLine($"using sql config : {sql_config}");
         Console.WriteLine($"Using schedule {schedule}");
 
-        // Add services to the container.
-        //builder.Services.AddAuthorization();
         builder.Services.AddHangfire(configuration =>
             configuration
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
@@ -93,29 +91,21 @@ public class Program
         builder.Services.AddHangfireServer();
         builder.Services.AddScoped<IInvokeDaprService, InvokeDaprService>();
 
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        //builder.Services.AddEndpointsApiExplorer();
-        //builder.Services.AddSwaggerGen();
-
+        
         var app = builder.Build();
 
         app.UseCloudEvents();
-        // Configure the HTTP request pipeline.
-        //if (app.Environment.IsDevelopment())
-        //{
         app.UseSwagger();
         app.UseSwaggerUI();
-        //}
-
+        
 
         app.MapControllers();
         app.MapSubscribeHandler();
-        var cts = new CancellationTokenSource();
-
+        
         app.UseHangfireDashboard();
         RecurringJob.AddOrUpdate<TriggerRetrieveDataForAi>(
             "trigger_ai_job",
-            x => x.RunAsync(cts.Token),
+            x => x.RunAsync(default),
             schedule,
             new RecurringJobOptions { TimeZone = TimeZoneInfo.Local }
         );
@@ -123,7 +113,7 @@ public class Program
         {
             RecurringJob.AddOrUpdate<TriggerTrainAiModel>(
                 "trigger_train_model",
-                x => x.RunAsync(cts.Token),
+                x => x.RunAsync(default),
                 schedule_train_model,
                 new RecurringJobOptions { TimeZone = TimeZoneInfo.Local }
             );

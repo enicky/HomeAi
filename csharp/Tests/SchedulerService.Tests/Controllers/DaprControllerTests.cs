@@ -92,6 +92,20 @@ public class DaprControllerTests
     }
 
     [Fact]
+    public async void DownloadDataHasFinished_WhenResponseWasNull_JustReturn()
+    {
+        // Given
+        var controller = createSut();
+        // When
+        await controller.DownloadDataHasFinished(null);
+        // Then
+        _mockedDaprClient.Verify(x => x.PublishEventAsync(It.Is<string>( x => x == NameConsts.AI_PUBSUB_NAME),
+                                    It.Is<string>(x => x == NameConsts.AI_START_DOWNLOAD_DATA),
+                                    It.IsAny<CancellationToken>()), Times.Never);
+    
+    }
+
+    [Fact]
     public async Task DownloadDataHasFinished_WhenResponseWasSuccess_AndStartAiProcessIsFalse_DoNotSendDaprMessage()
     {
         // Given
