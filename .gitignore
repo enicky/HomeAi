@@ -16,7 +16,7 @@ test_results
 python/results
 python/process
 dapr.yaml
-**/dapr*
+#**/dapr*
 flask.log
 merged_and_sorted_file.csv
 flask*
