@@ -2,7 +2,7 @@ name: SchedulerService
 on:
   push:
     branches: ['main']
-    paths: ['csharp/Common/**', 'csharp/SchedulerService/**', '.github/workflows/schedulerservice.yaml']
+    paths: ['csharp/Common/**', 'csharp/SchedulerService/**', '.github/workflows/schedulerservice.yaml', 'csharp/Tests/SchedulerService.Tests/**']
 permissions:
   contents: read
 jobs:
