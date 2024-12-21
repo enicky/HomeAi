@@ -40,7 +40,7 @@ public class DaprController : ControllerBase
 
     [Topic(pubsubName: NameConsts.INFLUX_PUBSUB_NAME, name: NameConsts.INFLUX_FINISHED_RETRIEVE_DATA)]
     [HttpPost("DownloadDataHasFinished")]
-    public async Task DownloadDataHasFinished([FromBody] RetrieveDataResponse response)
+    public async Task DownloadDataHasFinished([FromBody] RetrieveDataResponse? response)
     {
         logger.LogInformation("Trigger received that download has Finished {ResponseValue}", JsonConvert.SerializeObject(response));
         logger.LogInformation("Completed {IsCompleted}, filename {FileName}",response?.Success, response?.GeneratedFileName);
