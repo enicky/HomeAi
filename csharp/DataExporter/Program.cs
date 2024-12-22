@@ -3,6 +3,7 @@ using app.Services;
 using Common.Services;
 using DataExporter.Extensions;
 using DataExporter.Services;
+using Microsoft.ApplicationInsights.DependencyCollector;
 
 namespace DataExporter;
 [ExcludeFromCodeCoverage]
@@ -19,6 +20,7 @@ internal static class Program
         builder.Configuration.AddCommandLine(args);
 
         builder.Services.AddApplicationInsightsTelemetry(); // add Application Insights
+        builder.Services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) => module.EnableSqlCommandTextInstrumentation = true);
         
         builder.Services.AddHealthChecks(); // enable /healtz
         
