@@ -28,6 +28,7 @@ public class FileServiceTests : IClassFixture<TestSetup>
     public FileServiceTests(TestSetup testSetup, ITestOutputHelper testOutputHelper)
     {
         _output = testOutputHelper;
+        _output.WriteLine($"Current Folder : {Directory.GetCurrentDirectory()}");
         _serviceProvider = testSetup.ServiceProvider;
         testSetup.ServiceCollection.AddSingleton<ILoggerProvider>(new XUnitLoggerProvider(testOutputHelper, true));
         _serviceProvider = testSetup.ServiceCollection.BuildServiceProvider();

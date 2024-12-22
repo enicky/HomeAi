@@ -1,11 +1,8 @@
-using Castle.Core.Logging;
 using DataExporter.Services;
-using Meziantou.Extensions.Logging.Xunit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit.Abstractions;
 
 namespace DataExporter.Tests.ControllerTests;
 
