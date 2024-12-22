@@ -13,10 +13,9 @@ public interface ILocalFileService
     List<InfluxRecord> ReadFromFile(string fileName);
     Task CopyFile(string source, string target);
 }
-public class LocalFileService(IFileSystem fileSystem, ILogger<LocalFileService>? logger = null) : ILocalFileService
+public class LocalFileService(IFileSystem fileSystem) : ILocalFileService
 {
     private readonly IFileSystem _fileSystem = fileSystem;
-    private readonly ILogger<LocalFileService>? _logger = logger;
 
     [ExcludeFromCodeCoverage]
     public LocalFileService() : this(new FileSystem()) { }
