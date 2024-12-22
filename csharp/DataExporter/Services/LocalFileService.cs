@@ -24,18 +24,14 @@ public class LocalFileService(IFileSystem fileSystem, ILogger<LocalFileService>?
 
     public Task CopyFile(string source, string target)
     {
-        _logger?.LogInformation($"Copying file from {source} to {target}");
         if (_fileSystem.File.Exists(target))
         {
-            _logger?.LogInformation($"Deleting file {target}");
             _fileSystem.File.Delete(target);
         }
         if (_fileSystem.File.Exists(source))
         {
-            _logger?.LogInformation($"Source {source} exists, copying to {target}");
             _fileSystem.File.Copy(source, target,true);
         }
-        _logger?.LogInformation($"Finished copying file from {source} to {target}");
         return Task.CompletedTask;
     }
     public async Task WriteToFile(string generatedFileName, List<InfluxRecord>? cleanedUpResponses, CancellationToken token)
