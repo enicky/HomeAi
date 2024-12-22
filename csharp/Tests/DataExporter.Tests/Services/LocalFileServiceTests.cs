@@ -46,13 +46,12 @@ public class LocalFileServiceTests : IClassFixture<TestSetup>
     [Fact]
     public async Task IfSourceFileDoesExist_WeDoSomethingElse()
     {
-        var _logger = XUnitLogger.CreateLogger<LocalFileService>(_output);
         var content = $"abc";
 
         var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>{
             {"test.txt", new MockFileData(content)}
         });
-        var sut = new LocalFileService(fileSystem, _logger);
+        var sut = new LocalFileService(fileSystem);
         await sut.CopyFile("test.txt", "test2.txt");
         Assert.True(fileSystem.File.Exists("test2.txt"));
     }
