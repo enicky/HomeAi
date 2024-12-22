@@ -20,6 +20,13 @@ from logging.config import dictConfig
 import matplotlib
 from utils.singleton import SingletonClass
 
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from azure.monitor.opentelemetry import AzureMonitorTraceExporter
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+
 from flasgger import Swagger
 
 
@@ -85,7 +92,20 @@ logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING)
 logging.getLogger('matplotlib.backends.backend_pdf').setLevel(logging.WARNING)
 logging.getLogger('numba.core.ssa').setLevel(logging.WARNING)
 
+
+# Set up tracing
+trace.set_tracer_provider(TracerProvider())
+tracer_provider = trace.get_tracer_provider()
+azure_exporter = AzureMonitorTraceExporter(
+    connection_string="InstrumentationKey=74e35221-cd3e-4c68-8356-c71dc4ff19fb"
+)
+span_processor = BatchSpanProcessor(azure_exporter)
+tracer_provider.add_span_processor(span_processor)
+
+
 app = flask.Flask(__name__, static_url_path='/static', static_folder='./static')
+FlaskInstrumentor().instrument_app(app)
+RequestsInstrumentor().instrument()
 swagger = Swagger(app)
 
 dapr_app = DaprApp(app)

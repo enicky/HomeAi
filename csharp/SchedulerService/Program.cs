@@ -5,6 +5,7 @@ using SchedulerService.Triggers;
 using Microsoft.ApplicationInsights.Extensibility;
 using Common.ApplicationInsights.Filter;
 using Common.ApplicationInsights.Initializers;
+using Microsoft.ApplicationInsights.DependencyCollector;
 
 namespace SchedulerService;
 
@@ -30,6 +31,8 @@ public class Program
         builder.Services.AddSingleton<ITelemetryInitializer>(x => new CustomTelemetryInitializer(
             "SchedulerService"
         ));
+        builder.Services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) => module.EnableSqlCommandTextInstrumentation = true);
+        
         builder.Services.AddHealthChecks();
         builder.Services.AddDaprClient();
         builder.Services.AddControllers().AddDapr();

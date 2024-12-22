@@ -1,4 +1,4 @@
-name: SonarCloud
+name: SonarCloud - DataExporter
 on:
   push:
     paths: ['csharp/Common/**', 'csharp/DataExporter/**', 'csharp/Tests/DataExporter.Tests/**']
@@ -49,7 +49,8 @@ jobs:
         shell: powershell
         run: |-
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"homeai_dataexporter" /o:"enicky" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
-          dotnet build ./csharp/DataExporter/DataExporter.csproj --no-incremental
+          dotnet restore ./csharp/DataExporter/DataExporter.csproj
+          dotnet build ./csharp/DataExporter/DataExporter.csproj --no-incremental --no-restore
           dotnet-coverage collect "dotnet test ./csharp/Tests/DataExporter.Tests/DataExporter.Tests.csproj" -f xml -o "coverage.xml"
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
       - uses: actions/upload-artifact@v4

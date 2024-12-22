@@ -1,4 +1,4 @@
-name: SonarCloud
+name: SonarCloud - SchedulerService
 on:
   push:
     paths: ['csharp/Common/**', 'csharp/SchedulerService/**', 'csharp/Tests/SchedulerService.Tests/**']
@@ -49,7 +49,8 @@ jobs:
         shell: powershell
         run: |-
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"enicky_schedulerservice" /o:"enicky" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml /d:sonar.scanner.scanAll=false
-          dotnet build ./csharp/SchedulerService/SchedulerService.csproj --no-incremental
+          dotnet restore ./csharp/SchedulerService/SchedulerService.csproj
+          dotnet build ./csharp/SchedulerService/SchedulerService.csproj --no-incremental --no-restore
           dotnet-coverage collect "dotnet test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj" -f xml -o "coverage.xml"
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
       - uses: actions/upload-artifact@v4

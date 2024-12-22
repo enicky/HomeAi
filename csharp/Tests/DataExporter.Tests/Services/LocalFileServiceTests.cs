@@ -3,6 +3,7 @@ using System.Security.Policy;
 using Common.Models.Influx;
 using DataExporter.Services;
 using DataExporter.Tests.ControllerTests;
+using Meziantou.Extensions.Logging.Xunit;
 using Newtonsoft.Json;
 using Xunit.Abstractions;
 
@@ -45,14 +46,15 @@ public class LocalFileServiceTests : IClassFixture<TestSetup>
     [Fact]
     public async Task IfSourceFileDoesExist_WeDoSomethingElse()
     {
+        var _logger = XUnitLogger.CreateLogger<LocalFileService>(_output);
         var content = $"abc";
 
         var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>{
             {"test.txt", new MockFileData(content)}
         });
-        var sut = new LocalFileService(fileSystem);
+        var sut = new LocalFileService(fileSystem, _logger);
         await sut.CopyFile("test.txt", "test2.txt");
-        Assert.True(_mockFileSystem.File.Exists("test2.txt"));
+        Assert.True(fileSystem.File.Exists("test2.txt"));
     }
 
     [Fact]
@@ -66,7 +68,7 @@ public class LocalFileServiceTests : IClassFixture<TestSetup>
         });
         var sut = new LocalFileService(fileSystem);
         await sut.CopyFile("test.txt", "target.txt");
-        Assert.True(_mockFileSystem.File.Exists("target.txt"));
+        Assert.True(fileSystem.File.Exists("target.txt"));
     }   
 
     [Fact]

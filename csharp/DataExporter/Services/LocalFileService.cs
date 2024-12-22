@@ -13,16 +13,13 @@ public interface ILocalFileService
     List<InfluxRecord> ReadFromFile(string fileName);
     Task CopyFile(string source, string target);
 }
-public class LocalFileService : ILocalFileService
+public class LocalFileService(IFileSystem fileSystem) : ILocalFileService
 {
-    private readonly IFileSystem _fileSystem;
+    private readonly IFileSystem _fileSystem = fileSystem;
 
     [ExcludeFromCodeCoverage]
     public LocalFileService() : this(new FileSystem()) { }
-    public LocalFileService(IFileSystem fileSystem)
-    {
-        _fileSystem = fileSystem;
-    }
+
 
     public Task CopyFile(string source, string target)
     {
