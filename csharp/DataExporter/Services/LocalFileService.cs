@@ -13,27 +13,29 @@ public interface ILocalFileService
     List<InfluxRecord> ReadFromFile(string fileName);
     Task CopyFile(string source, string target);
 }
-public class LocalFileService : ILocalFileService
+public class LocalFileService(IFileSystem fileSystem, ILogger<LocalFileService>? logger = null) : ILocalFileService
 {
-    private readonly IFileSystem _fileSystem;
+    private readonly IFileSystem _fileSystem = fileSystem;
+    private readonly ILogger<LocalFileService>? _logger = logger;
 
     [ExcludeFromCodeCoverage]
     public LocalFileService() : this(new FileSystem()) { }
-    public LocalFileService(IFileSystem fileSystem)
-    {
-        _fileSystem = fileSystem;
-    }
+
 
     public Task CopyFile(string source, string target)
     {
+        _logger?.LogInformation($"Copying file from {source} to {target}");
         if (_fileSystem.File.Exists(target))
         {
+            _logger?.LogInformation($"Deleting file {target}");
             _fileSystem.File.Delete(target);
         }
         if (_fileSystem.File.Exists(source))
         {
+            _logger?.LogInformation($"Source {source} exists, copying to {target}");
             _fileSystem.File.Copy(source, target,true);
         }
+        _logger?.LogInformation($"Finished copying file from {source} to {target}");
         return Task.CompletedTask;
     }
     public async Task WriteToFile(string generatedFileName, List<InfluxRecord>? cleanedUpResponses, CancellationToken token)
