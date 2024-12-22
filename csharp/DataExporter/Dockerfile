@@ -5,6 +5,7 @@ RUN echo "BUILDPLATFORM : $BUILDPLATFORM"
 # Copy csproj and restore as distinct layers
 COPY DataExporter/*.csproj ./DataExporter/
 COPY Common/*.csproj ./Common/
+COPY *.targets ./
 
 RUN dotnet restore ./DataExporter/DataExporter.csproj
 
