@@ -4,6 +4,7 @@ WORKDIR /app
 # Copy csproj and restore as distinct layers
 COPY SchedulerService/*.csproj ./SchedulerService/
 COPY Common/*.csproj ./Common/
+COPY *.targets ./
 
 RUN dotnet restore ./SchedulerService/SchedulerService.csproj
 
