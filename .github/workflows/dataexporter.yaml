@@ -72,7 +72,8 @@ jobs:
           token: ${{ secrets.GIT_TOKEN }}
       - name: list-cluster-template
         run: |
-          ls -la kubernetes/apps/home/ai/dataexporter
+          ls -la
+          ls -la kubernetes/
       - name: modify the image
         run: |
           git config user.email enicky80@gmail.com
