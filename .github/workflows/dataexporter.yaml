@@ -70,17 +70,14 @@ jobs:
         with:
           repository: "enicky/cluster-template"
           token: ${{ secrets.GIT_TOKEN }}
-      - name: List workspace contents
-        run: ls -la
       - name: list-cluster-template
         run: |
-          ls -la cluster-template
+          ls -la kubernetes/apps/home/ai/dataexporter
       - name: modify the image
         run: |
-          ls -la ? 
           git config user.email enicky80@gmail.com
           git config user.name enicky
-          cd cluster-template/templates/kubernetes/apps/home/ai/dataexporter
+          cd kubernetes/apps/home/ai/dataexporter
           pwd
           cat values.yaml
           pwd
