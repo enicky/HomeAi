@@ -73,7 +73,7 @@ jobs:
       - name: list-cluster-template
         run: |
           ls -la
-          ls -la kubernetes/
+          ls -la kubernetes/apps/
       - name: modify the image
         run: |
           git config user.email enicky80@gmail.com
