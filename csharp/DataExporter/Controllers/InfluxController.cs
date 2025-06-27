@@ -92,7 +92,7 @@ namespace InfluxController.Controllers
             return Ok();
 
         }
-        
+
         [Topic(pubsubName: NameConsts.INFLUX_PUBSUB_NAME, name: NameConsts.INFLUX_RETRIEVE_DATA)]
         [HttpPost(NameConsts.INFLUX_RETRIEVE_DATA)]
         public async Task RetrieveData(CancellationToken token)
@@ -103,8 +103,8 @@ namespace InfluxController.Controllers
             try
             {
                 response = await influxDBService.QueryAsync(queryString, _org, token);
-                
-                var fileName = await _fileService.RetrieveParsedFile($"export-{DateTime.Now.AddDays(-1):yyyy-MM-dd}.csv", StorageHelpers.ContainerName);
+                var fileName = await RetrieveLastFile();
+                //var fileName = await _fileService.RetrieveParsedFile($"export-{DateTime.Now.AddDays(-1):yyyy-MM-dd}.csv", StorageHelpers.ContainerName);
                 records = _localFileService.ReadFromFile(fileName);
                 var cleanedUpResponses = _cleanupService.Cleanup(response, records);
                 var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
@@ -136,6 +136,32 @@ namespace InfluxController.Controllers
 
 
             _logger.LogInformation($"Sent that retrieve of file to azaure has been finished");
+        }
+
+        private async Task<string?> RetrieveLastFile()
+        {
+            // Start from yesterday and go back up to 30 days
+            const int maxDaysBack = 430;
+            for (int daysBack = 1; daysBack <= maxDaysBack; daysBack++)
+            {
+                var date = DateTime.Now.AddDays(-daysBack);
+                var fileName = $"export-{date:yyyy-MM-dd}.csv";
+                try
+                {
+                    var parsedFile = await _fileService.RetrieveParsedFile(fileName, StorageHelpers.ContainerName);
+                    if (!string.IsNullOrEmpty(parsedFile) && System.IO.File.Exists(parsedFile))
+                    {
+                        _logger.LogInformation($"Found file: {fileName} at {parsedFile}");
+                        return parsedFile;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug($"File not found for date {date:yyyy-MM-dd}: {ex.Message}");
+                }
+            }
+            _logger.LogWarning($"No export file found in the last {maxDaysBack} days.");
+            return null;
         }
     }
 }

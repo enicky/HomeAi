@@ -33,7 +33,7 @@ public class FileService : IFileService
         {
             throw new AccountKeyNullException("FileStorage:accountKey cannot be NULL");
         }
-
+        
         _blobServiceClient = blobServiceClientFactory.Create(_accountName, _accountKey);
     }
 

@@ -71,7 +71,7 @@ jobs:
           repository: "enicky/cluster-template"
           token: ${{ secrets.GIT_TOKEN }}
       - name: list-cluster-template
-        run: |
+        run: |  
           ls -la kubernetes/apps/home
       - name: modify the image
         run: |
