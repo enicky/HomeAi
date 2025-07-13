@@ -66,7 +66,9 @@ public class DaprController : ControllerBase
         if (mustTrainModel)
         {
             logger.LogInformation("Start triggering of downloading data to python training container");
-            await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_DOWNLOAD_DATA);
+            var traceParent = Activity.Current?.Id ?? string.Empty;
+            var evt = new StartDownloadDataEvent { TraceParent = traceParent };
+            await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_DOWNLOAD_DATA, evt);
             logger.LogInformation("Sent message to AI container to start Downloading data and prepare it to start training model");
         }
         else
@@ -82,7 +84,9 @@ public class DaprController : ControllerBase
     {
         logger.LogInformation("Retrieved from python module that download of data has been finished");
         logger.LogInformation("Send message to start training model on AI container");
-        await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_TRAIN_MODEL);
+        var traceParent = Activity.Current?.Id ?? string.Empty;
+        var evt = new StartTrainModelEvent { TraceParent = traceParent };
+        await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_TRAIN_MODEL, evt);
         logger.LogInformation("Finished sending message to AI container to start training model");
 
     }
