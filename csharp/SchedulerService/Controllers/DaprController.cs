@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Common.Helpers;
 using Common.Models.AI;
 using Common.Models.Responses;
@@ -90,6 +91,7 @@ public class DaprController : ControllerBase
     [HttpPost("AiFinishedTrainingModel")]
     public async Task AiFinishedTrainingModel([FromBody] TrainAiModelResponse response)
     {
+        var traceParent = Activity.Current?.Id ?? string.Empty;
         logger.LogInformation("Retrieved message that training of model has been finished");
         logger.LogInformation("Training was a success: {IsSuccess}", response.Success);
         logger.LogInformation("ModelPath to use is : {ModelPath}", response.ModelPath);
@@ -100,7 +102,8 @@ public class DaprController : ControllerBase
             var data = new StartUploadModel
             {
                 ModelPath = response.ModelPath,
-                TriggerMoment = DateTime.Now
+                TriggerMoment = DateTime.Now,
+                TraceParent = traceParent
             };
             await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_UPLOAD_MODEL, data);
             logger.LogInformation("Finished sending message to upload model to azure");
