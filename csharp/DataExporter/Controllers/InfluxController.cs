@@ -126,7 +126,8 @@ namespace InfluxController.Controllers
                     Success = true,
                     GeneratedFileName = generatedFileName,
                     StartAiProcess = true,
-                    TraceParent = activity.Id
+                    TraceParent = activity.Id,
+                    TraceState = activity.TraceStateString
                 };
 
                 await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME,

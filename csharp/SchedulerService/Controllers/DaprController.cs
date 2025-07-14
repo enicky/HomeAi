@@ -68,7 +68,7 @@ public class DaprController : ControllerBase
         {
             logger.LogInformation("Start triggering of downloading data to python training container");
 
-            var evt = new StartDownloadDataEvent { TraceParent = response.TraceParent };
+            var evt = new StartDownloadDataEvent { TraceParent = response.TraceParent, TraceState = response.TraceState};
             var evtJson = JsonConvert.SerializeObject(evt);
             logger.LogInformation("StartDownloadDataEvent: {EventJson}", evtJson);
             await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_DOWNLOAD_DATA, evtJson);
@@ -88,7 +88,7 @@ public class DaprController : ControllerBase
         logger.LogInformation("Retrieved from python module that download of data has been finished");
         logger.LogInformation("Send message to start training model on AI container");
         var traceParent = Activity.Current?.Id ?? string.Empty;
-        var evt = new StartTrainModelEvent { TraceParent = traceParent };
+        var evt = new StartTrainModelEvent { TraceParent = traceParent, TraceState = Activity.Current?.TraceStateString ?? string.Empty};
         await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_TRAIN_MODEL, evt);
         logger.LogInformation("Finished sending message to AI container to start training model");
 
@@ -110,7 +110,8 @@ public class DaprController : ControllerBase
             {
                 ModelPath = response.ModelPath,
                 TriggerMoment = DateTime.Now,
-                TraceParent = traceParent
+                TraceParent = traceParent, 
+                TraceState = Activity.Current?.TraceStateString ?? string.Empty
             };
             await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_UPLOAD_MODEL, data);
             logger.LogInformation("Finished sending message to upload model to azure");

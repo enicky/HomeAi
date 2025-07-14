@@ -5,6 +5,7 @@ public abstract class TraceableEvent
 {
     [JsonPropertyName("traceparent")]
     public string TraceParent { get; set; } = string.Empty;
+    [JsonPropertyName("tracestate")] public string TraceState { get; set; } = string.Empty;
 }
 
 public class StartDownloadDataEvent : TraceableEvent {}
