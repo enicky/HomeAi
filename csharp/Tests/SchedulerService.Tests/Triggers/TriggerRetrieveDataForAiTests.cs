@@ -19,7 +19,7 @@ public class TriggerRetrieveDataForAiTests
         // When
         await trigger.RunAsync(CancellationToken.None);
         // Then
-        _mockedInvokeDaprService.Verify(x => x.TriggerExportData(It.IsAny<CancellationToken>()), Times.Once);
+        _mockedInvokeDaprService.Verify(x => x.TriggerExportData(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     private TriggerRetrieveDataForAi CreateSut()
