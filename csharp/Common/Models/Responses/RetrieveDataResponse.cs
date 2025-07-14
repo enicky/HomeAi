@@ -2,11 +2,12 @@
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.DataContracts;
 using System.Text.Json.Serialization;
+using Common.Models.AI;
 
 namespace Common.Models.Responses;
 
 [DataContract]
-public class RetrieveDataResponse{
+public class RetrieveDataResponse : TraceableEvent {
 
     [DataMember]
     [JsonPropertyName("generatedFileName")]

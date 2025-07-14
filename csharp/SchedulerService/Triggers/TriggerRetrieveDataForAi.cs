@@ -1,5 +1,4 @@
-
-
+using System.Diagnostics;
 using SchedulerService.Service;
 
 namespace SchedulerService.Triggers;
@@ -19,7 +18,9 @@ public class TriggerRetrieveDataForAi
     {
         const string logPrefix = "[TriggerRetrieveDataForAi:RunAsync]";
         _logger.LogInformation($"{logPrefix} Process data");
-        await _invokeDaprService.TriggerExportData(token);
+        using var activity = new Activity("TriggerRetrieveDataForAi").Start();
+        var traceParent = activity.Id ?? string.Empty;
+        await _invokeDaprService.TriggerExportData(traceParent, token);
         _logger.LogInformation($"{logPrefix} Finished processing data remotely");
     }
 }

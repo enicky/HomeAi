@@ -46,6 +46,7 @@ public class DaprController : ControllerBase
         logger.LogInformation("Trigger received that download has Finished {ResponseValue}", JsonConvert.SerializeObject(response));
         logger.LogInformation("Completed {IsCompleted}, filename {FileName}",response?.Success, response?.GeneratedFileName);
         logger.LogInformation("Start AI Processing ? {StartAiProcessing}", response?.StartAiProcess);
+        logger.LogInformation("TraceParent {TraceParent}", response?.TraceParent);
         var mustTrainModel = false;
         if(response == null)
         {
@@ -66,8 +67,8 @@ public class DaprController : ControllerBase
         if (mustTrainModel)
         {
             logger.LogInformation("Start triggering of downloading data to python training container");
-            var traceParent = Activity.Current?.Id ?? string.Empty;
-            var evt = new StartDownloadDataEvent { TraceParent = traceParent };
+
+            var evt = new StartDownloadDataEvent { TraceParent = response.TraceParent };
             await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_DOWNLOAD_DATA, evt);
             logger.LogInformation("Sent message to AI container to start Downloading data and prepare it to start training model");
         }

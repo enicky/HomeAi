@@ -1,8 +1,7 @@
 using System.Globalization;
 using app.Services;
 using Common.Helpers;
-using Common.Models;
-using Common.Models.Influx;
+using Common.Models.AI;
 using Common.Models.Responses;
 using Common.Services;
 using CsvHelper;
@@ -30,14 +29,14 @@ namespace InfluxController.Controllers
 
             " |> yield(name: \"values\")";
 
-        private readonly IInfluxDbService influxDBService;
+        private readonly IInfluxDbService _influxDbService;
         private readonly string _org;
         private readonly IFileService _fileService;
         private readonly ILogger<InfluxController> _logger;
         private readonly DaprClient _daprClient;
         private readonly ICleanupService _cleanupService;
         private readonly ILocalFileService _localFileService;
-        private readonly SemaphoreSlim semaphoreSlim = new(1, 1);
+        private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
 
         public InfluxController(IInfluxDbService influxDBService,
                     IFileService fileService,
@@ -47,7 +46,7 @@ namespace InfluxController.Controllers
                     ILocalFileService localFileService,
                     ILogger<InfluxController> logger)
         {
-            this.influxDBService = influxDBService;
+            this._influxDbService = influxDBService;
             _org = configuration.GetValue<string>("InfluxDB:Org")!;
             _fileService = fileService;
             _logger = logger;
@@ -78,7 +77,7 @@ namespace InfluxController.Controllers
 
             " |> yield(name: \"values\")";
 
-            var response = await influxDBService.QueryAsync(q, _org, token);
+            var response = await _influxDbService.QueryAsync(q, _org, token);
             var fileName = await _fileService.RetrieveParsedFile($"export-{startDate.AddDays(-1).ToString("yyyy-MM-dd")}.csv", StorageHelpers.ContainerName);
             var records = _localFileService.ReadFromFile(fileName);
             var cleanedUpResponses = _cleanupService.Cleanup(response.ToList(), records);
@@ -95,22 +94,29 @@ namespace InfluxController.Controllers
 
         [Topic(pubsubName: NameConsts.INFLUX_PUBSUB_NAME, name: NameConsts.INFLUX_RETRIEVE_DATA)]
         [HttpPost(NameConsts.INFLUX_RETRIEVE_DATA)]
-        public async Task RetrieveData(CancellationToken token)
+        public async Task RetrieveData(StartDownloadDataEvent evt, CancellationToken token)
         {
             _logger.LogInformation("Trigger received to retrieve data from influx");
-            List<InfluxRecord> records, response;
-            await semaphoreSlim.WaitAsync(token);
+            _logger.LogInformation("Received event with traceParent {TraceParent}", evt.TraceParent);
+            using var activity = new System.Diagnostics.Activity("RetrieveData");
+            if (!string.IsNullOrEmpty(evt.TraceParent))
+            {
+                activity.SetParentId(evt.TraceParent);
+            }
+            activity.Start();
+            _logger.LogInformation("Started activity with id {ActivityId}", activity);
+            await _semaphoreSlim.WaitAsync(token);
             try
             {
-                response = await influxDBService.QueryAsync(queryString, _org, token);
+                var response = await _influxDbService.QueryAsync(queryString, _org, token);
                 var fileName = await RetrieveLastFile();
                 //var fileName = await _fileService.RetrieveParsedFile($"export-{DateTime.Now.AddDays(-1):yyyy-MM-dd}.csv", StorageHelpers.ContainerName);
-                records = _localFileService.ReadFromFile(fileName);
+                var records = _localFileService.ReadFromFile(fileName);
                 var cleanedUpResponses = _cleanupService.Cleanup(response, records);
                 var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
                 var generatedFileName = $"export-{currentDate}.csv";
-                using (var writer = new StreamWriter(generatedFileName))
-                using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                await using (var writer = new StreamWriter(generatedFileName))
+                await using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
                 {
                     await csv.WriteRecordsAsync(cleanedUpResponses, token);
                 }
@@ -119,8 +125,8 @@ namespace InfluxController.Controllers
                 {
                     Success = true,
                     GeneratedFileName = generatedFileName,
-                    StartAiProcess = true
-
+                    StartAiProcess = true,
+                    TraceParent = activity.Id
                 };
 
                 await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME,
@@ -130,7 +136,7 @@ namespace InfluxController.Controllers
             }
             finally
             {
-                semaphoreSlim.Release();
+                _semaphoreSlim.Release();
             }
 
 
