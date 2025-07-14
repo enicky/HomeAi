@@ -71,7 +71,7 @@ public class DaprController : ControllerBase
             var evt = new StartDownloadDataEvent { TraceParent = response.TraceParent };
             var evtJson = JsonConvert.SerializeObject(evt);
             logger.LogInformation("StartDownloadDataEvent: {EventJson}", evtJson);
-            await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_DOWNLOAD_DATA, evt);
+            await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_DOWNLOAD_DATA, evtJson);
             logger.LogInformation("Sent message to AI container to start Downloading data and prepare it to start training model");
         }
         else
