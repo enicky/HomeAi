@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using app.Services;
 using Common.Helpers;
@@ -17,17 +18,16 @@ namespace InfluxController.Controllers
     public class InfluxController : ControllerBase
     {
         private readonly string queryString = "import \"experimental\"" +
-            " from(bucket: \"home_assistant\")" +
-            " |> range(start:experimental.subDuration(d: 24h, from: today()), stop: today())" +
-            " |> filter(fn: (r) => r[\"entity_id\"] == \"forecast_home_2\" or r[\"entity_id\"] == \"warmtepomp_power\" or r[\"entity_id\"] == \"smoke_detector_device_17_temperature\")" +
-            " |> filter(fn: (r) =>  r[\"_field\"] == \"humidity\" or r[\"_field\"] == \"pressure\" or r[\"_field\"] == \"value\")" +
-            " |> aggregateWindow(every: 1m, fn: mean, createEmpty: true)" +
-            " |> fill(usePrevious: true)" +
-            " |> keep(columns: [\"_field\", \"_measurement\", \"_value\", \"_time\"])" +
-            " |> pivot(" +
-            "     rowKey: [\"_time\"], columnKey: [\"_measurement\", \"_field\"], valueColumn: \"_value\")" +
-
-            " |> yield(name: \"values\")";
+                                              " from(bucket: \"home_assistant\")" +
+                                              " |> range(start:experimental.subDuration(d: 24h, from: today()), stop: today())" +
+                                              " |> filter(fn: (r) => r[\"entity_id\"] == \"forecast_home_2\" or r[\"entity_id\"] == \"warmtepomp_power\" or r[\"entity_id\"] == \"smoke_detector_device_17_temperature\")" +
+                                              " |> filter(fn: (r) =>  r[\"_field\"] == \"humidity\" or r[\"_field\"] == \"pressure\" or r[\"_field\"] == \"value\")" +
+                                              " |> aggregateWindow(every: 1m, fn: mean, createEmpty: true)" +
+                                              " |> fill(usePrevious: true)" +
+                                              " |> keep(columns: [\"_field\", \"_measurement\", \"_value\", \"_time\"])" +
+                                              " |> pivot(" +
+                                              "     rowKey: [\"_time\"], columnKey: [\"_measurement\", \"_field\"], valueColumn: \"_value\")" +
+                                              " |> yield(name: \"values\")";
 
         private readonly IInfluxDbService _influxDbService;
         private readonly string _org;
@@ -39,12 +39,12 @@ namespace InfluxController.Controllers
         private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
 
         public InfluxController(IInfluxDbService influxDBService,
-                    IFileService fileService,
-                    IConfiguration configuration,
-                    ICleanupService cleanupService,
-                    DaprClient daprClient,
-                    ILocalFileService localFileService,
-                    ILogger<InfluxController> logger)
+            IFileService fileService,
+            IConfiguration configuration,
+            ICleanupService cleanupService,
+            DaprClient daprClient,
+            ILocalFileService localFileService,
+            ILogger<InfluxController> logger)
         {
             this._influxDbService = influxDBService;
             _org = configuration.GetValue<string>("InfluxDB:Org")!;
@@ -53,7 +53,6 @@ namespace InfluxController.Controllers
             _daprClient = daprClient;
             _cleanupService = cleanupService;
             _localFileService = localFileService;
-
         }
 
         [HttpGet("ExportDataForDate")]
@@ -65,20 +64,20 @@ namespace InfluxController.Controllers
             var strTomorrowStartDate = startDate.ToStartDayString();
 
             var q = "import \"experimental\"" +
-            " from(bucket: \"home_assistant\")" +
-            " |> range(start: " + strStartDate + ", stop: " + strTomorrowStartDate + ")" +
-            " |> filter(fn: (r) => r[\"entity_id\"] == \"forecast_home_2\" or r[\"entity_id\"] == \"warmtepomp_power\" or r[\"entity_id\"] == \"smoke_detector_device_17_temperature\")" +
-            " |> filter(fn: (r) =>  r[\"_field\"] == \"humidity\" or r[\"_field\"] == \"pressure\" or r[\"_field\"] == \"value\")" +
-            " |> aggregateWindow(every: 1m, fn: mean, createEmpty: true)" +
-            " |> fill(usePrevious: true)" +
-            " |> keep(columns: [\"_field\", \"_measurement\", \"_value\", \"_time\"])" +
-            " |> pivot(" +
-            "     rowKey: [\"_time\"], columnKey: [\"_measurement\", \"_field\"], valueColumn: \"_value\")" +
-
-            " |> yield(name: \"values\")";
+                    " from(bucket: \"home_assistant\")" +
+                    " |> range(start: " + strStartDate + ", stop: " + strTomorrowStartDate + ")" +
+                    " |> filter(fn: (r) => r[\"entity_id\"] == \"forecast_home_2\" or r[\"entity_id\"] == \"warmtepomp_power\" or r[\"entity_id\"] == \"smoke_detector_device_17_temperature\")" +
+                    " |> filter(fn: (r) =>  r[\"_field\"] == \"humidity\" or r[\"_field\"] == \"pressure\" or r[\"_field\"] == \"value\")" +
+                    " |> aggregateWindow(every: 1m, fn: mean, createEmpty: true)" +
+                    " |> fill(usePrevious: true)" +
+                    " |> keep(columns: [\"_field\", \"_measurement\", \"_value\", \"_time\"])" +
+                    " |> pivot(" +
+                    "     rowKey: [\"_time\"], columnKey: [\"_measurement\", \"_field\"], valueColumn: \"_value\")" +
+                    " |> yield(name: \"values\")";
 
             var response = await _influxDbService.QueryAsync(q, _org, token);
-            var fileName = await _fileService.RetrieveParsedFile($"export-{startDate.AddDays(-1).ToString("yyyy-MM-dd")}.csv", StorageHelpers.ContainerName);
+            var fileName = await _fileService.RetrieveParsedFile(
+                $"export-{startDate.AddDays(-1).ToString("yyyy-MM-dd")}.csv", StorageHelpers.ContainerName);
             var records = _localFileService.ReadFromFile(fileName);
             var cleanedUpResponses = _cleanupService.Cleanup(response.ToList(), records);
 
@@ -89,7 +88,6 @@ namespace InfluxController.Controllers
 
             _logger.LogDebug($"Finished uploading to Azure");
             return Ok();
-
         }
 
         [Topic(pubsubName: NameConsts.INFLUX_PUBSUB_NAME, name: NameConsts.INFLUX_RETRIEVE_DATA)]
@@ -97,14 +95,17 @@ namespace InfluxController.Controllers
         public async Task RetrieveData(StartDownloadDataEvent evt, CancellationToken token)
         {
             _logger.LogInformation("Trigger received to retrieve data from influx");
+            _logger.LogInformation("Current activity id: {ActivityId}", System.Diagnostics.Activity.Current?.Id);
+            _logger.LogInformation("Current activity parent id: {ParentId}", Activity.Current?.ParentId);
             _logger.LogInformation("Received event with traceParent {TraceParent}", evt.TraceParent);
-            using var activity = new System.Diagnostics.Activity("RetrieveData");
+
+
             if (!string.IsNullOrEmpty(evt.TraceParent))
             {
-                activity.SetParentId(evt.TraceParent);
+                _logger.LogInformation("Setting parent id for current activity to {TraceParent}", evt.TraceParent);
+                Activity.Current?.SetParentId(evt.TraceParent);
             }
-            activity.Start();
-            _logger.LogInformation("Started activity with id {ActivityId}", activity);
+
             await _semaphoreSlim.WaitAsync(token);
             try
             {
@@ -120,26 +121,26 @@ namespace InfluxController.Controllers
                 {
                     await csv.WriteRecordsAsync(cleanedUpResponses, token);
                 }
+
                 await _fileService.UploadToAzure(StorageHelpers.ContainerName, generatedFileName, token);
                 var retrieveDataResponse = new RetrieveDataResponse
                 {
                     Success = true,
                     GeneratedFileName = generatedFileName,
                     StartAiProcess = true,
-                    TraceParent = activity.Id,
-                    TraceState = activity.TraceStateString
+                    TraceParent = Activity.Current!.Id!,
+                    TraceState = Activity.Current!.TraceStateString!
                 };
 
                 await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME,
-                                    NameConsts.INFLUX_FINISHED_RETRIEVE_DATA,
-                                    retrieveDataResponse,
-                                    token);
+                    NameConsts.INFLUX_FINISHED_RETRIEVE_DATA,
+                    retrieveDataResponse,
+                    token);
             }
             finally
             {
                 _semaphoreSlim.Release();
             }
-
 
 
             _logger.LogInformation($"Sent that retrieve of file to azaure has been finished");
@@ -167,6 +168,7 @@ namespace InfluxController.Controllers
                     _logger.LogDebug($"File not found for date {date:yyyy-MM-dd}: {ex.Message}");
                 }
             }
+
             _logger.LogWarning($"No export file found in the last {maxDaysBack} days.");
             return null;
         }
