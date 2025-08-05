@@ -83,13 +83,13 @@ public class DaprController : ControllerBase
 
     [Topic(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_FINISHED_DOWNLOAD_DATA)]
     [HttpPost("AiDownloadFinishedStartTraining")]
-    public async Task AiDownloadFinishedStartTraining()
+    public async Task AiDownloadFinishedStartTraining(CancellationToken cancellationToken)
     {
         logger.LogInformation("Retrieved from python module that download of data has been finished");
         logger.LogInformation("Send message to start training model on AI container");
         var traceParent = Activity.Current?.Id ?? string.Empty;
         var evt = new StartTrainModelEvent { TraceParent = traceParent, TraceState = Activity.Current?.TraceStateString ?? string.Empty};
-        await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_TRAIN_MODEL, evt);
+        await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_TRAIN_MODEL, evt, cancellationToken);
         logger.LogInformation("Finished sending message to AI container to start training model");
 
     }

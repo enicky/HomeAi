@@ -88,6 +88,7 @@ public class DaprControllerTests
         // Then
         _mockedDaprClient.Verify(x => x.PublishEventAsync(It.Is<string>( x => x == NameConsts.AI_PUBSUB_NAME),
                                     It.Is<string>(x => x == NameConsts.AI_START_DOWNLOAD_DATA),
+                                    It.IsAny<string>(),
                                     It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -127,11 +128,12 @@ public class DaprControllerTests
     {
         // Given
         var controller = createSut();
+        var cts = new CancellationTokenSource();
         // When
-        await controller.AiDownloadFinishedStartTraining();
+        await controller.AiDownloadFinishedStartTraining(cts.Token);
         // Then
         _mockedDaprClient.Verify(a => a.PublishEventAsync(It.Is<string>(x => x == NameConsts.AI_PUBSUB_NAME),
-            It.Is<string>(x => x == NameConsts.AI_START_TRAIN_MODEL), It.IsAny<CancellationToken>()), Times.Once);
+            It.Is<string>(x => x == NameConsts.AI_START_TRAIN_MODEL), It.IsAny<StartTrainModelEvent>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

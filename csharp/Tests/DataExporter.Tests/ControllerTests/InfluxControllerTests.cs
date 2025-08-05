@@ -2,6 +2,7 @@ using System.Net;
 using app.Services;
 using Common.Helpers;
 using Common.Models;
+using Common.Models.AI;
 using Common.Models.Influx;
 using Common.Models.Responses;
 using Common.Services;
@@ -41,7 +42,7 @@ public class InfluxControllerTests : IClassFixture<TestSetup>
         var cts = new CancellationTokenSource();
         var sut = CreateSut();
         _output.WriteLine("Start retrieving data");
-        await sut.RetrieveData(cts.Token);
+        await sut.RetrieveData(new StartDownloadDataEvent(), cts.Token);
         //_mockedLogger.Verify(x => x.LogDebug(It.IsAny<string>()), Times.Exactly(20));
         _mockedDaprClient.Verify(x =>
             x.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, NameConsts.INFLUX_FINISHED_RETRIEVE_DATA, It.IsAny<RetrieveDataResponse>(), It.IsAny<CancellationToken>()), Times.Once());
