@@ -15,15 +15,22 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-        builder.Configuration.AddEnvironmentVariables();
-        builder.Configuration.AddCommandLine(args);
+#if DEBUG
         builder.Configuration.AddJsonFile(
-            "appsettings.json",
-            optional: false,
+            "appsettings.Development.json",
+            optional: true,
             reloadOnChange: true
         );
+#endif
         builder.Configuration.AddEnvironmentVariables();
         builder.Configuration.AddCommandLine(args);
+        // builder.Configuration.AddJsonFile(
+        //     "appsettings.json",
+        //     optional: false,
+        //     reloadOnChange: true
+        // );
+        // builder.Configuration.AddEnvironmentVariables();
+        // builder.Configuration.AddCommandLine(args);
 
         builder.Services.AddApplicationInsightsTelemetry();
         builder.Services.AddApplicationInsightsTelemetryProcessor<SqlDependencyFilter>();
