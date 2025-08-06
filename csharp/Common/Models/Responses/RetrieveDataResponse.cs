@@ -11,10 +11,10 @@ public class RetrieveDataResponse : TraceableEvent {
 
     [DataMember]
     [JsonPropertyName("generatedFileName")]
-    public string GeneratedFileName { get; set; } = string.Empty;
+    public string? GeneratedFileName { get; set; } = string.Empty;
 
     [JsonPropertyName("success")]
     public bool Success { get; set; }
     [JsonPropertyName("startaiprocess")]
-    public bool StartAiProcess { get; set; }
+    public bool? StartAiProcess { get; set; }
 }

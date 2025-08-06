@@ -58,10 +58,14 @@ public class DaprController : ControllerBase
             logger.LogWarning("Download of data pre training AI model failed !!");
             return;
         }
-        if (response.StartAiProcess)
+        if (response.StartAiProcess.HasValue && response.StartAiProcess.Value)
         {
             logger.LogInformation("Start training model was true => set boolean val");
             mustTrainModel = true;
+        }
+        else if (response.StartAiProcess == null || !response.StartAiProcess.Value)
+        {
+            logger.LogInformation("Start training model was true => set boolean val");
         }
 
         if (mustTrainModel)
