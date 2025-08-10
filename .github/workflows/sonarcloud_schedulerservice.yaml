@@ -7,6 +7,7 @@ on:
         "csharp/Common/**",
         "csharp/SchedulerService/**",
         "csharp/Tests/SchedulerService.Tests/**",
+        "csharp/Tests/Common.Tests/**",
       ]
     branches: ["main"]
   pull_request:
@@ -16,6 +17,7 @@ on:
         "csharp/Common/**",
         "csharp/SchedulerService/**",
         "csharp/Tests/SchedulerService.Tests/**",
+        "csharp/Tests/Common.Tests/**",
       ]
 jobs:
   build:
