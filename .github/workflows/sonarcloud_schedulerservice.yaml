@@ -97,7 +97,7 @@ jobs:
 
 
           # Install coverlet.console
-          dotnet tool install --global coverlet.console
+          dotnet tool update --global coverlet.console
           export PATH="$PATH:/home/runner/.dotnet/tools"
 
           # Run tests and collect coverage for each test project using coverlet
@@ -105,7 +105,7 @@ jobs:
           coverlet ./csharp/Tests/Common.Tests/bin/Debug/net8.0/Common.Tests.dll --target "dotnet" --targetargs "test ./csharp/Tests/Common.Tests/Common.Tests.csproj --no-build" --format json --output coverage2.json
 
           # Merge coverage files
-          coverlet merge coverage1.json coverage2.json -o coverage.json
+          coverlet merge coverage1.json coverage2.json --output coverage.json
 
           # Convert merged coverage to opencover for SonarCloud
           coverlet report --input coverage.json --output coverage.opencover.xml --format opencover
