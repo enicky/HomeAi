@@ -35,6 +35,7 @@ public class Program
         builder.Services.AddApplicationInsightsTelemetry();
         builder.Services.AddApplicationInsightsTelemetryProcessor<SqlDependencyFilter>();
         builder.Services.AddApplicationInsightsTelemetryProcessor<HangfireRequestFilter>();
+        builder.Services.AddApplicationInsightsTelemetryProcessor<HealthzRequestFilter>();
         builder.Services.AddSingleton<ITelemetryInitializer>(x => new CustomTelemetryInitializer(
             "SchedulerService"
         ));
