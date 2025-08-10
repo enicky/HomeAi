@@ -82,27 +82,10 @@ jobs:
           dotnet build ./csharp/Common/Common.csproj --no-incremental --no-restore
 
 
-          # Run tests and collect coverage for both test projects using coverlet collector
 
-          dotnet test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-          cp ./csharp/Tests/SchedulerService.Tests/TestResults/**/coverage.opencover.xml coverage1.opencover.xml
-
-          dotnet test ./csharp/Tests/Common.Tests/Common.Tests.csproj --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-          cp ./csharp/Tests/Common.Tests/TestResults/**/coverage.opencover.xml coverage2.opencover.xml
-
-          echo "Coverage files:"
-          ls -la 
-
-          echo "Merging coverage reports..."
-          # Merge coverage reports
-          reportgenerator -reports:"coverage1.opencover.xml;coverage2.opencover.xml" -targetdir:coverage-report -reporttypes:OpenCover
-
-          echo "Coverage report directory contents:"
-          ls -la coverage-report/
-
-          echo "Copying merged coverage report..."
-          # The merged file will be at coverage-report/OpenCover.xml
-          cp coverage-report/OpenCover.xml coverage.opencover.xml
+          # Run all tests in one command and collect a single OpenCover coverage file
+          dotnet test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj ./csharp/Tests/Common.Tests/Common.Tests.csproj --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          cp ./csharp/Tests/SchedulerService.Tests/TestResults/**/coverage.opencover.xml coverage.opencover.xml
 
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
       - uses: actions/upload-artifact@v4
