@@ -7,6 +7,10 @@ if (args.Length != 2)
     Environment.Exit(1);
 }
 
+Console.WriteLine("Converting Coverlet JSON to OpenCover XML...");
+Console.WriteLine($"Input: {args[0]}");
+Console.WriteLine($"Output: {args[1]}");
+
 string inputPath = args[0];
 string outputPath = args[1];
 

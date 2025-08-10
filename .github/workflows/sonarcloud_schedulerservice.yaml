@@ -126,7 +126,7 @@ jobs:
           echo "conert to opencover format"
 
           # Convert merged coverage to opencover for SonarCloud
-          dotnet run --project tools/CoverletJsonToOpenCover coverage.json coverage.opencover.xml
+          dotnet run --project tools/CoverletJsonToOpenCover coverage.json ./coverage.opencover.xml
 
           #End SonarCloud analysis
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
