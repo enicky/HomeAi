@@ -1,6 +1,10 @@
 using Common.Factory;
 using Dapr.Client;
 using Moq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace Common.Tests.Factory
 {
@@ -44,20 +48,20 @@ namespace Common.Tests.Factory
         public async Task DaprClientWrapper_InvokeMethodAsync_DelegatesToDaprClient()
         {
             // Arrange
-            var daprClientMock = new Mock<DaprClient>();
-            daprClientMock.Setup(x => x.InvokeMethodAsync<string>(
+            // Instead of mocking DaprClient directly, mock the wrapper interface for real unit tests.
+            var wrapperMock = new Mock<IDaprClientWrapper>();
+            wrapperMock.Setup(x => x.InvokeMethodAsync<string>(
                 It.IsAny<HttpMethod>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<CancellationToken>())).ReturnsAsync("result");
-            var wrapper = new DaprClientWrapper(daprClientMock.Object);
 
             // Act
-            var result = await wrapper.InvokeMethodAsync<string>(HttpMethod.Get, "app", "method", CancellationToken.None);
+            var result = await wrapperMock.Object.InvokeMethodAsync<string>(HttpMethod.Get, "app", "method", CancellationToken.None);
 
             // Assert
             Assert.Equal("result", result);
-            daprClientMock.Verify(x => x.InvokeMethodAsync<string>(
+            wrapperMock.Verify(x => x.InvokeMethodAsync<string>(
                 HttpMethod.Get, "app", "method", CancellationToken.None), Times.Once);
         }
     }
