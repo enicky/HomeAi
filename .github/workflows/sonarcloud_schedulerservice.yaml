@@ -55,7 +55,7 @@ jobs:
           dotnet tool install --global dotnet-coverage
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
       - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool --version 4.8.12
       - name: Install SonarCloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         shell: bash
@@ -126,7 +126,10 @@ jobs:
           echo "conert to opencover format"
 
           # Convert merged coverage to opencover for SonarCloud
-          ./.config/.tools/coverlet report --input coverage.json --output coverage.opencover.xml --format opencover
+          reportgenerator -reports:coverage.json -targetdir:out -reporttypes:opencover
+          cp out/opencover.xml coverage.opencover.xml
+
+          #./.config/.tools/coverlet report --input coverage.json --output coverage.opencover.xml --format opencover
 
           # End SonarCloud analysis
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
