@@ -1,12 +1,22 @@
 name: SonarCloud - SchedulerService
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
   push:
-    paths: ['csharp/Common/**', 'csharp/SchedulerService/**', 'csharp/Tests/SchedulerService.Tests/**']
-    branches: ['main']
+    paths:
+      [
+        "csharp/Common/**",
+        "csharp/SchedulerService/**",
+        "csharp/Tests/SchedulerService.Tests/**",
+      ]
+    branches: ["main"]
   pull_request:
     types: [opened, synchronize, reopened]
-    paths: ['csharp/Common/**', 'csharp/SchedulerService/**', 'csharp/Tests/SchedulerService.Tests/**']
+    paths:
+      [
+        "csharp/Common/**",
+        "csharp/SchedulerService/**",
+        "csharp/Tests/SchedulerService.Tests/**",
+      ]
 jobs:
   build:
     name: Build and analyze
@@ -16,7 +26,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: 17
-          distribution: 'zulu' # Alternative distribution options are available.
+          distribution: "zulu" # Alternative distribution options are available.
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
@@ -38,6 +48,8 @@ jobs:
         run: |
           dotnet tool install --global dotnet-coverage
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
       - name: Install SonarCloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         shell: bash
@@ -46,19 +58,33 @@ jobs:
           dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
       - name: Build and analyze
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: bash
         run: |
           ./.sonar/scanner/dotnet-sonarscanner begin /k:"enicky_schedulerservice" \
-          /o:"enicky" /d:sonar.token="${SONAR_TOKEN}" \
-          /d:sonar.host.url="https://sonarcloud.io" \
-          /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
-          /d:sonar.scanner.scanAll=false
+            /o:"enicky" /d:sonar.token="${SONAR_TOKEN}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.vscoveragexml.reportsPaths=coverage.cobertura.xml \
+            /d:sonar.scanner.scanAll=false
+
           dotnet restore ./csharp/SchedulerService/SchedulerService.csproj
+          dotnet restore ./csharp/Common/Common.csproj
+
           dotnet build ./csharp/SchedulerService/SchedulerService.csproj --no-incremental --no-restore
-          dotnet-coverage collect "dotnet test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj" -f xml -o "coverage.xml"
+          dotnet build ./csharp/Common/Common.csproj --no-incremental --no-restore
+
+          # Run tests and collect coverage for both test projects
+          dotnet-coverage collect "dotnet test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj" -f cobertura -o "coverage1.cobertura.xml"
+          dotnet-coverage collect "dotnet test ./csharp/Tests/Common.Tests/Common.Tests.csproj" -f cobertura -o "coverage2.cobertura.xml"
+
+          # Merge coverage reports
+          reportgenerator -reports:coverage1.cobertura.xml;coverage2.cobertura.xml -targetdir:coverage-report -reporttypes:Cobertura
+
+          # The merged file will be at coverage-report/Cobertura.xml
+          cp coverage-report/Cobertura.xml coverage.cobertura.xml
+
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
       - uses: actions/upload-artifact@v4
         with:
-          path: coverage.xml
+          path: coverage.cobertura.xml
