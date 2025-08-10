@@ -72,7 +72,7 @@ jobs:
           ./.sonar/scanner/dotnet-sonarscanner begin /k:"enicky_schedulerservice" \
             /o:"enicky" /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.cobertura.reportsPaths=coverage.cobertura.xml \
+            /d:sonar.cs.opencover.reportsPaths=coverage.opencover.xml \
             /d:sonar.verbose=true
 
           dotnet restore ./csharp/SchedulerService/SchedulerService.csproj
@@ -83,19 +83,20 @@ jobs:
 
 
           # Run tests and collect coverage for both test projects using coverlet collector
-          dotnet test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --collect:"XPlat Code Coverage"
-          cp ./csharp/Tests/SchedulerService.Tests/TestResults/**/coverage.cobertura.xml coverage1.cobertura.xml
 
-          dotnet test ./csharp/Tests/Common.Tests/Common.Tests.csproj --collect:"XPlat Code Coverage"
-          cp ./csharp/Tests/Common.Tests/TestResults/**/coverage.cobertura.xml coverage2.cobertura.xml
+          dotnet test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          cp ./csharp/Tests/SchedulerService.Tests/TestResults/**/coverage.opencover.xml coverage1.opencover.xml
+
+          dotnet test ./csharp/Tests/Common.Tests/Common.Tests.csproj --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          cp ./csharp/Tests/Common.Tests/TestResults/**/coverage.opencover.xml coverage2.opencover.xml
 
           # Merge coverage reports
-          reportgenerator -reports:"coverage1.cobertura.xml;coverage2.cobertura.xml" -targetdir:coverage-report -reporttypes:Cobertura
+          reportgenerator -reports:"coverage1.opencover.xml;coverage2.opencover.xml" -targetdir:coverage-report -reporttypes:OpenCover
 
-          # The merged file will be at coverage-report/Cobertura.xml
-          cp coverage-report/Cobertura.xml coverage.cobertura.xml
+          # The merged file will be at coverage-report/OpenCover.xml
+          cp coverage-report/OpenCover.xml coverage.opencover.xml
 
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
       - uses: actions/upload-artifact@v4
         with:
-          path: coverage.cobertura.xml
+          path: coverage.opencover.xml
