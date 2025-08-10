@@ -122,6 +122,9 @@ jobs:
             --output coverage.json \
             --merge-with coverage.json
 
+          echo "Merged coverage files into coverage.json"
+          echo "conert to opencover format"
+
           # Convert merged coverage to opencover for SonarCloud
           ./.config/.tools/coverlet report --input coverage.json --output coverage.opencover.xml --format opencover
 
