@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using app.Services;
+using Common.ApplicationInsights.Filter;
 using Common.Services;
 using DataExporter.Extensions;
 using DataExporter.Services;
@@ -20,6 +21,8 @@ internal static class Program
         builder.Configuration.AddCommandLine(args);
 
         builder.Services.AddApplicationInsightsTelemetry(); // add Application Insights
+        builder.Services.AddApplicationInsightsTelemetryProcessor<HealthzRequestFilter>();
+        
         builder.Services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) => module.EnableSqlCommandTextInstrumentation = true);
         
         builder.Services.AddHealthChecks(); // enable /healtz
