@@ -85,7 +85,7 @@ jobs:
           dotnet-coverage collect "dotnet test ./csharp/Tests/Common.Tests/Common.Tests.csproj" -f cobertura -o "coverage2.cobertura.xml"
 
           # Merge coverage reports
-          reportgenerator -reports:coverage1.cobertura.xml;coverage2.cobertura.xml -targetdir:coverage-report -reporttypes:Cobertura
+          reportgenerator -reports:"coverage1.cobertura.xml;coverage2.cobertura.xml" -targetdir:coverage-report -reporttypes:Cobertura
 
           # The merged file will be at coverage-report/Cobertura.xml
           cp coverage-report/Cobertura.xml coverage.cobertura.xml
