@@ -85,6 +85,12 @@ jobs:
           dotnet build ./csharp/SchedulerService/SchedulerService.csproj --no-incremental --no-restore
           dotnet build ./csharp/Common/Common.csproj --no-incremental --no-restore
 
+          # Restore and build test projects
+          dotnet restore ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj
+          dotnet restore ./csharp/Tests/Common.Tests/Common.Tests.csproj
+          dotnet build ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --no-incremental --no-restore
+          dotnet build ./csharp/Tests/Common.Tests/Common.Tests.csproj --no-incremental --no-restore
+
           # Build test projects
           dotnet build ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --no-incremental --no-restore
           dotnet build ./csharp/Tests/Common.Tests/Common.Tests.csproj --no-incremental --no-restore
