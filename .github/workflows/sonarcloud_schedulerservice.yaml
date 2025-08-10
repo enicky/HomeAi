@@ -8,6 +8,8 @@ on:
         "csharp/SchedulerService/**",
         "csharp/Tests/SchedulerService.Tests/**",
         "csharp/Tests/Common.Tests/**",
+        ".github/workflows/sonarcloud_schedulerservice.yaml",
+        ".github/workflows/schedulerservice.yaml",
       ]
     branches: ["main"]
   pull_request:
@@ -18,6 +20,8 @@ on:
         "csharp/SchedulerService/**",
         "csharp/Tests/SchedulerService.Tests/**",
         "csharp/Tests/Common.Tests/**",
+        ".github/workflows/sonarcloud_schedulerservice.yaml",
+        ".github/workflows/schedulerservice.yaml",
       ]
 jobs:
   build:
