@@ -37,7 +37,7 @@ namespace DataExporter.Controllers
         private readonly ILocalFileService _localFileService;
         private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
 
-        public InfluxController(IInfluxDbService influxDBService,
+        public InfluxController(IInfluxDbService influxDbService,
             IFileService fileService,
             IConfiguration configuration,
             ICleanupService cleanupService,
@@ -45,7 +45,7 @@ namespace DataExporter.Controllers
             ILocalFileService localFileService,
             ILogger<InfluxController> logger)
         {
-            this._influxDbService = influxDBService;
+            this._influxDbService = influxDbService;
             _org = configuration.GetValue<string>("InfluxDB:Org")!;
             _fileService = fileService;
             _logger = logger;
