@@ -80,9 +80,13 @@ jobs:
           dotnet build ./csharp/SchedulerService/SchedulerService.csproj --no-incremental --no-restore
           dotnet build ./csharp/Common/Common.csproj --no-incremental --no-restore
 
-          # Run tests and collect coverage for both test projects
-          dotnet-coverage collect "dotnet test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj" -f cobertura -o "coverage1.cobertura.xml"
-          dotnet-coverage collect "dotnet test ./csharp/Tests/Common.Tests/Common.Tests.csproj" -f cobertura -o "coverage2.cobertura.xml"
+
+          # Run tests and collect coverage for both test projects using coverlet collector
+          dotnet test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --collect:"XPlat Code Coverage"
+          cp ./csharp/Tests/SchedulerService.Tests/TestResults/**/coverage.cobertura.xml coverage1.cobertura.xml
+
+          dotnet test ./csharp/Tests/Common.Tests/Common.Tests.csproj --collect:"XPlat Code Coverage"
+          cp ./csharp/Tests/Common.Tests/TestResults/**/coverage.cobertura.xml coverage2.cobertura.xml
 
           # Merge coverage reports
           reportgenerator -reports:"coverage1.cobertura.xml;coverage2.cobertura.xml" -targetdir:coverage-report -reporttypes:Cobertura
