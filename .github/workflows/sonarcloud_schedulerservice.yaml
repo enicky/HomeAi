@@ -128,7 +128,7 @@ jobs:
           # Convert merged coverage to opencover for SonarCloud
           dotnet run --project tools/CoverletJsonToOpenCover coverage.json coverage.opencover.xml
 
-          # End SonarCloud analysis
+          #End SonarCloud analysis
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
       - uses: actions/upload-artifact@v4
         with:
