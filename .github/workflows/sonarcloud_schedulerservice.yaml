@@ -93,7 +93,7 @@ jobs:
           cp ./csharp/Tests/Common.Tests/TestResults/**/coverage.opencover.xml coverage2.opencover.xml
 
           # Merge coverage files
-          reportgenerator -reports:coverage1.opencover.xml;coverage2.opencover.xml -targetdir:coveragereport -reporttypes:opencover -filefilters:-*Tests.dll
+          reportgenerator -reports:coverage1.opencover.xml;coverage2.opencover.xml --targetdir:coveragereport --reporttypes:opencover --filefilters:-*Tests.dll
           cp coveragereport/opencover.xml coverage.opencover.xml
 
           # End SonarCloud analysis
