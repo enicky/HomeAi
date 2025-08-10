@@ -97,6 +97,10 @@ jobs:
           # Merge coverage reports
           reportgenerator -reports:"coverage1.opencover.xml;coverage2.opencover.xml" -targetdir:coverage-report -reporttypes:OpenCover
 
+          echo "Coverage report directory contents:"
+          ls -la coverage-report/
+
+          echo "Copying merged coverage report..."
           # The merged file will be at coverage-report/OpenCover.xml
           cp coverage-report/OpenCover.xml coverage.opencover.xml
 
