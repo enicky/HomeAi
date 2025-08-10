@@ -69,24 +69,34 @@ jobs:
           SONAR_VERBOSE: "true"
         shell: bash
         run: |
+          #!/usr/bin/env bash
+          set -e
+
+          # Start SonarCloud analysis
           ./.sonar/scanner/dotnet-sonarscanner begin /k:"enicky_schedulerservice" \
             /o:"enicky" /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths=coverage.opencover.xml \
             /d:sonar.verbose=true
 
+          # Restore and build
           dotnet restore ./csharp/SchedulerService/SchedulerService.csproj
           dotnet restore ./csharp/Common/Common.csproj
-
           dotnet build ./csharp/SchedulerService/SchedulerService.csproj --no-incremental --no-restore
           dotnet build ./csharp/Common/Common.csproj --no-incremental --no-restore
 
+          # Run tests and collect coverage for each test project
+          dotnet test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          cp ./csharp/Tests/SchedulerService.Tests/TestResults/**/coverage.opencover.xml coverage1.opencover.xml
 
+          dotnet test ./csharp/Tests/Common.Tests/Common.Tests.csproj --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          cp ./csharp/Tests/Common.Tests/TestResults/**/coverage.opencover.xml coverage2.opencover.xml
 
-          # Run all tests in one command and collect a single OpenCover coverage file
-          dotnet test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj ./csharp/Tests/Common.Tests/Common.Tests.csproj --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-          cp ./csharp/Tests/SchedulerService.Tests/TestResults/**/coverage.opencover.xml coverage.opencover.xml
+          # Merge coverage files
+          reportgenerator -reports:coverage1.opencover.xml;coverage2.opencover.xml -targetdir:coveragereport -reporttypes:opencover -filefilters:-*Tests.dll
+          cp coveragereport/opencover.xml coverage.opencover.xml
 
+          # End SonarCloud analysis
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
       - uses: actions/upload-artifact@v4
         with:
