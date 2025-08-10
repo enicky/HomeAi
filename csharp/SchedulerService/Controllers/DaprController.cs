@@ -29,8 +29,12 @@ public class DaprController : ControllerBase
         logger.LogInformation($"TestReply got triggered");
         if (o is not null)
         {
+            if (string.IsNullOrEmpty(o.GeneratedFileName))
+            {
+                return BadRequest();
+            }
             var success= o.Success.ToString();
-            var generatedFileName = o.GeneratedFileName.Replace(" ", "_");
+            var generatedFileName = o!.GeneratedFileName?.Replace(" ", "_");
             var startAiProcess = o.StartAiProcess.ToString();
             logger.LogInformation("Received RetrieveDataResponse response : {Success} for id {GeneratedFileName} -> {StartAiProcess}", success, generatedFileName, startAiProcess);
             return Ok();
@@ -100,12 +104,12 @@ public class DaprController : ControllerBase
 
     [Topic(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_FINISHED_TRAIN_MODEL)]
     [HttpPost("AiFinishedTrainingModel")]
-    public async Task AiFinishedTrainingModel([FromBody] TrainAiModelResponse response)
+    public async Task AiFinishedTrainingModel([FromBody] TrainAiModelResponse? response)
     {
         var traceParent = Activity.Current?.Id ?? string.Empty;
         logger.LogInformation("Retrieved message that training of model has been finished");
-        logger.LogInformation("Training was a success: {IsSuccess}", response.Success);
-        logger.LogInformation("ModelPath to use is : {ModelPath}", response.ModelPath);
+        logger.LogInformation("Training was a success: {IsSuccess}", response?.Success);
+        logger.LogInformation("ModelPath to use is : {ModelPath}", response?.ModelPath);
         
         if (response != null && !string.IsNullOrEmpty(response.ModelPath))
         {
