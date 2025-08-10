@@ -1,9 +1,10 @@
+using Common.Factory;
+
+namespace SchedulerService.Service;
+
 using Common.Helpers;
 using Common.Models.AI;
 using Common.Models.Responses;
-using Dapr.Client;
-
-namespace SchedulerService.Service;
 
 public interface IInvokeDaprService
 {
@@ -14,14 +15,17 @@ public interface IInvokeDaprService
 public class InvokeDaprService : IInvokeDaprService
 {
     private readonly ILogger<InvokeDaprService> _logger;
-    public InvokeDaprService(ILogger<InvokeDaprService> logger)
+    private readonly IDaprClientFactory _daprClientFactory;
+
+    public InvokeDaprService(ILogger<InvokeDaprService> logger, IDaprClientFactory daprClientFactory)
     {
         _logger = logger;
+        _daprClientFactory = daprClientFactory;
     }
 
     public async Task TriggerExportData(string traceParent, CancellationToken token = default)
     {
-        using var client = new DaprClientBuilder().Build();
+        var client = _daprClientFactory.CreateClient();
         var evt = new StartDownloadDataEvent { TraceParent = traceParent };
         await client.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME, NameConsts.INFLUX_RETRIEVE_DATA, evt, token);
         _logger.LogInformation("Send event to retrieve data with traceParent: {TraceParent}", traceParent);
@@ -29,7 +33,7 @@ public class InvokeDaprService : IInvokeDaprService
 
     public async Task TriggerTrainingOfAiModel(CancellationToken token = default)
     {
-        using var client = new DaprClientBuilder().Build();
+        var client = _daprClientFactory.CreateClient();
         var retrieveResponse = await client.InvokeMethodAsync<TrainAiModelResponse>(HttpMethod.Get, "pythonaitrainer", "/train_model", token);
         if (retrieveResponse.Success)
         {

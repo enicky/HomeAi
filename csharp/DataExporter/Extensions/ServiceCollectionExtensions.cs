@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using app.Services;
 using Common.Factory;
 using Common.Services;
 using DataExporter.Services;
@@ -13,7 +12,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
         return services.AddTransient<IInfluxDbClientFactory, InfluxDbClientFactory>()
-            .AddSingleton<IInfluxDbService, InfluxDBService>()
+            .AddSingleton<IInfluxDbService, InfluxDbService>()
             .AddScoped<IFileService, FileService>()
             .AddTransient<ICleanupService, CleanupService>()
             .AddTransient<ILocalFileService, LocalFileService>()

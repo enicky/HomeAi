@@ -5,6 +5,7 @@ using SchedulerService.Triggers;
 using Microsoft.ApplicationInsights.Extensibility;
 using Common.ApplicationInsights.Filter;
 using Common.ApplicationInsights.Initializers;
+using Common.Factory;
 using Microsoft.ApplicationInsights.DependencyCollector;
 
 namespace SchedulerService;
@@ -24,7 +25,7 @@ public class Program
 #endif
         builder.Configuration.AddEnvironmentVariables();
         builder.Configuration.AddCommandLine(args);
-       
+
         builder.Services.AddApplicationInsightsTelemetry();
         builder.Services.AddApplicationInsightsTelemetryProcessor<SqlDependencyFilter>();
         builder.Services.AddApplicationInsightsTelemetryProcessor<HangfireRequestFilter>();
@@ -33,7 +34,9 @@ public class Program
             "SchedulerService"
         ));
         builder.Services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) => module.EnableSqlCommandTextInstrumentation = true);
-        
+
+        builder.Services.AddSingleton<IDaprClientFactory, DaprClientFactory>();
+
         builder.Services.AddHealthChecks();
         builder.Services.AddDaprClient();
         builder.Services.AddControllers().AddDapr();
@@ -95,17 +98,17 @@ public class Program
         builder.Services.AddHangfireServer();
         builder.Services.AddScoped<IInvokeDaprService, InvokeDaprService>();
 
-        
+
         var app = builder.Build();
 
         app.UseCloudEvents();
         app.UseSwagger();
         app.UseSwaggerUI();
-        
+
 
         app.MapControllers();
         app.MapSubscribeHandler();
-        
+
         app.UseHangfireDashboard();
         RecurringJob.AddOrUpdate<TriggerRetrieveDataForAi>(
             "trigger_ai_job",

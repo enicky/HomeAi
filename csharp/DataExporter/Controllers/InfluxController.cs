@@ -1,17 +1,16 @@
 using System.Diagnostics;
 using System.Globalization;
-using app.Services;
+using Common.Factory;
 using Common.Helpers;
 using Common.Models.AI;
 using Common.Models.Responses;
 using Common.Services;
 using CsvHelper;
 using Dapr;
-using Dapr.Client;
 using DataExporter.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InfluxController.Controllers
+namespace DataExporter.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -33,7 +32,7 @@ namespace InfluxController.Controllers
         private readonly string _org;
         private readonly IFileService _fileService;
         private readonly ILogger<InfluxController> _logger;
-        private readonly DaprClient _daprClient;
+        private readonly IDaprClientWrapper _daprClient;
         private readonly ICleanupService _cleanupService;
         private readonly ILocalFileService _localFileService;
         private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
@@ -42,7 +41,7 @@ namespace InfluxController.Controllers
             IFileService fileService,
             IConfiguration configuration,
             ICleanupService cleanupService,
-            DaprClient daprClient,
+            IDaprClientWrapper daprClient,
             ILocalFileService localFileService,
             ILogger<InfluxController> logger)
         {

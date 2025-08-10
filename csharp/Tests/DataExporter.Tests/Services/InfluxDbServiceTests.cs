@@ -1,5 +1,5 @@
-using app.Services;
 using Common.Models.Influx;
+using DataExporter.Services;
 using DataExporter.Services.Factory;
 using DataExporter.Services.Wrapper;
 using DataExporter.Tests.ControllerTests;
@@ -55,8 +55,8 @@ public class InfluxDbServiceTests : IClassFixture<TestSetup>
                            .Returns(_mockInfluxDbClientWrapper.Object);
         _mockInfluxDbClientWrapper.Setup(f => f.GetData(It.IsAny<string>(), orgString, cts.Token)).Returns(Task.FromResult(dataToReturn));
 
-        var _logger = XUnitLogger.CreateLogger<InfluxDBService>(_output);
-        var sut = new InfluxDBService(_configuration, _mockInfluxDbClientFactory.Object, _logger);
+        var _logger = XUnitLogger.CreateLogger<InfluxDbService>(_output);
+        var sut = new InfluxDbService(_configuration, _mockInfluxDbClientFactory.Object, _logger);
         var result = await sut.QueryAsync(queryString, orgString, cts.Token);
         Assert.NotNull(result);
         Assert.NotEmpty(result);
