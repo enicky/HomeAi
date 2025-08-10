@@ -24,14 +24,7 @@ public class Program
 #endif
         builder.Configuration.AddEnvironmentVariables();
         builder.Configuration.AddCommandLine(args);
-        // builder.Configuration.AddJsonFile(
-        //     "appsettings.json",
-        //     optional: false,
-        //     reloadOnChange: true
-        // );
-        // builder.Configuration.AddEnvironmentVariables();
-        // builder.Configuration.AddCommandLine(args);
-
+       
         builder.Services.AddApplicationInsightsTelemetry();
         builder.Services.AddApplicationInsightsTelemetryProcessor<SqlDependencyFilter>();
         builder.Services.AddApplicationInsightsTelemetryProcessor<HangfireRequestFilter>();

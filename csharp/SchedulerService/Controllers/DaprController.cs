@@ -44,8 +44,8 @@ public class DaprController : ControllerBase
     public async Task DownloadDataHasFinished([FromBody] RetrieveDataResponse? response)
     {
         logger.LogInformation("Trigger received that download has Finished {ResponseValue}", JsonConvert.SerializeObject(response));
-        logger.LogInformation("Completed {IsCompleted}, filename {FileName}",response?.Success, response?.GeneratedFileName);
-        logger.LogInformation("Start AI Processing ? {StartAiProcessing}", response?.StartAiProcess);
+        logger.LogDebug("Completed {IsCompleted}, filename {FileName}",response?.Success, response?.GeneratedFileName);
+        logger.LogDebug("Start AI Processing ? {StartAiProcessing}", response?.StartAiProcess);
         logger.LogInformation("TraceParent {TraceParent}", response?.TraceParent);
         var mustTrainModel = false;
         if(response == null)

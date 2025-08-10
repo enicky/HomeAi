@@ -14,7 +14,7 @@ public class HealthzRequestFilter(ITelemetryProcessor next): ITelemetryProcessor
         next.Process(item);
     }
 
-    private bool OKtoSend(ITelemetry item)
+    private static bool OKtoSend(ITelemetry item)
     {
         // Filter out health check requests
         if (item.Context.Operation.Name == "GET /healthz" ||
@@ -25,10 +25,7 @@ public class HealthzRequestFilter(ITelemetryProcessor next): ITelemetryProcessor
         {
             return false;
         }
-        {
-            return false;
-        }
-
+        
         // Allow all other telemetry items
         return true;
     }
