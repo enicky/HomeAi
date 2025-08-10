@@ -85,6 +85,10 @@ jobs:
           dotnet build ./csharp/SchedulerService/SchedulerService.csproj --no-incremental --no-restore
           dotnet build ./csharp/Common/Common.csproj --no-incremental --no-restore
 
+          # Build test projects
+          dotnet build ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --no-incremental --no-restore
+          dotnet build ./csharp/Tests/Common.Tests/Common.Tests.csproj --no-incremental --no-restore
+
 
           # Install coverlet.console
           dotnet tool install --global coverlet.console
