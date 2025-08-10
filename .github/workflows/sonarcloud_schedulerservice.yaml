@@ -97,18 +97,24 @@ jobs:
 
 
           # Install coverlet.console
-          dotnet tool update --global coverlet.console
-          export PATH="$PATH:/home/runner/.dotnet/tools"
+          # Use a local tool manifest to guarantee latest coverlet.console with merge support
+          mkdir -p .config
+          dotnet new tool-manifest --output .config
+          dotnet tool install coverlet.console --tool-path .config/.tools
+          export PATH="$PATH:$(pwd)/.config/.tools"
+
+          ./.config/.tools/coverlet --version
 
           # Run tests and collect coverage for each test project using coverlet
-          coverlet ./csharp/Tests/SchedulerService.Tests/bin/Debug/net8.0/SchedulerService.Tests.dll --target "dotnet" --targetargs "test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --no-build" --format json --output coverage1.json
-          coverlet ./csharp/Tests/Common.Tests/bin/Debug/net8.0/Common.Tests.dll --target "dotnet" --targetargs "test ./csharp/Tests/Common.Tests/Common.Tests.csproj --no-build" --format json --output coverage2.json
+
+          ./.config/.tools/coverlet ./csharp/Tests/SchedulerService.Tests/bin/Debug/net8.0/SchedulerService.Tests.dll --target "dotnet" --targetargs "test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --no-build" --format json --output coverage1.json
+          ./.config/.tools/coverlet ./csharp/Tests/Common.Tests/bin/Debug/net8.0/Common.Tests.dll --target "dotnet" --targetargs "test ./csharp/Tests/Common.Tests/Common.Tests.csproj --no-build" --format json --output coverage2.json
 
           # Merge coverage files
-          coverlet merge coverage1.json coverage2.json --output coverage.json
+          ./.config/.tools/coverlet merge coverage1.json coverage2.json --output coverage.json
 
           # Convert merged coverage to opencover for SonarCloud
-          coverlet report --input coverage.json --output coverage.opencover.xml --format opencover
+          ./.config/.tools/coverlet report --input coverage.json --output coverage.opencover.xml --format opencover
 
           # End SonarCloud analysis
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
