@@ -107,20 +107,23 @@ jobs:
 
           # Run tests and collect coverage for each test project using coverlet
 
-          # First test project (opencover format)
+          # First test project (json format)
           ./.config/.tools/coverlet ./csharp/Tests/SchedulerService.Tests/bin/Debug/net8.0/SchedulerService.Tests.dll \
             --target "dotnet" \
             --targetargs "test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --no-build" \
-            --format opencover \
-            --output coverage.opencover.xml
+            --format json \
+            --output coverage.json
 
-          # Second test project, merge with previous (opencover format)
+          # Second test project, merge with previous (json format)
           ./.config/.tools/coverlet ./csharp/Tests/Common.Tests/bin/Debug/net8.0/Common.Tests.dll \
             --target "dotnet" \
             --targetargs "test ./csharp/Tests/Common.Tests/Common.Tests.csproj --no-build" \
-            --format opencover \
-            --output coverage.opencover.xml \
-            --merge-with coverage.opencover.xml
+            --format json \
+            --output coverage.json \
+            --merge-with coverage.json
+
+          # Convert merged coverage to opencover for SonarCloud
+          ./.config/.tools/coverlet report --input coverage.json --output coverage.opencover.xml --format opencover
 
           # End SonarCloud analysis
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
