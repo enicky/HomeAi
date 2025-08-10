@@ -1,5 +1,6 @@
 name: SonarCloud - SchedulerService
 on:
+  workflow_dispatch: 
   push:
     paths: ['csharp/Common/**', 'csharp/SchedulerService/**', 'csharp/Tests/SchedulerService.Tests/**']
     branches: ['main']
