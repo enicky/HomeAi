@@ -86,6 +86,7 @@ jobs:
           ./.sonar/scanner/dotnet-sonarscanner begin /k:"enicky_schedulerservice" \
             /o:"enicky" /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.sources="csharp/**""
             /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
             /d:sonar.verbose=true
 
