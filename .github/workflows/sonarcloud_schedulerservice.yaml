@@ -87,7 +87,7 @@ jobs:
             /o:"enicky" /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.sources="csharp" \
-            /d:sonar.exclusions="python,csharp/DataExporter" \
+            /d:sonar.exclusions="python/**,csharp/DataExporter/**" \
             /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml 
             
           # Restore and build
@@ -103,7 +103,7 @@ jobs:
           dotnet build ./csharp/Tests/Common.Tests/Common.Tests.csproj --no-incremental --no-restore
 
           # Collect coverage in vscoveragexml format
-          dotnet-coverage collect "dotnet test HomeAi-SchedulerService.sln" -f xml -o "coverage.xml"
+          dotnet-coverage collect "dotnet test --filter 'FullyQualifiedName!~DataExporter.Tests'" -f xml -o "coverage.xml"
 
           # End SonarCloud analysis
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
