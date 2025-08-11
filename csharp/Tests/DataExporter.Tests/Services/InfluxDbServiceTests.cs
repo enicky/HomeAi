@@ -26,12 +26,19 @@ public class InfluxDbServiceTests : IClassFixture<TestSetup>
 
     private readonly Mock<IInfluxDbClientFactory> _mockInfluxDbClientFactory = new();
     private readonly Mock<IInfluxDbClientWrapper> _mockInfluxDbClientWrapper = new();
-    
+
+    [Fact]
+    public void InfluxRecord_CanBeCreated()
+    {
+        var record = new InfluxRecord();
+        Assert.NotNull(record);
+    }
+
     // test
     [Fact]
     public async Task Test()
     {
-       var dataToReturn = new List<InfluxRecord>{
+        var dataToReturn = new List<InfluxRecord>{
         new InfluxRecord{Humidity = 1, Pressure = 1, Temperature = 1, Time = DateTime.Today, Watt = 10}
        };
 
@@ -50,7 +57,7 @@ public class InfluxDbServiceTests : IClassFixture<TestSetup>
            " |> yield(name: \"values\")";
         var orgString = "e6601eb7b60be0fe";
 
-        
+
         _mockInfluxDbClientFactory.Setup(f => f.CreateWrapper(It.IsAny<string>(), It.IsAny<string>()))
                            .Returns(_mockInfluxDbClientWrapper.Object);
         _mockInfluxDbClientWrapper.Setup(f => f.GetData(It.IsAny<string>(), orgString, cts.Token)).Returns(Task.FromResult(dataToReturn));
