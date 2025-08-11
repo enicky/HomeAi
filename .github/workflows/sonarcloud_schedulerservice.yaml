@@ -87,7 +87,7 @@ jobs:
             /o:"enicky" /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.sources="csharp" \
-            /d:sonar.exclusions="python" \
+            /d:sonar.exclusions="python,csharp/DataExporter" \
             /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml 
             
 

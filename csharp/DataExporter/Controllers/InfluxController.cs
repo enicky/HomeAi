@@ -170,7 +170,7 @@ namespace DataExporter.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("File not found for date {DateTime:yyyy-MM-dd}: {ExMessage}", date, ex.Message);
+                    _logger.LogError(ex, "File not found for date {DateTime:yyyy-MM-dd}: {ExMessage}", date, ex.Message);
                 }
             }
 
