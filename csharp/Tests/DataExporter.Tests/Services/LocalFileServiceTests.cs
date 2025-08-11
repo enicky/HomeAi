@@ -1,13 +1,11 @@
 using System.IO.Abstractions.TestingHelpers;
-using System.Security.Policy;
 using Common.Models.Influx;
 using DataExporter.Services;
 using DataExporter.Tests.ControllerTests;
-using Meziantou.Extensions.Logging.Xunit;
 using Newtonsoft.Json;
 using Xunit.Abstractions;
 
-namespace DataExporter.Tests.File;
+namespace DataExporter.Tests.Services;
 
 public class LocalFileServiceTests : IClassFixture<TestSetup>
 {

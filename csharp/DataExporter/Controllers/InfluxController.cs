@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.IO.Abstractions;
 using Common.Exceptions;
 using Common.Factory;
 using Common.Helpers;
@@ -37,14 +38,17 @@ namespace DataExporter.Controllers
         private readonly ICleanupService _cleanupService;
         private readonly ILocalFileService _localFileService;
         private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
+        private readonly IFileSystem _fileSystem;
 
-        public InfluxController(IInfluxDbService influxDbService,
+        public InfluxController(
+            IInfluxDbService influxDbService,
             IFileService fileService,
             IConfiguration configuration,
             ICleanupService cleanupService,
             IDaprClientWrapper daprClient,
             ILocalFileService localFileService,
-            ILogger<InfluxController> logger)
+            ILogger<InfluxController> logger,
+            IFileSystem fileSystem)
         {
             this._influxDbService = influxDbService;
             _org = configuration.GetValue<string>("InfluxDB:Org")!;
@@ -53,6 +57,7 @@ namespace DataExporter.Controllers
             _daprClient = daprClient;
             _cleanupService = cleanupService;
             _localFileService = localFileService;
+            _fileSystem = fileSystem;
         }
 
         [HttpGet("ExportDataForDate")]
@@ -111,7 +116,7 @@ namespace DataExporter.Controllers
             {
                 var response = await _influxDbService.QueryAsync(queryString, _org, token);
                 var fileName = await RetrieveLastFile();
-                if(string.IsNullOrEmpty(fileName)) throw new InvalidFilenameException("No file found to read from");    
+                if (string.IsNullOrEmpty(fileName)) throw new InvalidFilenameException("No file found to read from");
                 var records = _localFileService.ReadFromFile(fileName);
                 var cleanedUpResponses = _cleanupService.Cleanup(response, records);
                 var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
@@ -157,7 +162,7 @@ namespace DataExporter.Controllers
                 try
                 {
                     var parsedFile = await _fileService.RetrieveParsedFile(fileName, StorageHelpers.ContainerName);
-                    if (!string.IsNullOrEmpty(parsedFile) && System.IO.File.Exists(parsedFile))
+                    if (!string.IsNullOrEmpty(parsedFile) && _fileSystem.File.Exists(parsedFile))
                     {
                         _logger.LogInformation("Found file: {FileName} at {ParsedFile}", fileName, parsedFile);
                         return parsedFile;
