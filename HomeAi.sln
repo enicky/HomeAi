@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SchedulerService", "csharp\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "csharp\Common\Common.csproj", "{5BE64E55-D5FD-411F-B2A1-93F907147ED2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConvertOldData", "..\..\ConvertOldDataToNewFormat\ConvertOldData\ConvertOldData.csproj", "{B32DD8A0-5F44-457A-9161-91031D328301}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{77C9226E-4749-4307-9323-90F598DB17EF}"
 	ProjectSection(SolutionItems) = preProject
 		csharp\Tests\Common.Tests\UnitTest1.cs = csharp\Tests\Common.Tests\UnitTest1.cs
@@ -42,10 +40,6 @@ Global
 		{5BE64E55-D5FD-411F-B2A1-93F907147ED2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5BE64E55-D5FD-411F-B2A1-93F907147ED2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5BE64E55-D5FD-411F-B2A1-93F907147ED2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B32DD8A0-5F44-457A-9161-91031D328301}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B32DD8A0-5F44-457A-9161-91031D328301}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B32DD8A0-5F44-457A-9161-91031D328301}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B32DD8A0-5F44-457A-9161-91031D328301}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B723C7C4-215C-44D7-98F2-7A5E4D1B6FA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B723C7C4-215C-44D7-98F2-7A5E4D1B6FA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B723C7C4-215C-44D7-98F2-7A5E4D1B6FA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
