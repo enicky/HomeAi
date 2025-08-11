@@ -1,58 +1,109 @@
 name: SonarCloud - DataExporter
 on:
+  workflow_dispatch:
   push:
-    paths: ['csharp/Common/**', 'csharp/DataExporter/**', 'csharp/Tests/DataExporter.Tests/**']
-    branches: ['main']
+    paths:
+      [
+        "csharp/Common/**",
+        "csharp/Tests/Common.Tests/**",
+        "csharp/DataExporter/**",
+        "csharp/Tests/DataExporter.Tests/**",
+        ".github/workflows/sonarcloud_dataexporter.yaml",
+        ".github/workflows/dataexporter.yaml",
+      ]
+    branches: ["main"]
   pull_request:
     types: [opened, synchronize, reopened]
-    paths: ['csharp/Common/**', 'csharp/DataExporter/**', 'csharp/Tests/DataExporter.Tests/**']
+    paths:
+      [
+        "csharp/Common/**",
+        "csharp/DataExporter/**",
+        "csharp/Tests/DataExporter.Tests/**",
+        "csharp/Tests/Common.Tests/**",
+        ".github/workflows/sonarcloud_dataexporter.yaml",
+        ".github/workflows/dataexporter.yaml",
+      ]
 jobs:
   build:
     name: Build and analyze
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: 'zulu' # Alternative distribution options are available.
+      - name: Install libxml2
+        run: sudo apt-get update && sudo apt-get install -y libxml2
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
-          path: ~\sonar\cache
+          path: ~/sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - name: Cache SonarCloud scanner
         id: cache-sonar-scanner
         uses: actions/cache@v3
         with:
-          path: .\.sonar\scanner
+          path: ./.sonar/scanner
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
       - name: Install sonar dotnet coverage tool
-        shell: powershell
+        shell: bash
         run: |
           dotnet tool install --global dotnet-coverage
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
       - name: Install SonarCloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        shell: powershell
+        shell: bash
         run: |
-          New-Item -Path .\.sonar\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+          mkdir -p ./.sonar/scanner
+          dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
       - name: Build and analyze
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        shell: powershell
-        run: |-
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"homeai_dataexporter" /o:"enicky" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
+          SONAR_VERBOSE: "true"
+        shell: bash
+        run: |
+          #!/usr/bin/env bash
+          set -e
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+        shell: bash
+        run: |
+          #!/usr/bin/env bash
+          set -e
+
+          # Start SonarCloud analysis
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"homeai_dataexporter" \
+            /o:"enicky" /d:sonar.token="${SONAR_TOKEN}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.sources="csharp" \
+            /d:sonar.tests="csharp/Tests/Common.Tests/**,csharp/Tests/DataExporter.Tests/**" \
+            /d:sonar.exclusions="python/**,csharp/SchedulerService/**,components/**,.config/**,.github/**" \
+            /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml 
+
+          # Restore and build
           dotnet restore ./csharp/DataExporter/DataExporter.csproj
+          dotnet restore ./csharp/Common/Common.csproj
           dotnet build ./csharp/DataExporter/DataExporter.csproj --no-incremental --no-restore
-          dotnet-coverage collect "dotnet test ./csharp/Tests/DataExporter.Tests/DataExporter.Tests.csproj" -f xml -o "coverage.xml"
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          dotnet build ./csharp/Common/Common.csproj --no-incremental --no-restore
+
+          # Restore and build test projects
+          dotnet restore ./csharp/Tests/Common.Tests/Common.Tests.csproj
+          dotnet build ./csharp/Tests/Common.Tests/Common.Tests.csproj --no-incremental --no-restore
+          dotnet restore ./csharp/Tests/DataExporter.Tests/DataExporter.Tests.csproj
+          dotnet build ./csharp/Tests/DataExporter.Tests/DataExporter.Tests.csproj --no-incremental --no-restore
+
+          # Collect coverage in vscoveragexml format
+          dotnet-coverage collect "dotnet test --filter 'FullyQualifiedName!~SchedulerService.Tests'" -f xml -o "coverage.xml"
+
+          # End SonarCloud analysis
+          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
+
       - uses: actions/upload-artifact@v4
         with:
+          name: coverage.xml
           path: coverage.xml
