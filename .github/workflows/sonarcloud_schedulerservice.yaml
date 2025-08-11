@@ -87,7 +87,8 @@ jobs:
             /o:"enicky" /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.sources="csharp" \
-            /d:sonar.exclusions="python/**,csharp/DataExporter/**" \
+            /d:sonar.tests="csharp/Tests/Common.Tests/**,csharp/Tests/SchedulerService.Tests/**" \
+            /d:sonar.exclusions="python/**,csharp/DataExporter/**,components/**,.config/**,.github/**" \
             /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml 
             
           # Restore and build
