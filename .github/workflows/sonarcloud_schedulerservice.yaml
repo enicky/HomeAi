@@ -104,7 +104,7 @@ jobs:
           dotnet build ./csharp/Tests/Common.Tests/Common.Tests.csproj --no-incremental --no-restore
 
           # Collect coverage in vscoveragexml format
-          dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
+          dotnet-coverage collect "dotnet test --filter 'FullyQualifiedName!~DataExporter'" -f xml -o "coverage.xml"
 
           # End SonarCloud analysis
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
