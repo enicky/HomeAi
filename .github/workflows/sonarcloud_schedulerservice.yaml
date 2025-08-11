@@ -56,8 +56,7 @@ jobs:
         run: |
           dotnet tool install --global dotnet-coverage
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool --version 4.8.12
+      # ReportGenerator not needed for vscoveragexml only
       - name: Install SonarCloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         shell: bash
@@ -73,13 +72,20 @@ jobs:
         run: |
           #!/usr/bin/env bash
           set -e
-
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_VERBOSE: "true"
+        shell: bash
+        run: |
+          #!/usr/bin/env bash
+          set -e
 
           # Start SonarCloud analysis
           ./.sonar/scanner/dotnet-sonarscanner begin /k:"enicky_schedulerservice" \
             /o:"enicky" /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.opencover.reportsPaths=coverage.opencover.xml \
             /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
             /d:sonar.verbose=true
 
@@ -95,60 +101,11 @@ jobs:
           dotnet build ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --no-incremental --no-restore
           dotnet build ./csharp/Tests/Common.Tests/Common.Tests.csproj --no-incremental --no-restore
 
-          # Build test projects
-          dotnet build ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --no-incremental --no-restore
-          dotnet build ./csharp/Tests/Common.Tests/Common.Tests.csproj --no-incremental --no-restore
-
-
-          # Install coverlet.console
-          # Use a local tool manifest to guarantee latest coverlet.console with merge support
-          mkdir -p .config
-          dotnet new tool-manifest --output .config
-          dotnet tool install coverlet.console --tool-path .config/.tools
-          export PATH="$PATH:$(pwd)/.config/.tools"
-
-          ./.config/.tools/coverlet --version
-
-
+          # Collect coverage in vscoveragexml format
           dotnet-coverage collect "dotnet test" -f xml -o "coverage.xml"
 
-          # Run tests and collect coverage for each test project using coverlet
-
-          # First test project (json format)
-          ./.config/.tools/coverlet ./csharp/Tests/SchedulerService.Tests/bin/Debug/net8.0/SchedulerService.Tests.dll \
-            --target "dotnet" \
-            --targetargs "test ./csharp/Tests/SchedulerService.Tests/SchedulerService.Tests.csproj --no-build" \
-            --format json \
-            --output coverage.json
-
-          echo "Coverage for SchedulerService.Tests collected in coverage.json"
-          cp coverage.json coverage.schedulercov.json
-
-          # Second test project, merge with previous (json format)
-          ./.config/.tools/coverlet ./csharp/Tests/Common.Tests/bin/Debug/net8.0/Common.Tests.dll \
-            --target "dotnet" \
-            --targetargs "test ./csharp/Tests/Common.Tests/Common.Tests.csproj --no-build" \
-            --format json \
-            --output coverage.json \
-            --merge-with coverage.json
-
-          echo "Merged coverage files into coverage.json"
-          echo "conert to opencover format"
-
-          # Convert merged coverage to opencover for SonarCloud
-          dotnet run --project tools/CoverletJsonToOpenCover coverage.json ./coverage.opencover.xml
-
-          #End SonarCloud analysis
+          # End SonarCloud analysis
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: coverage.opencover.xml
-          path: coverage.opencover.xml
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: coverage.schedulercov.json
-          path: coverage.schedulercov.json
 
       - uses: actions/upload-artifact@v4
         with:
