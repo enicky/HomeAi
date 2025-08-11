@@ -22,3 +22,4 @@ merged_and_sorted_file.csv
 flask*
 **/checkpoint*
 **/*.csv
+**/*.DotSettings.user
