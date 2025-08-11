@@ -87,6 +87,7 @@ jobs:
             /o:"enicky" /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.sources="/home/runner/work/HomeAi/HomeAi/csharp/**" \
+            /d:sonar.exclusions="/home/runner/work/HomeAi/HomeAi/python/**" \
             /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml \
             /d:sonar.verbose=true
 
