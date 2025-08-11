@@ -114,6 +114,9 @@ jobs:
             --format json \
             --output coverage.json
 
+          echo "Coverage for SchedulerService.Tests collected in coverage.json"
+          cp coverage.json coverage.schedulercov.json
+
           # Second test project, merge with previous (json format)
           ./.config/.tools/coverlet ./csharp/Tests/Common.Tests/bin/Debug/net8.0/Common.Tests.dll \
             --target "dotnet" \
@@ -132,4 +135,15 @@ jobs:
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
       - uses: actions/upload-artifact@v4
         with:
+          name: coverage.opencover.xml
           path: coverage.opencover.xml
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage.schedulercov.json
+          path: coverage.schedulercov.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage.json
+          path: coverage.json
