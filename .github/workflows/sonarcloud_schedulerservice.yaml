@@ -90,6 +90,8 @@ jobs:
             /d:sonar.exclusions="python,csharp/DataExporter" \
             /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml 
             
+          # Delete DataExporter tests
+          rm -rf ./csharp/Tests/DataExporter.Tests
 
           # Restore and build
           dotnet restore ./csharp/SchedulerService/SchedulerService.csproj
