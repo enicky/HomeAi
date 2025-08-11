@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using Common.Exceptions;
 using Common.Factory;
 using Common.Helpers;
 using Common.Models.AI;
@@ -58,7 +59,7 @@ namespace DataExporter.Controllers
         public async Task<IActionResult> ExportDataForDate(DateTime startDate, CancellationToken token)
         {
             var strDateTime = startDate.ToStartDayString();
-            _logger.LogDebug("Start export data for date {startDate}", strDateTime);
+            _logger.LogDebug("Start export data for date {StartDate}", strDateTime);
             var strStartDate = startDate.AddDays(-1).ToStartDayString();
             var strTomorrowStartDate = startDate.ToStartDayString();
 
@@ -94,9 +95,9 @@ namespace DataExporter.Controllers
         public async Task RetrieveData(StartDownloadDataEvent evt, CancellationToken token)
         {
             _logger.LogInformation("Trigger received to retrieve data from influx");
-            _logger.LogInformation("Current activity id: {ActivityId}", System.Diagnostics.Activity.Current?.Id);
-            _logger.LogInformation("Current activity parent id: {ParentId}", Activity.Current?.ParentId);
-            _logger.LogInformation("Received event with traceParent {TraceParent}", evt.TraceParent);
+            _logger.LogDebug("Current activity id: {ActivityId}", System.Diagnostics.Activity.Current?.Id);
+            _logger.LogDebug("Current activity parent id: {ParentId}", Activity.Current?.ParentId);
+            _logger.LogDebug("Received event with traceParent {TraceParent}", evt.TraceParent);
 
 
             if (!string.IsNullOrEmpty(evt.TraceParent))
@@ -110,7 +111,7 @@ namespace DataExporter.Controllers
             {
                 var response = await _influxDbService.QueryAsync(queryString, _org, token);
                 var fileName = await RetrieveLastFile();
-                //var fileName = await _fileService.RetrieveParsedFile($"export-{DateTime.Now.AddDays(-1):yyyy-MM-dd}.csv", StorageHelpers.ContainerName);
+                if(string.IsNullOrEmpty(fileName)) throw new InvalidFilenameException("No file found to read from");    
                 var records = _localFileService.ReadFromFile(fileName);
                 var cleanedUpResponses = _cleanupService.Cleanup(response, records);
                 var currentDate = DateTime.Now.ToString("yyyy-MM-dd");
@@ -158,17 +159,17 @@ namespace DataExporter.Controllers
                     var parsedFile = await _fileService.RetrieveParsedFile(fileName, StorageHelpers.ContainerName);
                     if (!string.IsNullOrEmpty(parsedFile) && System.IO.File.Exists(parsedFile))
                     {
-                        _logger.LogInformation($"Found file: {fileName} at {parsedFile}");
+                        _logger.LogInformation("Found file: {FileName} at {ParsedFile}", fileName, parsedFile);
                         return parsedFile;
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogDebug($"File not found for date {date:yyyy-MM-dd}: {ex.Message}");
+                    _logger.LogError("File not found for date {DateTime:yyyy-MM-dd}: {ExMessage}", date, ex.Message);
                 }
             }
 
-            _logger.LogWarning($"No export file found in the last {maxDaysBack} days.");
+            _logger.LogWarning("No export file found in the last {MaxDaysBack} days.", maxDaysBack);
             return null;
         }
     }
