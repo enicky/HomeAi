@@ -26,7 +26,7 @@ public class InfluxControllerTests : IClassFixture<TestSetup>
     private readonly Mock<IDaprClientWrapper> _mockedDaprClient = new();
     private readonly Mock<ILocalFileService> _localFileService = new();
     private readonly Mock<ILogger<InfluxController>> _mockedLogger = new();
-    private readonly Mock<IFileSystem> _mockedFileSystem = new();
+    private readonly Mock<System.IO.Abstractions.IFileSystem> _mockedFileSystem = new();
 
     public InfluxControllerTests(TestSetup testSetup, ITestOutputHelper output)
     {
@@ -110,8 +110,8 @@ public class InfluxControllerTests : IClassFixture<TestSetup>
                         cleanupService,
                         _mockedDaprClient.Object,
                         _localFileService.Object,
-                        _mockedLogger.Object,
-                        _mockedFileSystem.Object);
+                        _mockedLogger.Object);
+        controller.FileSystem = _mockedFileSystem.Object;
         return controller;
 
     }

@@ -38,17 +38,18 @@ namespace DataExporter.Controllers
         private readonly ICleanupService _cleanupService;
         private readonly ILocalFileService _localFileService;
         private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
-        private readonly IFileSystem _fileSystem;
+
+        [FromServices]
+        public IFileSystem FileSystem { get; set; } = default!;
 
         public InfluxController(
-            IInfluxDbService influxDbService,
-            IFileService fileService,
-            IConfiguration configuration,
-            ICleanupService cleanupService,
-            IDaprClientWrapper daprClient,
-            ILocalFileService localFileService,
-            ILogger<InfluxController> logger,
-            IFileSystem fileSystem)
+           IInfluxDbService influxDbService,
+           IFileService fileService,
+           IConfiguration configuration,
+           ICleanupService cleanupService,
+           IDaprClientWrapper daprClient,
+           ILocalFileService localFileService,
+           ILogger<InfluxController> logger)
         {
             this._influxDbService = influxDbService;
             _org = configuration.GetValue<string>("InfluxDB:Org")!;
@@ -57,7 +58,6 @@ namespace DataExporter.Controllers
             _daprClient = daprClient;
             _cleanupService = cleanupService;
             _localFileService = localFileService;
-            _fileSystem = fileSystem;
         }
 
         [HttpGet("ExportDataForDate")]
@@ -162,7 +162,7 @@ namespace DataExporter.Controllers
                 try
                 {
                     var parsedFile = await _fileService.RetrieveParsedFile(fileName, StorageHelpers.ContainerName);
-                    if (!string.IsNullOrEmpty(parsedFile) && _fileSystem.File.Exists(parsedFile))
+                    if (!string.IsNullOrEmpty(parsedFile) && FileSystem.File.Exists(parsedFile))
                     {
                         _logger.LogInformation("Found file: {FileName} at {ParsedFile}", fileName, parsedFile);
                         return parsedFile;
