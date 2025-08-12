@@ -14,6 +14,7 @@ using Xunit;
 namespace DataExporter.Tests.ControllerTests;
 
 public class InfluxController_RetrieveLastFileTests : IClassFixture<TestSetup>
+
 {
     private readonly ServiceProvider _serviceProvider;
     private readonly IConfiguration _configuration;
@@ -65,5 +66,45 @@ public class InfluxController_RetrieveLastFileTests : IClassFixture<TestSetup>
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception, string>>()),
             Times.AtLeastOnce);
+    }
+
+
+    [Fact]
+    public async Task RetrieveLastFile_WhenParsedFileIsNullOrEmpty_DoesNotReturnAndContinues()
+    {
+        // Arrange: always return null for parsedFile, so the if is never true
+        _mockedFileService.Setup(x => x.RetrieveParsedFile(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync((string)null);
+        // File.Exists should never be called, but if it is, return false
+        _mockedFileSystem.Setup(x => x.File.Exists(It.IsAny<string>())).Returns(false);
+        var controller = new InfluxController(
+            _mockedInfluxDbService.Object,
+            _mockedFileService.Object,
+            _configuration,
+            _mockedCleanupService.Object,
+            _mockedDaprClient.Object,
+            _localFileService.Object,
+            _mockedLogger.Object
+        )
+        {
+            FileSystem = _mockedFileSystem.Object
+        };
+
+        // Act
+        var method = controller.GetType().GetMethod("RetrieveLastFile", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var task = (Task<string?>)method.Invoke(controller, null);
+        var file = await task;
+
+        // Assert
+        Assert.Null(file);
+        // Optionally, verify that LogWarning was called for no export file found
+        _mockedLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("No export file found")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+            Times.Once);
     }
 }

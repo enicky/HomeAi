@@ -72,6 +72,35 @@ public class StorageControllerTests : IClassFixture<TestSetup>
         _output.WriteLine("finished");
     }
 
+    [Fact]
+    public async Task StartUploadingModelToAzure_WhenExceptionThrown_LogsError()
+    {
+        // Arrange
+        var logger = new Mock<ILogger<StorageController>>();
+        var fileService = new Mock<IFileService>();
+        var localFileService = new Mock<ILocalFileService>();
+        var controller = new StorageController(logger.Object, fileService.Object, localFileService.Object);
+        var model = new StartUploadModel { ModelPath = "/app/checkpoints/model.pt", TriggerMoment = DateTime.Now };
+        var daprClient = new Mock<Dapr.Client.DaprClient>().Object;
+        var token = CancellationToken.None;
+
+        // Force an exception in CopyFile
+        localFileService.Setup(x => x.CopyFile(It.IsAny<string>(), It.IsAny<string>())).ThrowsAsync(new Exception("Test exception"));
+
+        // Act
+        await controller.StartUploadingModelToAzure(model, daprClient, token);
+
+        // Assert
+        logger.Verify(
+            l => l.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v != null && v.ToString() != null && v.ToString()!.Contains("There was an error processing the model to azure")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
     private StorageController CreateSut()
     {
         _mockedFileService
