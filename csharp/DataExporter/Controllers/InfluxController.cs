@@ -104,12 +104,15 @@ namespace DataExporter.Controllers
             _logger.LogDebug("Current activity parent id: {ParentId}", Activity.Current?.ParentId);
             _logger.LogDebug("Received event with traceParent {TraceParent}", evt.TraceParent);
 
-
+            // Create a new Activity and set parent if provided
+            using var activity = new Activity("InfluxController.RetrieveData");
             if (!string.IsNullOrEmpty(evt.TraceParent))
             {
-                _logger.LogInformation("Setting parent id for current activity to {TraceParent}", evt.TraceParent);
-                Activity.Current?.SetParentId(evt.TraceParent);
+                _logger.LogInformation("Setting parent id for new activity to {TraceParent}", evt.TraceParent);
+                activity.SetParentId(evt.TraceParent);
             }
+            activity.Start();
+            Activity.Current = activity;
 
             await _semaphoreSlim.WaitAsync(token);
             try
@@ -133,8 +136,8 @@ namespace DataExporter.Controllers
                     Success = true,
                     GeneratedFileName = generatedFileName,
                     StartAiProcess = true,
-                    TraceParent = Activity.Current!.Id!,
-                    TraceState = Activity.Current!.TraceStateString!
+                    TraceParent = activity.Id!,
+                    TraceState = activity.TraceStateString!
                 };
 
                 await _daprClient.PublishEventAsync(NameConsts.INFLUX_PUBSUB_NAME,
@@ -146,7 +149,6 @@ namespace DataExporter.Controllers
             {
                 _semaphoreSlim.Release();
             }
-
 
             _logger.LogInformation($"Sent that retrieve of file to azaure has been finished");
         }
