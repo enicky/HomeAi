@@ -52,8 +52,8 @@ public class InfluxController_RetrieveLastFileTests : IClassFixture<TestSetup>
         };
 
         // Act
-        var method = controller.GetType().GetMethod("RetrieveLastFile", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var task = (Task<string?>)method.Invoke(controller, null);
+        var method = controller.GetType().GetMethod("RetrieveLastFile", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        var task = (Task<string?>)method.Invoke(controller, null)!;
         var file = await task;
 
         // Assert
@@ -62,9 +62,9 @@ public class InfluxController_RetrieveLastFileTests : IClassFixture<TestSetup>
             l => l.Log(
                 LogLevel.Error,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Test exception")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Test exception")),
                 It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.AtLeastOnce);
     }
 
@@ -74,7 +74,7 @@ public class InfluxController_RetrieveLastFileTests : IClassFixture<TestSetup>
     {
         // Arrange: always return null for parsedFile, so the if is never true
         _mockedFileService.Setup(x => x.RetrieveParsedFile(It.IsAny<string>(), It.IsAny<string>()))
-            .ReturnsAsync((string)null);
+            .ReturnsAsync((string?)null);
         // File.Exists should never be called, but if it is, return false
         _mockedFileSystem.Setup(x => x.File.Exists(It.IsAny<string>())).Returns(false);
         var controller = new InfluxController(
@@ -91,8 +91,8 @@ public class InfluxController_RetrieveLastFileTests : IClassFixture<TestSetup>
         };
 
         // Act
-        var method = controller.GetType().GetMethod("RetrieveLastFile", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var task = (Task<string?>)method.Invoke(controller, null);
+        var method = controller.GetType().GetMethod("RetrieveLastFile", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        var task = (Task<string?>)method.Invoke(controller, null)!;
         var file = await task;
 
         // Assert
@@ -102,9 +102,9 @@ public class InfluxController_RetrieveLastFileTests : IClassFixture<TestSetup>
             l => l.Log(
                 LogLevel.Warning,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("No export file found")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("No export file found")),
                 null,
-                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
     }
 }

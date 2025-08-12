@@ -11,7 +11,7 @@ namespace Common.Services;
 
 public interface IFileService
 {
-    Task<string> RetrieveParsedFile(string fileName, string containerName);
+    Task<string?> RetrieveParsedFile(string fileName, string containerName);
     Task UploadToAzure(string containerName, string generatedFileName, CancellationToken token = default);
 }
 
@@ -33,7 +33,7 @@ public class FileService : IFileService
         {
             throw new AccountKeyNullException("FileStorage:accountKey cannot be NULL");
         }
-        
+
         _blobServiceClient = blobServiceClientFactory.Create(_accountName, _accountKey);
     }
 
@@ -84,12 +84,12 @@ public class FileService : IFileService
         _logger.LogInformation("[UploadToAzure] Finished upload to Azure");
     }
 
-    public async Task<string> RetrieveParsedFile(string fileName, string containerName)
+    public async Task<string?> RetrieveParsedFile(string fileName, string containerName)
     {
         var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
         var blobClient = containerClient.GetBlobClient(fileName);
-        await blobClient.DownloadToAsync(fileName);      
+        await blobClient.DownloadToAsync(fileName);
         return fileName;
-        
+
     }
 }

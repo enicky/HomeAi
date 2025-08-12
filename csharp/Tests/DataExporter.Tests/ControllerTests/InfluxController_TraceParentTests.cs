@@ -76,7 +76,9 @@ public class InfluxController_TraceParentTests : IClassFixture<TestSetup>
 
         // Act
         await controller.RetrieveData(evt, cts.Token);
+#pragma warning disable xUnit1031 // Do not use blocking task operations in test method
         var capturedActivity = await Task.WhenAny(tcs.Task, Task.Delay(1000)) == tcs.Task ? tcs.Task.Result : null;
+#pragma warning restore xUnit1031 // Do not use blocking task operations in test method
 
         // Assert
         Assert.NotNull(capturedActivity);
