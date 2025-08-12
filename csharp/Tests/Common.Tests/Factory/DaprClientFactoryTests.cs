@@ -64,5 +64,6 @@ namespace Common.Tests.Factory
             wrapperMock.Verify(x => x.InvokeMethodAsync<string>(
                 HttpMethod.Get, "app", "method", CancellationToken.None), Times.Once);
         }
+
     }
 }
