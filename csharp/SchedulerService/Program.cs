@@ -61,20 +61,20 @@ public static class Program
             configureApplicationInsightsLoggerOptions: (options) => { }
         );
 
-        string sql_config = builder.Configuration.GetValue<string>("SQL_CONFIG")!;
-        string sql_USERNAME = builder.Configuration.GetValue<string>("SQL_USERNAME")!;
-        string sql_PASSWORD = builder.Configuration.GetValue<string>("SQL_PASSWORD")!;
-        string sql_SERVER = builder.Configuration.GetValue<string>("SQL_SERVER")!;
-        sql_config = sql_config
-            .Replace("[SQL_USERNAME]", sql_USERNAME)
-            .Replace("[SQL_PASSWORD]", sql_PASSWORD)
-            .Replace("[SQL_SERVER]", sql_SERVER);
+        string sqlConfig = builder.Configuration.GetValue<string>("SQL_CONFIG")!;
+        string sqlUsername = builder.Configuration.GetValue<string>("SQL_USERNAME")!;
+        string sqlPassword = builder.Configuration.GetValue<string>("SQL_PASSWORD")!;
+        string sqlServer = builder.Configuration.GetValue<string>("SQL_SERVER")!;
+        sqlConfig = sqlConfig
+            .Replace("[SQL_USERNAME]", sqlUsername)
+            .Replace("[SQL_PASSWORD]", sqlPassword)
+            .Replace("[SQL_SERVER]", sqlServer);
 
         string schedule = builder.Configuration.GetValue<string>("SCHEDULE")!;
-        string schedule_train_model = builder.Configuration.GetValue<string>(
+        string scheduleTrainModel = builder.Configuration.GetValue<string>(
             "SCHEDULE_TRAIN_MODEL"
         )!;
-        bool enable_extra_train_model = bool.Parse(
+        bool enableExtraTrainModel = bool.Parse(
             builder.Configuration.GetValue("ENABLE_EXTRA_MODEL_TRAIN", "false")!
         );
 
@@ -82,10 +82,10 @@ public static class Program
         {
             schedule = "* 8 * * *"; // every day at 8 AM
         }
-        if (string.IsNullOrEmpty(schedule_train_model))
-            schedule_train_model = "* 10 * * *"; // every day at 10 AM => Way to fast. But hey ...
+        if (string.IsNullOrEmpty(scheduleTrainModel))
+            scheduleTrainModel = "* 10 * * *"; // every day at 10 AM => Way to fast. But hey ...
 
-        Console.WriteLine($"using sql config : {sql_config}");
+        Console.WriteLine($"using sql config : {sqlConfig}");
         Console.WriteLine($"Using schedule {schedule}");
 
         builder.Services.AddHangfire(configuration =>
@@ -93,7 +93,7 @@ public static class Program
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
-                .UseSqlServerStorage(sql_config)
+                .UseSqlServerStorage(sqlConfig)
         );
         builder.Services.AddHangfireServer();
         builder.Services.AddScoped<IInvokeDaprService, InvokeDaprService>();
@@ -116,12 +116,12 @@ public static class Program
             schedule,
             new RecurringJobOptions { TimeZone = TimeZoneInfo.Local }
         );
-        if (enable_extra_train_model)
+        if (enableExtraTrainModel)
         {
             RecurringJob.AddOrUpdate<TriggerTrainAiModel>(
                 "trigger_train_model",
                 x => x.RunAsync(default),
-                schedule_train_model,
+                scheduleTrainModel,
                 new RecurringJobOptions { TimeZone = TimeZoneInfo.Local }
             );
         }

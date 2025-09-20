@@ -6,22 +6,27 @@ using Dapr;
 using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using SchedulerService.Triggers;
 
 namespace SchedulerService.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class DaprController : ControllerBase
+public class DaprController(IServiceProvider sp, ILogger<DaprController> logger, DaprClient daprClient) : ControllerBase
 {
-    private readonly ILogger<DaprController> logger;
-    private readonly DaprClient _daprClient;
-
-    public DaprController(ILogger<DaprController> logger, DaprClient daprClient)
+    [HttpGet]
+    public async Task<IActionResult> TestCallingMethod(CancellationToken token)
     {
-        this.logger = logger;
-        _daprClient = daprClient;
+        logger.LogInformation("TestCallingMethod got triggered - will call TriggerRetrieveDataForAi");
+        logger.LogInformation("Current Activity Id: {ActivityId}", Activity.Current?.Id);
+        var _logger = sp.GetRequiredService<ILogger<TriggerRetrieveDataForAi>>();
+        var x = new TriggerRetrieveDataForAi(_logger, null);
+        logger.LogInformation("Calling RunAsync of TriggerRetrieveDataForAi");
+        await x.RunAsync(token);
+        logger.LogInformation("TestCallingMethod got triggered");
+        return Ok("Hello from SchedulerService");
     }
-
+    
     [Topic(NameConsts.INFLUX_PUBSUB_NAME, "testreply")]
     [HttpPost("testreply")]
     public IActionResult TestReply([FromBody] RetrieveDataResponse? o)
@@ -79,7 +84,7 @@ public class DaprController : ControllerBase
             var evt = new StartDownloadDataEvent { TraceParent = response.TraceParent, TraceState = response.TraceState};
             var evtJson = JsonConvert.SerializeObject(evt);
             logger.LogInformation("StartDownloadDataEvent: {EventJson}", evtJson);
-            await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_DOWNLOAD_DATA, evtJson);
+            await daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_DOWNLOAD_DATA, evtJson);
             logger.LogInformation("Sent message to AI container to start Downloading data and prepare it to start training model");
         }
         else
@@ -97,7 +102,7 @@ public class DaprController : ControllerBase
         logger.LogInformation("Send message to start training model on AI container");
         var traceParent = Activity.Current?.Id ?? string.Empty;
         var evt = new StartTrainModelEvent { TraceParent = traceParent, TraceState = Activity.Current?.TraceStateString ?? string.Empty};
-        await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_TRAIN_MODEL, evt, cancellationToken);
+        await daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_TRAIN_MODEL, evt, cancellationToken);
         logger.LogInformation("Finished sending message to AI container to start training model");
 
     }
@@ -121,7 +126,7 @@ public class DaprController : ControllerBase
                 TraceParent = traceParent, 
                 TraceState = Activity.Current?.TraceStateString ?? string.Empty
             };
-            await _daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_UPLOAD_MODEL, data);
+            await daprClient.PublishEventAsync(NameConsts.AI_PUBSUB_NAME, NameConsts.AI_START_UPLOAD_MODEL, data);
             logger.LogInformation("Finished sending message to upload model to azure");
 
         }
