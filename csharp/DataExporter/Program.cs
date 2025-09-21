@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Common.ApplicationInsights.Filter;
+using Common.Factory;
 using Common.Services;
 using DataExporter.Extensions;
 using DataExporter.Services;
@@ -39,6 +40,8 @@ internal static class Program
             configureApplicationInsightsLoggerOptions: (options) => { }
         );
         builder.Services.AddDaprClient();
+        builder.Services.AddSingleton<IDaprClientFactory, DaprClientFactory>();
+        builder.Services.AddScoped<IDaprClientWrapper, DaprClientWrapper>();
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddControllers().AddDapr();
