@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using Common.ApplicationInsights.Filter;
 using Common.Factory;
 using Common.Services;
@@ -42,6 +43,7 @@ internal static class Program
         builder.Services.AddDaprClient();
         builder.Services.AddSingleton<IDaprClientFactory, DaprClientFactory>();
         builder.Services.AddScoped<IDaprClientWrapper, DaprClientWrapper>();
+        builder.Services.AddSingleton<System.IO.Abstractions.IFileSystem, FileSystem>();
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddControllers().AddDapr();
