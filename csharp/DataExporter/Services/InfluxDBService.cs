@@ -19,11 +19,12 @@ namespace DataExporter.Services
 
         public async Task<List<InfluxRecord>> QueryAsync(string queryString, string organisation, CancellationToken token)
         {
-            logger.LogInformation($"start query");
+            const string logPrefix = "[InfluxDbService:QueryAsync]";
+            logger.LogInformation("{LogPrefix} Start querying influxdb at url: {_url} for organisation: {organisation}", logPrefix, _url, organisation);
             var wrapper = factory.CreateWrapper(_url, _token);
 
             var x = await wrapper.GetData(queryString, organisation, token);        
-            logger.LogInformation("Get data result : {DataResult}", x);
+            logger.LogInformation("{LogPrefix} Get data result : {DataResult}", logPrefix, x);
             return x;    
         }
     }

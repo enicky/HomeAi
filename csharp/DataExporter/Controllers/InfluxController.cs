@@ -83,6 +83,8 @@ namespace DataExporter.Controllers
             var response = await _influxDbService.QueryAsync(q, _org, token);
             var fileName = await _fileService.RetrieveParsedFile(
                 $"export-{startDate.AddDays(-1).ToString("yyyy-MM-dd")}.csv", StorageHelpers.ContainerName);
+            if (string.IsNullOrEmpty(fileName)) throw new InvalidFilenameException("No file found to read from");
+            _logger.LogDebug("Reading from file {FileName}", fileName);
             var records = _localFileService.ReadFromFile(fileName);
             var cleanedUpResponses = _cleanupService.Cleanup(response.ToList(), records);
 
@@ -99,16 +101,17 @@ namespace DataExporter.Controllers
         [HttpPost(NameConsts.INFLUX_RETRIEVE_DATA)]
         public async Task RetrieveData(StartDownloadDataEvent evt, CancellationToken token)
         {
-            _logger.LogInformation("Trigger received to retrieve data from influx");
-            _logger.LogDebug("Current activity id: {ActivityId}", System.Diagnostics.Activity.Current?.Id);
-            _logger.LogDebug("Current activity parent id: {ParentId}", Activity.Current?.ParentId);
-            _logger.LogDebug("Received event with traceParent {TraceParent}", evt.TraceParent);
+            const string logPrefix = "[InfluxController:RetrieveData]";
+            _logger.LogInformation("{LogPrefix} Trigger received to retrieve data from influx", logPrefix);
+            _logger.LogInformation("{LogPrefix} Current activity id: {ActivityId}", logPrefix, System.Diagnostics.Activity.Current?.Id);
+            _logger.LogInformation("{LogPrefix} Current activity parent id: {ParentId}",logPrefix, Activity.Current?.ParentId);
+            _logger.LogInformation("{LogPrefix} Received event with traceParent {TraceParent}", logPrefix, evt.TraceParent);
 
             // Create a new Activity and set parent if provided
             using var activity = new Activity("InfluxController.RetrieveData");
             if (!string.IsNullOrEmpty(evt.TraceParent))
             {
-                _logger.LogInformation("Setting parent id for new activity to {TraceParent}", evt.TraceParent);
+                _logger.LogInformation("{LogPrefix} Setting parent id for new activity to {TraceParent}", logPrefix, evt.TraceParent);
                 activity.SetParentId(evt.TraceParent);
             }
             activity.Start();
@@ -118,6 +121,12 @@ namespace DataExporter.Controllers
             try
             {
                 var response = await _influxDbService.QueryAsync(queryString, _org, token);
+                if (response == null || !response.Any())
+                {
+                    _logger.LogWarning("{LogPrefix} No data retrieved from InfluxDB", logPrefix);
+                    throw new NoDataRetrievedException("No data retrieved from InfluxDB");
+                }
+                _logger.LogInformation("{LogPrefix} Retrieved {Count} records from InfluxDB", logPrefix, response.Count);
                 var fileName = await RetrieveLastFile();
                 if (string.IsNullOrEmpty(fileName)) throw new InvalidFilenameException("No file found to read from");
                 var records = _localFileService.ReadFromFile(fileName);
@@ -155,6 +164,7 @@ namespace DataExporter.Controllers
 
         private async Task<string?> RetrieveLastFile()
         {
+            const string logPrefix = "[InfluxController:RetrieveLastFile]";
             // Start from yesterday and go back up to 30 days
             const int maxDaysBack = 430;
             for (int daysBack = 1; daysBack <= maxDaysBack; daysBack++)
@@ -166,17 +176,17 @@ namespace DataExporter.Controllers
                     var parsedFile = await _fileService.RetrieveParsedFile(fileName, StorageHelpers.ContainerName);
                     if (!string.IsNullOrEmpty(parsedFile) && FileSystem.File.Exists(parsedFile))
                     {
-                        _logger.LogInformation("Found file: {FileName} at {ParsedFile}", fileName, parsedFile);
+                        _logger.LogInformation("{LogPrefix} Found file: {FileName} at {ParsedFile}", logPrefix, fileName, parsedFile);
                         return parsedFile;
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "File not found for date {DateTime:yyyy-MM-dd}: {ExMessage}", date, ex.Message);
+                    _logger.LogError(ex, "{LogPrefix} File not found for date {DateTime:yyyy-MM-dd}: {ExMessage}", logPrefix, date, ex.Message);
                 }
             }
 
-            _logger.LogWarning("No export file found in the last {MaxDaysBack} days.", maxDaysBack);
+            _logger.LogWarning("{LogPrefix} No export file found in the last {MaxDaysBack} days.", logPrefix, maxDaysBack);
             return null;
         }
     }

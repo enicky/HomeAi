@@ -1,11 +1,12 @@
-using System.Security.AccessControl;
 using Common.Helpers;
 using Common.Models.AI;
 using Common.Models.Responses;
 using Dapr.Client;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SchedulerService.Controllers;
+using SchedulerService.Triggers;
 
 namespace SchedulerService.Tests.Controllers;
 
@@ -13,10 +14,12 @@ public class DaprControllerTests
 {
     private readonly Mock<ILogger<DaprController>> _mockedLogger = new();
     private readonly Mock<DaprClient> _mockedDaprClient = new();
+    private readonly Mock<IServiceProvider> _mockedServiceProvider = new();
+
     [Fact]
     public void TestReply_Test()
     {
-        var controller = createSut();
+        var controller = CreateSut();
 
         var p = new RetrieveDataResponse()
         {
@@ -38,7 +41,7 @@ public class DaprControllerTests
     public void TestReply_WhenPassingNullAsARgument_WeDontLog2Statements()
     {
         // Given
-        var controller = createSut();
+        var controller = CreateSut();
         // When
         controller.TestReply(null);
         // Then
@@ -54,7 +57,7 @@ public class DaprControllerTests
     public async Task DownloadDataHasFinished_WhenResponseWasNotSuccessfull_WeLogWarning()
     {
         // Given
-        var controller = createSut();
+        var controller = CreateSut();
         var p = new RetrieveDataResponse()
         {
             GeneratedFileName = "test",
@@ -76,7 +79,7 @@ public class DaprControllerTests
     public async Task DownloadDataHasFinished_WhenResponseWasSuccess_AndStartAiProcessIsTrue_SendDaprMessage()
     {
         // Given
-        var controller = createSut();
+        var controller = CreateSut();
         var p = new RetrieveDataResponse()
         {
             GeneratedFileName = "test",
@@ -96,7 +99,7 @@ public class DaprControllerTests
     public async Task DownloadDataHasFinished_WhenResponseWasNull_JustReturn()
     {
         // Given
-        var controller = createSut();
+        var controller = CreateSut();
         // When
         await controller.DownloadDataHasFinished(null);
         // Then
@@ -110,7 +113,7 @@ public class DaprControllerTests
     public async Task DownloadDataHasFinished_WhenResponseWasSuccess_AndStartAiProcessIsFalse_DoNotSendDaprMessage()
     {
         // Given
-        var controller = createSut();
+        var controller = CreateSut();
         var p = new RetrieveDataResponse()
         {
             GeneratedFileName = "test",
@@ -127,7 +130,7 @@ public class DaprControllerTests
     public async Task AiDownloadFinishedStartTraining_WhenReceiving_ForwardMessageOnDapr()
     {
         // Given
-        var controller = createSut();
+        var controller = CreateSut();
         var cts = new CancellationTokenSource();
         // When
         await controller.AiDownloadFinishedStartTraining(cts.Token);
@@ -140,7 +143,7 @@ public class DaprControllerTests
     public async Task AiFinishedTrainingModel_WhenWeReceiveAResponse_AndModelPathIsNull_WeDoNothing()
     {
         // Given
-        var controller = createSut();
+        var controller = CreateSut();
 
         // When
         await controller.AiFinishedTrainingModel(new TrainAiModelResponse()
@@ -154,7 +157,7 @@ public class DaprControllerTests
 
     [Fact] 
     public async Task AiFinishedTrainingModel_WhenWeReceiveAResponse_AndModelPathIsValid_WePublishMessage(){
-        var controller = createSut();
+        var controller = CreateSut();
         var modelResponse = new TrainAiModelResponse()
         {
             Success = true,
@@ -168,8 +171,13 @@ public class DaprControllerTests
     }
 
 
-    private DaprController createSut()
+    private DaprController CreateSut()
     {
-        return new DaprController(_mockedLogger.Object, _mockedDaprClient.Object);
+        var mockLogger = new Mock<ILogger<TriggerRetrieveDataForAi>>();
+        var sc = new ServiceCollection();
+        sc.AddSingleton(mockLogger.Object);
+        var serviceProvider = new ServiceCollection().BuildServiceProvider();
+        
+        return new DaprController(sc.BuildServiceProvider(), _mockedLogger.Object, _mockedDaprClient.Object);
     }
 }
