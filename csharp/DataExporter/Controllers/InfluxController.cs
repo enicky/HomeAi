@@ -121,7 +121,7 @@ namespace DataExporter.Controllers
             try
             {
                 var response = await _influxDbService.QueryAsync(queryString, _org, token);
-                if (response == null || !response.Any())
+                if (response == null || response.Count == 0)
                 {
                     _logger.LogWarning("{LogPrefix} No data retrieved from InfluxDB", logPrefix);
                     throw new NoDataRetrievedException("No data retrieved from InfluxDB");

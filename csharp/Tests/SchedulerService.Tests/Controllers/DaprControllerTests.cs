@@ -173,11 +173,7 @@ public class DaprControllerTests
 
     private DaprController CreateSut()
     {
-        var mockLogger = new Mock<ILogger<TriggerRetrieveDataForAi>>();
-        var sc = new ServiceCollection();
-        sc.AddSingleton(mockLogger.Object);
-        var serviceProvider = new ServiceCollection().BuildServiceProvider();
-        
-        return new DaprController(sc.BuildServiceProvider(), _mockedLogger.Object, _mockedDaprClient.Object);
+       
+        return new DaprController(_mockedLogger.Object, _mockedDaprClient.Object);
     }
 }

@@ -20,7 +20,7 @@ namespace DataExporter.Services
         public async Task<List<InfluxRecord>> QueryAsync(string queryString, string organisation, CancellationToken token)
         {
             const string logPrefix = "[InfluxDbService:QueryAsync]";
-            logger.LogInformation("{LogPrefix} Start querying influxdb at url: {_url} for organisation: {organisation}", logPrefix, _url, organisation);
+            logger.LogInformation("{LogPrefix} Start querying influxdb at url: {Url} for organisation: {Organisation}", logPrefix, _url, organisation);
             var wrapper = factory.CreateWrapper(_url, _token);
 
             var x = await wrapper.GetData(queryString, organisation, token);        

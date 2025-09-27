@@ -16,7 +16,7 @@ public class TriggerRetrieveDataForAi(ILogger<TriggerRetrieveDataForAi> logger, 
         logger.LogInformation("{LogPrefix} Current activity id: '{ActivityId}'", LOG_PREFIX, activity.Id);
         if(invokeDaprService is not null){
             logger.LogInformation("{LOG_PREFIX} Calling InfluxDB to retrieve data", LOG_PREFIX);
-            await invokeDaprService?.TriggerExportData(Activity.Current?.Id ?? "EMPTY", token)!;
+            await invokeDaprService.TriggerExportData(Activity.Current?.Id ?? "EMPTY", token)!;
         }
         logger.LogInformation("{LOG_PREFIX} Finished processing data remotely", LOG_PREFIX);
     }

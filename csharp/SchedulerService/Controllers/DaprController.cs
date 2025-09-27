@@ -12,21 +12,8 @@ namespace SchedulerService.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class DaprController(IServiceProvider sp, ILogger<DaprController> logger, DaprClient daprClient) : ControllerBase
+public class DaprController( ILogger<DaprController> logger, DaprClient daprClient) : ControllerBase
 {
-    [HttpGet]
-    public async Task<IActionResult> TestCallingMethod(CancellationToken token)
-    {
-        logger.LogInformation("TestCallingMethod got triggered - will call TriggerRetrieveDataForAi");
-        logger.LogInformation("Current Activity Id: {ActivityId}", Activity.Current?.Id);
-        var _logger = sp.GetRequiredService<ILogger<TriggerRetrieveDataForAi>>();
-        var x = new TriggerRetrieveDataForAi(_logger, null);
-        logger.LogInformation("Calling RunAsync of TriggerRetrieveDataForAi");
-        await x.RunAsync(token);
-        logger.LogInformation("TestCallingMethod got triggered");
-        return Ok("Hello from SchedulerService");
-    }
-    
     [Topic(NameConsts.INFLUX_PUBSUB_NAME, "testreply")]
     [HttpPost("testreply")]
     public IActionResult TestReply([FromBody] RetrieveDataResponse? o)
